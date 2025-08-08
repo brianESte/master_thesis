@@ -5,9 +5,14 @@
 *.aux
 *.run.xml
 *.synctex.gz
+*.xmpdata
+pdfa.xmpi
+*.toc
+creationdate.lua
 # bibliography intermediate files
 *.bbl
 *.bcf
+*.blg
 *-blx.bib
 
 *.pdf
