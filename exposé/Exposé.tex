@@ -1,0 +1,98 @@
+\documentclass[a4paper, 10pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage[a4paper, total={160mm,230mm}]{geometry}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+
+\usepackage[english]{babel}
+
+% Bibliography
+\usepackage[
+%	backend=biber,
+	backend=bibtex,
+	style=numeric
+]{biblatex}
+\addbibresource{references.bib}
+%\bibliographystyle{plain}
+\usepackage{csquotes}
+
+\graphicspath{ {./images/} }
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\today}
+\chead{Exposé}
+\lhead{Brian Stephenson}
+
+\fancyfoot[C]{\thepage}
+\begin{document}
+	
+\begin{center}
+	\fontsize{24pt}{10pt}\selectfont
+	\textsc{\textbf{Coverage Path Planning on Arbitrary Geometry}}
+\end{center}
+\begin{center}
+	15.03.2025 - 15.09.2025 \\
+	Brian Stephenson, Matrikel-Nr: 2924906
+\end{center}
+
+\section*{Motivation}
+% Why cpp an object of arbitrary geometry?
+Processing of irradiated or otherwise toxic waste poses unnecessary risks to humans in the modern age.
+With the advent of 3D scanning technology and autonomous robots, humans need no longer manually handle harmful waste.
+In such a system, human contact is limited to placing the waste object in the system, repositioning the object as needed, and removing the cleaned object at the end.
+
+The intended application is the processing of waste and debris from the dismantling of nuclear power plants, but other applications are possible.
+The primary cooling system in a nuclear power plant is irradiated throughout its lifespan, thus components thereof are treated as hazardous waste.
+Coatings are used at nuclear power plants to protect metals from corrosion, reduce general wear, and facilitate decontamination of containment walls and surfaces \cite{NRC_coatings}.
+Because the coating exists to block radioactive nuclides from penetrating the metal underneath, once removed, the metal can be treated like ordinary material.
+This greatly reduces the volume of material that requires special treatment and storage.
+
+%Such a system already exists and is in operation in Biblis, Germany, but uses a (supposedly) inefficient algorithm and a pressure washer for coating removal.
+The updated(?) system will use a high power laser to ablate the coating, reducing necessary clean-up post processing.
+
+The difficulties in an autonomous waste processing system lie in handling arbitrary geometry, efficient computing of the geometry and path, as well as ensuring the entire surface is processed.
+To efficiently cover the given object's surfaces, it is proposed to segment the surface geometry into planar, cylindric, and convex primitive regions.
+Watershed segmentation was chosen as the basis for the partitioning algorithm.
+Watershed Segmentation applies a "height" function to each vertex in a mesh, and partitions the mesh into low regions with high bounds \cite{Watershed, Hier_seg_autobody_painting}.
+Concave regions are further partitioned via ??? to produce compact convex regions.
+
+Testing is currently conducted using a UR10 from Universal Robots.
+During prior testing, commands were sent to the robot without being certain that the previous command was executed fully.
+Newly received commands would interrupt the current command, leading to jerky, and sometimes erroneous movement.
+In order to prevent such issues, XML-RPC was chosen as the communication method between controller and robot for this project \cite{UR_XML-RPC}.
+XML-RPC (Remote Procedure Call) is a communication protocol that allows programs to communicate via HTTP independent of OS and architecture.
+A cursory examination of the UR programming facilities revealed nothing akin to a queue with which to hold received commands.
+As such, queuing of commands will take place server-side (controller) and the robot will be programmed to process commands individually, requesting the next as the current is being completed.
+
+\begin{flushleft}
+	\section*{Goal}
+	The goal of this master's thesis is to develop a coverage path planning algorithm able to handle objects of arbitrary geometry.
+	The algorithm should cover as much of the target surface as is possible.
+	Communication between the path planner and the robot should be seamless, such that the robot's movements are uninterrupted by path planner communication.
+\end{flushleft}
+\begin{flushleft}
+	\section*{Task}
+	\begin{enumerate}
+		\item Develop coverage path planning algorithm
+		\begin{enumerate}
+			\item Develop and implement robust surface segmentation algorithm
+			\item Develop or obtain an inverse-kinematic solver to ensure clean robotic movement
+			\item Evaluate algorithm using 3D printed test objects
+		\end{enumerate}
+		\item Communicate with robot via XML-RPC
+		\begin{enumerate}
+			\item Create a client-side (robot) program to accept and execute commands via XML-RPC
+			\item Test connection to a virtual machine
+			\item Test connection to a demonstration robot
+		\end{enumerate}
+		\item Test various sample objects to validate algorithm robustness
+		\item Test algorithm and connection on UR3
+	\end{enumerate}
+\end{flushleft}
+%\newpage
+\printbibliography
+\end{document}

@@ -1,0 +1,48 @@
+\documentclass[a4paper, 10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+
+\usepackage[british]{babel}
+
+\usepackage[
+backend=biber,
+style=numeric
+]{biblatex}
+\addbibresource{expose.bib}
+\graphicspath{ {./images/} }
+
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\today}
+\chead{Exposé}
+\lhead{Name}
+
+\fancyfoot[C]{\thepage}
+\begin{document}
+	
+	\begin{center}
+		\fontsize{24pt}{10pt}\selectfont
+		\textsc{\textbf{Titel}}
+	\end{center}
+	\begin{center}
+		13.03.2025 - 04.04.2025 \\
+		Name, Matrikel-Nr: ********
+	\end{center}
+	\begin{flushleft}
+		\textbf{Motivation}
+	\end{flushleft}
+	
+	\begin{flushleft}
+		\textbf{Goal}
+	\end{flushleft}
+	\begin{flushleft}
+		\textbf{Task}
+	\end{flushleft}
+	\newpage
+	\printbibliography
+\end{document}

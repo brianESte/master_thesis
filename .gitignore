@@ -1,0 +1,17 @@
+# commit notes / template
+.commit_notes
+
+# LaTeX intermediate and binary files
+*.aux
+*.run.xml
+*.synctex.gz
+# bibliography intermediate files
+*.bbl
+*.bcf
+*-blx.bib
+
+*.pdf
+# log files
+*.log
+
+*.zip
