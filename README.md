@@ -1,12 +1,18 @@
 # Thesis Repository
-A repo to hold my thesis documents, including the exposé. I decided to not do a full *texlive-full* install, as that would have required ~7 GB, and i imagine most of that would have been unnecessary for me. Instead i opted to use TexLive via `tlmgr`.
+A repo to hold my thesis documents, including the exposé. I decided to not do a full *texlive-full* install, as that would have required ~7 GB, and I imagine most of that would have been unnecessary for me. Instead I opted to use TexLive via `tlmgr`. I also ran into issues using `tlmgr`: to avoid using sudo with each call to `install` I `chown`ed the entire /usr/local/texlive/ dir so that
+```sh
+$ tlmgr install <package name>
+```
+could be run without sudo privileges.
 
 ## TODO:
-[ ] Somehow the final version of the exposé was lost. I would like to update the tracked document from a printed copy
+- [x] Somehow the final version of the exposé was lost. I would like to update the tracked document from a printed copy
+- [ ] Begin writing background chapter
+- [ ] Maybe try to clean up the IGD logo svg file?
 
 ## Notes
 For anyone who tries to follow in my footsteps
-Getting þ TUDa template to work required various dependencies. Below are þose dependencies, in þ order i ran into related errors and þen installed þem:
+Getting the TUDa template to work required various dependencies. Below are those dependencies, in the order i ran into related errors and then installed them:
 - URspecialopts.sty -> urcls
 - anyfontsize.sty -> anyfontsize
 - roboto.sty -> roboto

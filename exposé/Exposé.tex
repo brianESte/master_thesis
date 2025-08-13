@@ -19,6 +19,8 @@
 %\bibliographystyle{plain}
 \usepackage{csquotes}
 
+\usepackage{anyfontsize}
+
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning}
 
@@ -29,6 +31,9 @@
 \rhead{\today}
 \chead{Exposé}
 \lhead{Brian Stephenson}
+
+% disable paragraph indentation
+\setlength{\parindent}{0pt}
 
 \fancyfoot[C]{\thepage}
 \begin{document}
@@ -45,37 +50,37 @@
 \section*{Motivation}
 % Why cpp an object of arbitrary geometry?
 Processing of irradiated or otherwise toxic waste poses unnecessary risks to humans in the modern age.
-Current decontamination procedures are typicall carried out manually, with operators relying on protective suits and pollution monitors for safety.
+Current decontamination procedures are typically carried out manually, with operators relying on protective suits and pollution monitors for safety.
 In addition to the risk of contact with pollution, such work is often physically demanding.
 With the advent of 3D scanning technology and autonomous robots, humans need no longer manually handle harmful waste.
-In such a semi-autonomous system, human contact to the contaminated object is limited to placing it in the system, repositioning between deconamination steps, and removal post cleaning.
+In such a semi-autonomous system, human contact to the contaminated object is limited to placing it in the system, repositioning between decontamination steps, and removal post cleaning.
 
 The envisioned application thereof is the processing of waste and debris from the dismantling of nuclear power plants, but other applications are possible.
 The primary cooling system in a nuclear power plant is irradiated throughout its lifespan.
-Thus, during decomissioning, components thereof are treated as hazardous waste.
+Thus, during decommissioning, components thereof are treated as hazardous waste.
 Coatings are used at nuclear power plants to protect metals from corrosion, reduce general wear, and facilitate decontamination of containment walls and surfaces \cite{NRC_coatings}.
-Because the coating exists to block radioactive nuclides from penetrating the metal underneath, once removed, the metal can be unconditionally released for recycling\cite{NEA-DnD}.
+Because the coating exists to block radioactive nuclides from penetrating the metal underneath, once removed, the metal can be unconditionally released for recycling \cite{NRC_coatings}.
 This greatly reduces the volume of material that requires special treatment and storage.
 
-Such a system is currently in operation in Biblis, Germany \cite{ROBBE22}.
+Such a system is currently in operation in Biblis, Germany \cite{ROBBE}.
 The purpose of this thesis is to improve upon that system with a more efficient path planning algorithm and by replacing the high pressure water jet currently used with a high-powered laser to remove the coatings via ablation.
 This change will facilitate clean-up, as laser ablation produces only gases and vapor that van be removed via vacuum, whereas the water from the pressure washer produced a greater mess and volume of material to be stored.
-The disadvantages of laser ablation over a pressure washer, are that the laser has a significantly smaller cleaning contact area, necessitating a longer coverage path, and requiring the laser be positioned closer to the object's surface, increasing the positonal path precision required.
+The disadvantages of laser ablation over a pressure washer, are that the laser has a significantly smaller cleaning contact area, necessitating a longer coverage path, and requiring the laser be positioned closer to the object's surface, increasing the positional path precision required.
 
 \section*{Description}
 The difficulty in an autonomous waste processing system lies in handling arbitrary shapes, efficient computing of the geometry and paths, as well as ensuring the entire surface is processed.
 The primary goal of the proposed algorithm is to produce simple, convex, unwrappable surfaces upon which a back-and-forth path will be planned.
-The specific steps are outlined below and in Fig 1.%TODO
+The specific steps are outlined below and in Fig~\ref{fig:procedure_overview}.
 \begin{enumerate}
 	\item Apply Watershed Segmentation to the mesh, yielding surfaces that are unwrappable to 2D.
 		Watershed Segmentation applies a "height" function to each vertex in the mesh.
-		Regions are formed from "low" areas separated by "high" areas \cite{MW99, CMU05}.
+		Regions are formed from "low" areas separated by "high" areas \cite{Watershed, Hier_seg_autobody_painting}.
 	\item The resulting surfaces are classified as planar, cylindric, convex, or multi-planar.
 		Multi-planar indicates that a region could not be classified as one of the three primitive surfaces, and needs to undergo Watershed segmentation again.
-	\item Srufaces with a concave outline are sudject to Interior Edge Extension, a 2D segmentaiton process that produces copmact convex shapes from a concave one \cite{IEE19}.
+	\item Surfaces with a concave outline are subject to Interior Edge Extension, a 2D segmentation process that produces compact convex shapes from a concave one \cite{IntEdgeExt}.
 	\item Apply a modified Traveling Salesman Problem to the convex surface-sections to connect them in a travel-efficient manner.
 		The TSP is modified such that the start and end nodes need not be the same.
-	\item Plot a back-and-forth path on each surface-section, taking into account the preceeding and subsequent surface-sections.
+	\item Plot a back-and-forth path on each surface-section, taking into account the preceding and subsequent surface-sections.
 \end{enumerate}
 
 \begin{figure}[h]
@@ -99,6 +104,7 @@ The specific steps are outlined below and in Fig 1.%TODO
 		\draw (Bpath) edge[Arrow] (Path);
 	\end{tikzpicture}
 	\caption{Path generation procedure overview}
+	\label{fig:procedure_overview}
 \end{figure}
 
 Testing is currently conducted using a UR10 from Universal Robots.
@@ -110,40 +116,37 @@ A cursory examination of the UR programming facilities revealed nothing akin to 
 As such, queuing of commands will take place server-side (controller) and the robot will be programmed to process commands individually, requesting the next as the current is completed.
 The algorithm will be evaluated according to how complete, swift, and collision-free the resultant path is.
 To measure path completeness, a spray paint accessory could be attached to the robot arm to paint the test object.
-Areas left unpainted count against the pathś completeness.
+Areas left unpainted count against the path's completeness.
 Swiftness includes both calculation time and path traversal time, and can simply be measured in the program.
 Path evaluation for collision-free movement will be handled by simple observation.
 
-\begin{flushleft}
-	\section*{Goal}
-	The goal of this master's thesis is to develop a coverage path planning algorithm able to handle objects of arbitrary geometry.
-	The algorithm should cover as much of the target surface as is possible.
-	Communication between the path planner and the robot should be seamless, such that the robot's movements are uninterrupted by path planner communication.
-\end{flushleft}
-\begin{flushleft}
-	\section*{Task}
+\section*{Goal}
+The goal of this master's thesis is to develop a coverage path planning algorithm able to handle objects of arbitrary geometry.
+The algorithm should cover as much of the target surface as is possible.
+Communication between the path planner and the robot should be seamless, such that the robot's movements are uninterrupted by path planner communication.
+
+\section*{Task}
+\begin{enumerate}
+	\item Develop coverage path planning algorithm
 	\begin{enumerate}
-		\item Develop coverage path planning algorithm
-		\begin{enumerate}
-			\item Develop and implement robust surface segmentation algorithm
-			\item Develop or obtain an inverse-kinematic solver to ensure clean robotic movement
-			\item Evaluate algorithm using 3D printed test objects
-		\end{enumerate}
-		\item Communicate with robot via XML-RPC
-		\begin{enumerate}
-			\item Create a client-side (robot) program to accept and execute commands via XML-RPC
-			\item Test connection to a virtual machine
-			\item Test connection to a demonstration robot
-		\end{enumerate}
-		\item Test various sample objects to validate algorithm robustness
-		\item Evaluate algorithm on UR3 according to the following criteria:
-			\begin{itemize}
-				\item collision-free movement
-				\item coverage completeness
-				\item planning and execution time
-			\end{itemize}
+		\item Develop and implement robust surface segmentation algorithm
+		\item Develop or obtain an inverse-kinematic solver to ensure clean robotic movement
+		\item Evaluate algorithm using 3D printed test objects
 	\end{enumerate}
-\end{flushleft}
-%\newpage
+	\item Communicate with robot via XML-RPC
+	\begin{enumerate}
+		\item Create a client-side (robot) program to accept and execute commands via XML-RPC
+		\item Test connection to a virtual machine
+		\item Test connection to a demonstration robot
+	\end{enumerate}
+	\item Test various sample objects to validate algorithm robustness
+	\item Evaluate algorithm on UR3 according to the following criteria:
+		\begin{itemize}
+			\item collision-free movement
+			\item coverage completeness
+			\item planning and execution time
+		\end{itemize}
+\end{enumerate}
+
 \printbibliography
 \end{document}
