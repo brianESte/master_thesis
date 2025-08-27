@@ -28,9 +28,9 @@ Getting the TUDa template to work required various dependencies. Below are those
 I am in the process of setting up NeoVim to work properly with LaTeX. So far VimTeX and TexLab have been integrated, and auto-completion and syntax highlighting works. The following resources helped me thus far: [2,3,5,6].
 
 ## References
-[1] https://tex.stackexchange.com/a/503889
-[2] https://github.com/lervag/vimtex
-[3] https://github.com/nvim-lua/kickstart.nvim/issues/1466
-[4] https://manpages.ubuntu.com/manpages/bionic/man1/latexmk.1L.html
-[5] https://blog.epheme.re/software/nvim-latex.html
-[6] https://inwon.net/blog/vimtex-neovim
+- [1] https://tex.stackexchange.com/a/503889
+- [2] https://github.com/lervag/vimtex
+- [3] https://github.com/nvim-lua/kickstart.nvim/issues/1466
+- [4] https://manpages.ubuntu.com/manpages/bionic/man1/latexmk.1L.html
+- [5] https://blog.epheme.re/software/nvim-latex.html
+- [6] https://inwon.net/blog/vimtex-neovim
