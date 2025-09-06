@@ -3,22 +3,149 @@
 Here i will discuss background knowledge of Coverage Path Planning and surface curvature...
 
 Things / topics i will cover:
-watershed segmentation... -> background, methodology
-geometric curvature -> background
-UV Mapping -> background
-Geometry simplification -> methodology?
-Interior Edge Extension (and my modifications, if any) -> methodology
-boustrophedon -> methodology
-Modified TSP -> methodology
+\begin{enumerate}
+	\item watershed segmentation... -> background, methodology
+	\item geometric curvature -> background
+	\item UV Mapping -> background
+	\item Geometry simplification -> methodology?
+	\item Interior Edge Extension (and my modifications, if any) -> methodology
+	\item boustrophedon -> methodology
+	\item Modified TSP -> methodology
+\end{enumerate}
 
 
 \section{Geometric Curvature}
-To apply Watershed segmentation to a mesh, a curvature value of some kind at each vertex is necessary.
-\begin{enumerate}
-	\item{Mean Curvature}
-	\item{Gaussian Curvature}
-	\item{Root Mean Square Curvature}
-	\item{Principal Curvatures}
-	\item{Derivative of Curvature}
-\end{enumerate}
+For segmenting a 3D mesh via Watershed Segmentation each vertex requires a measure of curvature.
+Various forms and types of curvature were examined throughout this project.
+
+\subsubsection{Mean Curvature}
+
+\subsubsection{Gaussian Curvature}
+
+\subsubsection{Root Mean Square Curvature}
+
+\subsubsection{Principal Curvatures}
+
+\subsubsection{Derivative of Curvature}
+
+\section{UV Mapping}
+UV Mapping is the process of projecting a surface from 3D to 2D, effectively "unwrapping" the 3D surface.
+(insert sentence about common usage in 3D modeling / graphics and textures)
+\subsection{Conic Surfaces}
+General equation of a conic is:
+\begin{equation}
+	Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0
+\end{equation}
+
+\subsubsection{Elliptic Surface}
+General equation:
+\begin{equation}
+	\frac{x^2}{a^2} + \frac{y^2}{b^2} = 1
+\end{equation}
+To obtain a vector perpendicular to a point on the ellipse, the derivative of said point is rotated 90 degrees.
+The point, as a function of the angle $\theta$:
+\begin{equation}
+	(x,y) = (a\cos\theta, b\sin\theta)
+\end{equation}
+The derivative thereof:
+\begin{equation}
+	\frac{d}{d\theta}(x,y) = (-a\sin\theta, b\cos\theta)
+\end{equation}
+Rotated -90 degrees:
+\begin{equation}
+	\text{Rot}_{90}\frac{d}{d\theta}(x,y) = (b\cos\theta, a\sin\theta)
+\end{equation}
+
+\subsubsection{Parabolic Surface}
+Parabolas are much simpler than and ellipses and hyperbolas, as can be seen by the following equations.
+The parametric general equation of a parabola is:
+\begin{equation}
+	-\sin\theta x + \cos\theta y = \frac{1}{4f}(\cos\theta x + \sin\theta y - h)^2 + k
+\end{equation}
+To solve for the conic parameters of a parabola the general equation's quadratic term is expanded and like terms gathered:
+\begin{multline*}
+	-\sin\theta x + \cos\theta y = \frac{1}{4f}(\cos^2\theta x^2 + \cos\theta\sin\theta xy \\
+	- h \cos\theta x + \cos\theta\sin\theta xy + \sin^2\theta y^2 - h\sin\theta y - h \cos\theta x - h \sin\theta y + h^2) + k
+\end{multline*}
+\begin{multline*}
+	\frac{\cos^2\theta}{4f} x^2 + \frac{2\cos\theta\sin\theta}{4f} xy + \frac{\sin^2\theta}{4f} y^2 \\
+	+ \left(\sin\theta - \frac{2h \cos\theta}{4f}\right)x + \left(\cos\theta - \frac{2h \sin\theta}{4f}\right)y + \frac{h^2}{4f} + k = 0
+\end{multline*}
+\begin{align}
+	A &= \frac{\cos^2\theta}{4f} \\
+	B &= \frac{2\cos\theta\sin\theta}{4f} \\
+	C &= \frac{\sin^2\theta}{4f} \\
+	D &= \sin\theta - \frac{2h \cos\theta}{4f} \\
+	E &= \cos\theta - \frac{2h \sin\theta}{4f} \\
+	F &= \frac{h^2}{4f} + k
+\end{align}
+
+\subsubsection{Hyperbolic Surface}
+\begin{equation}
+\begin{split}
+	\frac{(\cos\theta(x-h) + \sin\theta(y-k))^2}{a^2} - \frac{(\cos\theta(y-k) + \sin\theta(x-h))^2}{b^2} &= 1 \\
+	\frac{(x_c + y_s)^2}{a^2} - \frac{(y_c + x_s)^2}{b^2} &= 1 \\
+	b^2(x_c^2 + 2x_c y_s + y_s^2) - a^2(y_c^2 + 2 x_s y_c + x_s^2) &= a^2 b^2 \\
+	b^2 x_c^2 + 2 b^2 x_c y_s + b^2 y_s^2 - a^2 y_c^2 - 2 a^2 x_s y_c - a^2 x_s^2 - a^2 b^2 &= 0 \\
+	b^2 x_c^2 - a^2 x_s^2 + 2 b^2 x_c y_s - 2 a^2 x_s y_c + b^2 y_s^2 - a^2 y_c^2 - a^2 b^2 &= 0 \\
+\end{split}
+\end{equation}
+\begin{multline*}
+	b^2 (\cos\theta(x-h))^2 - a^2 (\sin\theta(x-h))^2 \\
+	+ 2 b^2 \cos\theta(x-h) \sin\theta(y-k) - 2 a^2 \sin\theta(x-h) \cos\theta(y-k) \\
+	+ b^2 (\sin\theta(y-k))^2 - a^2 (\cos\theta(y-k))^2 - a^2 b^2 = 0
+\end{multline*}
+\begin{multline*}
+	(b^2 \cos^2\theta - a^2 \sin^2\theta)(x-h)^2 \\
+	+ 2 \cos\theta\sin\theta(b^2 - a^2)(x-h)(y-k) \\
+	+ (b^2 \sin^2\theta - a^2 \cos^2\theta)(y-k)^2 - a^2 b^2 = 0
+\end{multline*}
+\begin{equation*}
+	\begin{split}
+		c_1(x-h)^2 + c_2(x-h)(y-k) + c_3(y-k)^2 - a^2 b^2 &= 0 \\
+		c_1(x^2-2hx + h^2) + c_2(xy-hy-kx+hk) + c_3(y^2-2ky+k^2) - a^2 b^2 &= 0 \\
+		c_1 x^2 + c_2 xy + c_3 y^2 + (-2h c_1 -k c_2) x + (-h c_2 -2k c_3)y + c_1 h^2 + c_2 hk + c_3 k^2 - a^2 b^2 &= 0 \\
+	\end{split}
+\end{equation*}
+\begin{align*}
+	A &= c_1 = b^2 \cos^2\theta - a^2 \sin^2\theta \\
+	B &= c_2 = 2 \cos\theta\sin\theta(b^2 - a^2) \\
+	C &= c_3 = b^2 \sin^2\theta - a^2 \cos^2\theta \\
+	D &= (-2h c_1 -k c_2) \\
+	E &= (-h c_2 -2k c_3) \\
+	F &= c_1 h^2 + c_2 hk + c_3 k^2 - a^2 b^2
+\end{align*}
+Now to solve for $a$, $b$, and $\theta$:
+Solving $A$ for $b^2$:
+\begin{equation}
+	\begin{split}
+		A &= b^2 \cos^2\theta - a^2 \sin^2\theta \\
+		b^2 &= \frac{A}{\cos^2\theta} + a^2\tan^2\theta \\
+	\end{split}
+\end{equation}
+Setting 3.6 into $C$ and solving for $a^2$:
+\begin{equation}
+	\begin{split}
+		C &= b^2 \sin^2\theta - a^2 \cos^2\theta \\
+		a^2 &= -\frac{C}{\cos^2\theta} + b^2\tan^2\theta \\
+		a^2 &= -\frac{C}{\cos^2\theta} + \left(\frac{A}{\cos^2\theta} + a^2\tan^2\theta\right)\tan^2\theta \\
+		\cos^4\theta a^2 &= -C\cos^2\theta + A\cos^2\theta + \sin^4\theta a^2 \\
+		(\cos^4\theta - \sin^4\theta) a^2  &= \cos^2\theta(A-C) \\
+		a^2  &= \frac{\cos^2\theta(A-C)}{(\cos^4\theta - \sin^4\theta)} \\
+	\end{split}
+\end{equation}
+Setting 3.6 into $B$:
+\begin{equation}
+	\begin{split}
+		B &= 2 \cos\theta\sin\theta(\frac{A}{\cos^2\theta} + a^2\tan^2\theta - a^2) \\
+		\cos^2\theta B &= 2 \cos\theta\sin\theta(A + (\sin^2\theta - \cos^2\theta) a^2) \\
+	\end{split}
+\end{equation}
+Setting 3.7 into 3.8:
+\begin{equation}
+	\begin{split}
+		\cos^2\theta B &= 2 \cos\theta\sin\theta(A + (\sin^2\theta - \cos^2\theta) \frac{\cos^2\theta(A-C)}{(\cos^4\theta - \sin^4\theta)}) \\
+	\end{split}
+\end{equation}
+
 

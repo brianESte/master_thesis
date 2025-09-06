@@ -22,7 +22,11 @@ Getting the TUDa template to work required various dependencies. Below are those
 - xmpincl.sty -> xmpincl
 - Unknown option 'ngerman' -> babel-german
 - The font "XCharter" cannot be found -> xcharter
-- XCharter (apparently) depends on fontaxes, even though it has been deprecated...
+
+#### Warnings
+- XCharter (apparently) depends on fontaxes, even though it has been deprecated... -> fontaxes
+- Biblatex warns the user if BibTeX is used in place of Biber, because Biber has more functionality than BibTeX / others[7]. Simply switching to Biber quells the warning.
+- Missing German hyphenation patterns -> hyphen-german
 
 ### NeoVim
 I am in the process of setting up NeoVim to work properly with LaTeX. So far VimTeX and TexLab have been integrated, and auto-completion and syntax highlighting works. The following resources helped me thus far: [2,3,5,6].
@@ -34,3 +38,4 @@ I am in the process of setting up NeoVim to work properly with LaTeX. So far Vim
 - [4] https://manpages.ubuntu.com/manpages/bionic/man1/latexmk.1L.html
 - [5] https://blog.epheme.re/software/nvim-latex.html
 - [6] https://inwon.net/blog/vimtex-neovim
+- [7] https://tex.stackexchange.com/a/365075

@@ -1,37 +1,8 @@
-%% This is file `DEMO-TUDaThesis.tex' version 3.28 (2022/11/15),
-%% it is part of
-%% TUDa-CI -- Corporate Design for TU Darmstadt
-%% ----------------------------------------------------------------------------
-%%
-%%  Copyright (C) 2018--2022 by Marei Peischl <marei@peitex.de>
-%%
-%% ============================================================================
-%% This work may be distributed and/or modified under the
-%% conditions of the LaTeX Project Public License, either version 1.3c
-%% of this license or (at your option) any later version.
-%% The latest version of this license is in
-%% http://www.latex-project.org/lppl.txt
-%% and version 1.3c or later is part of all distributions of LaTeX
-%% version 2008/05/04 or later.
-%%
-%% This work has the LPPL maintenance status `maintained'.
-%%
-%% The Current Maintainers of this work are
-%%   Marei Peischl <tuda-ci@peitex.de>
-%%   Markus Lazanowski <latex@ce.tu-darmstadt.de>
-%%
-%% The development respository can be found at
-%% https://github.com/tudace/tuda_latex_templates
-%% Please use the issue tracker for feedback!
-%%
-%% If you need a compiled version of this document, have a look at
-%% http://mirror.ctan.org/macros/latex/contrib/tuda-ci/doc
-%% or at the documentation directory of this package (if installed)
-%% <path to your LaTeX distribution>/doc/latex/tuda-ci
-%% ============================================================================
-%%
 % !TeX program = lualatex
 % TeX TXS-program:compile = txs:///lualatex/[-shell-escape]
+%% Document based on `DEMO-TUDaThesis.tex' version 3.28 (2022/11/15),
+%% A part of
+%% TUDa-CI -- Corporate Design for TU Darmstadt
 %%
 
 \documentclass[
@@ -101,7 +72,7 @@
 %Literaturverzeichnis
 %%%%%%%%%%%%%%%%%%%
 \usepackage[
-	backend=bibtex
+	backend=biber
 ]{biblatex}   % Literaturverzeichnis
 \addbibresource{references.bib}
 %\bibliography{references}
@@ -119,7 +90,7 @@
 %%%%%%%%%%%%%%%%%%%
 %Paketvorschläge Mathematik
 %%%%%%%%%%%%%%%%%%%
-%\usepackage{mathtools} % erweiterte Fassung von amsmath
+\usepackage{mathtools} % erweiterte Fassung von amsmath
 %\usepackage{amssymb}   % erweiterter Zeichensatz
 %\usepackage{siunitx}   % Einheiten
 
@@ -135,23 +106,21 @@
 \newcommand*{\FeatureFalse}{\ding{56}}
 
 \addTitleBox{
-	\includegraphics[width=\linewidth]{../resources/igdLogo.png}
-	%\resizebox{\linewidth}{!}{
-		%\includestandalone{igd_logo}
-		%\input{igd_logo.tex}
-	% \tikz\pic[]{IGDLogo};
-	%}
+%	\includegraphics[width=\linewidth]{../resources/igdLogo.png}
+	\resizebox{\linewidth}{!}{
+		\includestandalone{../resources/igd_logo}
+	}
 }
 %\addTitleBoxLogo*{\includesvg[width=\linewidth]{igd_logo}}
 
 \begin{document}
 
 \Metadata{
-	title=Coverage Path Planning via Segmentation and Simplification,
+	title=Coverage Path Planning on Arbitrary via Surface Segmentation and Simplification,
 	author=Brian Stephenson
 }
 
-\title{Coverage Path Planning via Segmentation and Simplification}
+\title{Coverage Path Planning on Arbitrary Geometry via Surface Segmentation and Simplification}
 \subtitle{\LaTeX{} using TU Darmstadt's Corporate Design}
 \author[B. Stephenson]{Brian Stephenson}%optionales Argument ist die Signatur,
 \reviewer{Prof. Dr.-Ing. Rolf Findeisen \and Dr.-Ing Eric Lenz \and MSc. Hasan Kutlu}%Gutachter
@@ -178,7 +147,7 @@
 % \dedication{Für alle, die \TeX{} nutzen.}
 
 \maketitle
-	
+
 \affidavit% oder \affidavit[digital] falls eine rein digitale Abgabe vorgesehen ist.
 % Es gibt mit Version 3.20 die Möglichkeit ein Bild als Signatur einzubinden.
 % TUDa-CI kann nicht garantieren, dass dies zulässig ist oder eine eigenhändige Unterschrift ersetzt.
@@ -188,7 +157,7 @@
 
 \tableofcontents
 
-
+\iffalse
 \chapter{Über diese Datei}
 
 Die Datei \file{DEMO-TUDaThesis.tex} ist ein Template für Abschlussarbeiten im Stil des Corporate Designs der TU Darmstadt.
@@ -224,6 +193,7 @@ Da die Basisklasse für beide identisch ist, kann jede Option abgeändert werden
 	custommargins&\FeatureTrue&\FeatureTrue&\FeatureFalse\\
 	\bottomrule
 \end{tabularx}
+\fi
 
 \include{introduction}
 

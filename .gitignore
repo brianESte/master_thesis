@@ -4,6 +4,9 @@
 # LaTeX intermediate and binary files
 *.aux
 *.run.xml
+*fdb_latexmk
+*.fls
+# https://tex.stackexchange.com/a/561192
 *.synctex.gz
 *.xmpdata
 pdfa.xmpi

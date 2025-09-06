@@ -1,0 +1,25 @@
+
+// Reminder of how to set up preprocessor commands to handle windows/linux compilation
+https://stackoverflow.com/a/6649992
+
+// how to set CMake cache variables
+https://stackoverflow.com/a/12899005
+
+// what are SyncTeX files
+https://tex.stackexchange.com/a/118491
+// what are .bbl files
+https://tex.stackexchange.com/a/464540
+// More LaTeX file explanations
+https://tex.stackexchange.com/a/7772
+// where to put custom .cls files (such as those from TUDa template)
+https://tex.stackexchange.com/a/1138
+// pdfa.xmpi
+https://tex.stackexchange.com/a/746396
+
+// CAD models used
+https://grabcad.com/library/exercise-freecad-020-1
+https://grabcad.com/library/exercise-freecad-021-1
+https://grabcad.com/library/exercise-freecad-beginner-028-1
+https://grabcad.com/library/exercise-r-029-a-1
+https://grabcad.com/library/freecad-for-beginners-042-1
+https://grabcad.com/library/exercise-057-1
