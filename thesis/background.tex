@@ -15,16 +15,31 @@ Things / topics i will cover:
 
 
 \section{Geometric Curvature}
-For segmenting a 3D mesh via Watershed Segmentation each vertex requires a measure of curvature.
-Various forms and types of curvature were examined throughout this project.
+For segmenting a 3D mesh via Watershed Segmentation each vertex requires a singualr / combined measure of curvature.
+Various forms and types of curvature were examined throughout this project and are presented in the following sections.
+
+\subsubsection{Principal Curvatures}
+All combined measures of curvature are based, either in theory or in actuality, on the principal curvatures.
+The principal curvatures at a given point on a surface are simply the maximum and minimum curvature.
+Determining principal curvatures for a continuous surface is relatively clear and unambiguous.TODO: insert citation describing principal curvature on continuous surface
+NOTE: maybe also include a graphic showing principal curvatures ?
+There are however various ways of approximating the principal curvatures on a discrete mesh.TODO: insert citations of principal curvature comparisons
 
 \subsubsection{Mean Curvature}
+Mean curvature is, as the name implies, the mean of the principal curvatures.
+TODO: insert basic graphic re mean curvature
+TODO: talk about pros(?) of mean curvature
+Mean curvature however encodes little information and was not seriously considered by itself in this work.
+Mean curvature can be approximated on a discrete mesh in various ways...TODO
 
 \subsubsection{Gaussian Curvature}
+Gaussian curvature, (where does the name come from?) is the product of the principal curvatures.
+Gaussian curvature has the benefit of being more sensitive to changes in each of the principal curvatures, but it cannot distinguish "developable" surfaces, such as cylinders and planes.
+TODO: Insert picture visually detailing gaussian curvature
+Gaussian curvature can be approximated on a discrete mesh in various ways...TODO
 
 \subsubsection{Root Mean Square Curvature}
 
-\subsubsection{Principal Curvatures}
 
 \subsubsection{Derivative of Curvature}
 
