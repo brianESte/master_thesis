@@ -2,7 +2,33 @@
 \chapter{Methodology}
 \IMRADlabel{methods}
 
+\section{Overview}
+The basic premise is to segment the given model into primitive surfaces.
+Each surface is unwrapped to a 2D representation, which undergoes a 2D segmentation to produce convex regions.
+Upon each convex region a local path is planned.
+The order in which each region is traversed by the robot is determined via a modified Traveling Salesman Problem.
+Here, the start and end points of the salesman's path need not be the same.
+
+\section{3D Segmentation}
+
+
 \section{Watershed Segmentation}
+-> Give overview of how WS segmentation works.
+
+\subsection{Basic Procedure}
+0. Apply height function at each vertex
+1. Create initial mesh regions from local minima / minima plateaus
+2. "Minima Expansion" Expand outward from each mesh region up to a certain depth, absorbing any regions encountered.
+3. "Descent to Minima" From each un-indexed (check their word for this) vertex, follow the path of steepest descent until an indexed region is encountered.
+All vertices traversed along this descent are added to the encountered region.
+
+-> my modifications
+\subsection{Mini-Merge}
+As noted by Mangan and Whitaker(sp?) Descent to Minima Through testing and development it was observed that
+
+\subsection{Boundary Smoothing}
+Due to noise / other randomness in the mesh,
+
 
 \section{Geometry Simplification}
 
