@@ -1,3 +1,4 @@
+// Nuclear related sources
 @report{NRC_coatings,
 	author = {K. Natesan and R. Natarajan},
 	title = {Survey on Leaching of Coatings Used in Nuclear Power Plants},
@@ -7,109 +8,250 @@
 	pages = {6},
 	url = {https://www.nrc.gov/docs/ml0625/ml062560368.pdf},
 	urldate = {2025-02-13},
-	shorthand = {NRC},
+	OPTshorthand = {NRC},
 }
 
-@article{Watershed,
-	author = {Alan P. Mangan and Ross T. Whitaker},
-	title = {Partitioning 3D Surface Meshes Using Watershed Segmentation},
-	journaltitle = {IEEE TRANSACTIONS ON VISUALIZATION AND COMPUTER GRAPHICS},
-	date = {1999-10/1999-12},
+@report{DeconTechInDecommissioning,
+	author = {NEA Task Group on Decontamination},
+	title = {Decontamination Techniques Used in Decommissioning Activities},
+	type = {type},
+	institution = {Nuclear Energy Agency},
+	date = {1992-10-23},
+	OPTnote = {It would be good to find a newer source},
+	location = {Rome, Italy},
+	url = {
+	       https://www.oecd-nea.org/upload/docs/application/pdf/2020-12/decontec.pdf
+	       },
+}
+
+// Pathfinding sources
+@article{Dijkstra,
+	author = {Dijkstra, E. W.},
+	title = {A Note on Two Problems in Connexion with Graphs},
+	journaltitle = {Numerische Mathematik},
+	date = {1959-12-01},
+	OPTvolume = {1},
+	OPTissue = {1},
+	OPTmonth = {December},
+	OPTpages = {269-271},
+	OPTdoi = {https://doi.org/10.1007/BF01386390},
+	url = {https://ir.cwi.nl/pub/9256/9256D.pdf},
+}
+
+@inproceedings{Improved_Dijkstra,
+	author = {Fan, DongKai and Shi, Ping},
+	booktitle = {2010 Seventh International Conference on Fuzzy Systems and
+	             Knowledge Discovery},
+	title = {Improvement of Dijkstra's algorithm and its application in route
+	         planning},
+	year = {2010},
+	volume = {4},
+	number = {},
+	pages = {1901-1904},
+	keywords = {Algorithm design and analysis;Complexity
+	            theory;Roads;Approximation
+	            algorithms;Planning;Vehicles;Arrays;Dijkstra's algorithm;road
+	            network;route planning;storage structure;restricted searching
+	            area},
+	doi = {10.1109/FSKD.2010.5569452},
+	url = {https://ieeexplore.ieee.org/abstract/document/5569452},
+	OPTnote = {To read},
+}
+
+@article{Dijkstra_for_railroads,
+	author = {Schulz, Frank and Wagner, Dorothea and Weihe, Karsten},
+	title = {Dijkstra's algorithm on-line: an empirical case study from public
+	         railroad transport},
+	year = {2001},
+	issue_date = {2000},
+	publisher = {Association for Computing Machinery},
+	address = {New York, NY, USA},
 	volume = {5},
-	number = {4},
-	pages = {308-321},
-	url = {https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=817348},
-	urldate = {2025-02-13},
-	shorthand = {MW99},
+	issn = {1084-6654},
+	url = {https://doi.org/10.1145/351827.384254},
+	doi = {10.1145/351827.384254},
+	abstract = {Traffic information systems are among the most prominent
+	            real-world applications of Dijkstra's algorithm for shortest
+	            paths. We consider the scenario of a central information server
+	            in the realm of public railroad transport on wide-area networks.
+	            Such a system has to process a large number of on-line queries
+	            for optimal travel connections in real time. In practice, this
+	            problem is usually solved by heuristic variations of Dijkstra's
+	            algorithm, which do not guarantee an optimal result. We report
+	            results from a pilot study, in which we focused on the travel
+	            time as the only optimization criterion. In this study, various
+	            speed-up techniques for Dijkstra's algorithm were analysed
+	            empirically. This analysis was based on the timetable data of all
+	            German trains and on a "snapshot" of half a million customer
+	            queries.},
+	journal = {ACM J. Exp. Algorithmics},
+	month = dec,
+	pages = {12–es},
+	numpages = {23},
+	OPTnote = {To read},
 }
 
-@proceedings{Hier_seg_autobody_painting,
-	author = {Atkar, P.N. and Greenfield, A. and Conner, D.C. and Choset, H. and
-	          Rizzi, A.A.},
-	title = {Hierarchical Segmentation of Surfaces Embedded in R3 for Auto-Body
-	         Painting},
-	booktitle = {Proceedings of the 2005 IEEE International Conference on
-	             Robotics and Automation},
-	year = {2005},
-	month = {04},
+@article{A_Star_lit_review,
+	title = {A Systematic Literature Review of A* Pathfinding},
+	journal = {Procedia Computer Science},
+	volume = {179},
+	pages = {507-514},
+	year = {2021},
+	note = {5th International Conference on Computer Science and Computational
+	        Intelligence 2020},
+	issn = {1877-0509},
+	doi = {https://doi.org/10.1016/j.procs.2021.01.034},
+	url = {https://www.sciencedirect.com/science/article/pii/S1877050921000399},
+	author = {Daniel Foead and Alifio Ghifari and Marchel Budi Kusuma and Novita
+	          Hanafiah and Eric Gunawan},
+	keywords = {A-Star, Pathfinding, Heuristic function, HPA-STAR},
+	abstract = {A* is a search algorithm that has long been used in the
+	            pathfinding research community. Its efficiency, simplicity, and
+	            modularity are often highlighted as its strengths compared to
+	            other tools. Due to its ubiquity and widespread usage, A* has
+	            become a common option for researchers attempting to solve
+	            pathfinding problems. However, the sheer amount of research done
+	            on the topic makes it difficult to know where to start looking.
+	            With this paper, we hope to create an accessible, up to date
+	            reference on the current state of the A* search algorithm for
+	            future pathfinding projects to consider. This paper examines
+	            A-Star’s current usage in the field of pathfinding, comparing A*
+	            to other search algorithms. It also analyzes potential future
+	            developments for A-Star’s development. A* cannot keep up with the
+	            demands of current pathfinding problems. Other algorithms can
+	            maintain the same performance while also demanding less overhead
+	            and this problem only grows worse as grid size increases. However
+	            , use of innovative modifications such as different heuristic
+	            types or secondary components to the algorithm allow A* to
+	            achieve very fast times with good accuracy when dealing with
+	            large maps, while only having slightly increased overhead costs
+	            for the modifications. While beginning to show its age, improved
+	            algorithms based on the classic A* algorithm are more than
+	            capable of keeping up with modern pathfinding demands. These
+	            derivative search algorithms such as HPA* is used to overcome the
+	            limitations of A*. HPA* can compete with and even surpass its
+	            competitors depending on the challenge faced.},
+	OPTnote = {To read},
+}
+
+@online{A_Star_beginners,
+	author = {Lester, Patrick},
+	title = {A* Pathfinding for Beginners},
+	date = {2005-07-18},
+	url = {
+	       https://wiki.jmonkeyengine.org/docs/3.3/contributions/_attachments/Astar.pdf
+	       },
+	language = {English},
+	OPTnote = {originally published 2014-10-08},
+}
+
+@inproceedings{Gen_alg_explore_A_Star,
+	author = {Leigh, Ryan and Louis, Sushil J. and Miles, Chris},
+	booktitle = {2007 IEEE Symposium on Computational Intelligence and Games},
+	title = {Using a Genetic Algorithm to Explore A*-like Pathfinding Algorithms
+	         },
+	year = {2007},
 	volume = {},
 	number = {},
-	pages = {572-577},
-	eventtitle = {International Conference on Robotics and Automation},
-	eventdate = {2005-04-18/2005-04-22},
-	organization = {IEEE},
-	publisher = {IEEE},
-	location = {Barcelona, Spain},
-	doi = {10.1109/ROBOT.2005.1570179},
-	url = {https://ieeexplore.ieee.org/abstract/document/1570179},
-	urldate = {2025-02-13},
-	shorthand = {CMU05},
+	pages = {72-79},
+	keywords = {Genetic algorithms;Space exploration;Management
+	            training;Humans;Robots;Computational intelligence;Computer
+	            science;Genetic engineering;Real time systems;Computational
+	            modeling;Genetic Algorithms;A*;Pathfinding},
+	doi = {10.1109/CIG.2007.368081},
+	OPTnote = {To read},
 }
 
-@online{UR_XML-RPC,
-	title = {XML-RPC communication},
-	date = {2024-09-30},
-	url = {
-	       https://www.universal-robots.com/articles/ur/interface-communication/xml-rpc-communication/
-	       },
-	organization = {Universal Robots},
-	OPTdate = {30},
-	OPTmonth = {September},
-	year = {2024},
-	urldate = {2025-02-13},
-	shorthand = {XMLRPC},
+@article{A_Star_in_computer_games,
+	author = {Cui, Xiao and Shi, Hao},
+	year = {2010},
+	month = {11},
+	pages = {125-130},
+	title = {A*-based Pathfinding in Modern Computer Games},
+	volume = {11},
+	OPTnote = {To read},
 }
 
-@article{ROBBE,
-	title = {ROBBE – Robot-aided processing of assemblies during the dismantling
-	         of nuclear power plants},
-	author = {{Santos, Pedro} and {Recknagel, Jörg} and {Knuth, Martin} and {
-	          Steinbacher, Klaus} and {Ritz, Martin} and {Wassmann, Burkhard} and
-	          {Fellner, Dieter}},
-	DOI = {10.1051/epjn/2022016},
-	url = {https://doi.org/10.1051/epjn/2022016},
-	journal = {EPJ Nuclear Sci. Technol.},
-	year = {2022},
-	volume = {8},
-	pages = {20},
-	shorthand = {ROBBE},
+// Coverage path planning
+@article{CPP_3D_farming_terrain,
+	author = {Jin, Jian and Tang, Lie},
+	title = {Coverage path planning on three-dimensional terrain for arable
+	         farming},
+	journal = {Journal of Field Robotics},
+	volume = {28},
+	number = {3},
+	pages = {424-440},
+	doi = {https://doi.org/10.1002/rob.20388},
+	url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/rob.20388},
+	eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/rob.20388},
+	abstract = {Abstract Field operations should be done in a manner that
+	            minimizes time and travels over the field surface and is
+	            coordinated with topographic land features. Automated path
+	            planning can help to find the best coverage path so that the
+	            field operation costs can be minimized. Intelligent algorithms
+	            are desired for both two-dimensional (2D) and three-dimensional
+	            (3D) terrain field coverage path planning. The algorithm of
+	            generating an optimized full coverage pattern for a given 2D
+	            planar field by using boustrophedon paths has been investigated
+	            and reported before. However, a great proportion of farms have
+	            rolling terrains, which have a considerable influence on the
+	            design of coverage paths. Coverage path planning in 3D space has
+	            a great potential to further optimize field operations. This work
+	            addressed four critical tasks: terrain modeling and
+	            representation, coverage cost analysis, terrain decomposition,
+	            and the development of optimized path searching algorithm. The
+	            developed algorithms and methods have been successfully
+	            implemented and tested using 3D terrain maps of farm fields with
+	            various topographic features. Each field was decomposed into
+	            subregions based on its terrain features. A recommended “seed
+	            curve” based on a customized cost function was searched for each
+	            subregion, and parallel coverage paths were generated by
+	            offsetting the found “seed curve” toward its two sides until the
+	            whole region was completely covered. Compared with the 2D
+	            planning results, the experimental results of 3D coverage path
+	            planning showed its superiority in reducing both headland turning
+	            cost and soil erosion cost. On the tested fields, on average the
+	            3D planning algorithm saved 10.3\% on headland turning cost, 24.7
+	            \% on soil erosion cost, 81.2\% on skipped area cost, and 22.0\%
+	            on the weighted sum of these costs, where their corresponding
+	            weights were 1, 1, and 0.5, respectively. © 2011 Wiley
+	            Periodicals, Inc.},
+	year = {2011},
+	OPTnote = {To read},
 }
 
-@article{IntEdgeExt,
-	AUTHOR = {Nielsen, Lasse Damtoft and Sung, Inkyung and Nielsen, Peter},
-	TITLE = {Convex Decomposition for a Coverage Path Planning for Autonomous
-	         Vehicles: Interior Extension of Edges},
-	JOURNAL = {Sensors},
-	VOLUME = {19},
-	YEAR = {2019},
-	NUMBER = {19},
-	ARTICLE-NUMBER = {4165},
-	URL = {https://www.mdpi.com/1424-8220/19/19/4165},
-	PubMedID = {31557969},
-	ISSN = {1424-8220},
-	ABSTRACT = {To cover an area of interest by an autonomous vehicle, such as
-	            an Unmanned Aerial Vehicle (UAV), planning a coverage path which
-	            guides the unit to cover the area is an essential process.
-	            However, coverage path planning is often problematic, especially
-	            when the boundary of the area is complicated and the area
-	            contains several obstacles. A common solution for this situation
-	            is to decompose the area into disjoint convex sub-polygons and to
-	            obtain coverage paths for each sub-polygon using a simple
-	            back-and-forth pattern. Aligned with the solution approach, we
-	            propose a new convex decomposition method which is simple and
-	            applicable to any shape of target area. The proposed method is
-	            designed based on the idea that, given an area of interest
-	            represented as a polygon, a convex decomposition of the polygon
-	            mainly occurs at the points where an interior angle between two
-	            edges of the polygon is greater than 180 degrees. The performance
-	            of the proposed method is demonstrated by comparison with
-	            existing convex decomposition methods using illustrative
-	            examples.},
-	DOI = {10.3390/s19194165},
-	shorthand = {IEE19},
+@article{CPP_alg_agriculture,
+	Author = {Oksanen, Timo and Visala, Arto},
+	Title = {Coverage Path Planning Algorithms for Agricultural Field Machines},
+	Journal = {JOURNAL OF FIELD ROBOTICS},
+	Year = {2009},
+	Volume = {26},
+	Number = {8},
+	Pages = {651-668},
+	Month = {AUG},
+	DOI = {10.1002/rob.20300},
+	ISSN = {1556-4959},
+	ResearcherID-Numbers = {Oksanen, Timo/K-7607-2013 Visala, Arto/G-2475-2013},
+	Unique-ID = {WOS:000268150200003},
 }
 
-// Curvature
+@inproceedings{CCPP_cleaning_robots,
+	author = {Yu Liu and Xiaoyong Lin and Shiqiang Zhu},
+	booktitle = {2008 7th World Congress on Intelligent Control and Automation},
+	title = {Combined coverage path planning for autonomous cleaning robots in
+	         unstructured environments},
+	year = {2008},
+	volume = {},
+	number = {},
+	pages = {8271-8276},
+	keywords = {Cleaning;Path planning;Robots;Planning;Robot sensing
+	            systems;Wheels;Sensors;Autonomous cleaning robots;Ccomplete
+	            coverage path planning;Self-localization;Environment modeling},
+	doi = {10.1109/WCICA.2008.4594223},
+}
+
+
+// Curvature related sources
 @article{ExtCurvOnTriMesh,
 	author = {Gatzke, Timothy and Grimm, Cindy},
 	year = {2006},
@@ -121,58 +263,8 @@
 	doi = {10.1142/S0218654306000810},
 	url = {https://web.engr.oregonstate.edu/~
 	       grimmc/Curvature/cagd_curvature_gatzke_grimm_submit.pdf},
-	shorthand = {Grimm06},
-}
-
-
-@online{imrad,
-	title = {IMRAD},
-	url = {https://en.wikipedia.org/wiki/IMRAD},
-	organization = {Wikipedia},
-	urldate = {2018-12-20},
-}
-
-@online{scrguide,
-	title = {KOMA-Script},
-	subtitle = {Die Anleitung},
-	author = {Kohm, Markus},
-	date = {2019-01-14},
-	url = {
-	       http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf
-	       },
-	urldate = {2019-02-05},
-}
-
-@online{leaflet,
-	title = {The document class leaflet},
-	author = {Niepraschk, Rolf and Schmidt, Walter and Gäßlein, Hubert},
-	date = {2015-12-27},
-	urldate = {2020-02-12},
-	url = {
-	       http://mirrors.ctan.org/macros/latex/contrib/leaflet/leaflet-manual.pdf
-	       },
-}
-
-@online{TUDaGuideline,
-	title = {Das Bild der TU Darmstadt},
-	subtitle = {Corporate Design Handbuch},
-	edition = {3},
-	month = {06},
-	year = {2011},
-	url = {
-	       https://www.intern.tu-darmstadt.de/media/medien_stabsstelle_km/services/medien_cd/das_bild_der_tu_darmstadt.pdf
-	       },
-	urldate = {2020-05-01},
-}
-
-@online{tudapub,
-	title = {TUDaPub – \LaTeX-Paper im Corporate Design der TU Darmstadt},
-	author = {Marei Peischl},
-	date = {2021-10-12},
-	url = {
-	       http://mirrors.ctan.org/macros/latex/contrib/tuda-ci/doc/DEMO-TUDaPub.pdf
-	       },
-	urldate = {2021-10-12},
+	OPTshorthand = {Grimm06},
+	OPTnote = {To read},
 }
 
 @inproceedings{SRTensor,
@@ -264,6 +356,220 @@
 	note = {TODO},
 }
 
+// Watershed related sources
+@article{Watershed,
+	author = {Alan P. Mangan and Ross T. Whitaker},
+	title = {Partitioning 3D Surface Meshes Using Watershed Segmentation},
+	journaltitle = {IEEE TRANSACTIONS ON VISUALIZATION AND COMPUTER GRAPHICS},
+	date = {1999-10/1999-12},
+	volume = {5},
+	number = {4},
+	pages = {308-321},
+	url = {https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=817348},
+	urldate = {2025-02-13},
+	OPTshorthand = {MW99},
+}
+
+@online{USGS_Watersheds,
+	ALTauthor = {Water Science School},
+	title = {Watersheds and Drainage Basins | U.S. Geological Survey},
+	date = {2019-06-08},
+	url = {
+	       https://www.usgs.gov/water-science-school/science/watersheds-and-drainage-basins
+	       },
+	OPTorganization = {U.S. Geological Survey},
+}
+
+@online{DrainageDivideWiki,
+	title = {Drainage divide - Wikipedia},
+	date = {2025-05-24},
+	url = {https://en.wikipedia.org/wiki/Drainage_divide},
+}
+
+
+@article{ImageSegWS,
+	author = {N.H. Salman and C.-Q. Liu},
+	title = {Image Segmentation And Edge Detection Based On Watershed Techniques
+	         },
+	journal = {International Journal of Computers and Applications},
+	volume = {25},
+	number = {4},
+	pages = {258--263},
+	year = {2003},
+	publisher = {Taylor \& Francis},
+	doi = {10.1080/1206212X.2003.11441713},
+	URL = { https://doi.org/10.1080/1206212X.2003.11441713 },
+	eprint = { https://doi.org/10.1080/1206212X.2003.11441713 },
+	abstract = { K-means and watershed segmentation techniques are presented to
+	            perform image segmentation and edge detection tasks. We first
+	            used the K-means technique to obtain a primary segmented image.
+	            We then employed a watershed technique that works on that image;
+	            this process includes gradient of the segmented input image,
+	            divides the image into markers, completes the watershed line by
+	            using the markers, and stores the image in the format of region
+	            adjacency graph (RAG). The initial segmentation result was
+	            obtained by the watershed algorithm. We then used merging
+	            techniques based on mean gray values and two edge strengths (Ti,
+	            T2) to obtain edge maps. In this article we solved the problem of
+	            undesirable oversegmentation results produced by the watershed
+	            algorithm, when used directly with raw data images. Also, the
+	            edge maps have no broken lines on the entire image, and the final
+	            edge detection result is one closed boundary per actual region in
+	            the image. },
+	OPTshorthand = {Salman03},
+}
+
+@book{DigitalImageProc,
+	author = {Gonzalez, Rafael C. and Woods, Richard E.},
+	title = {Digital Image Processing},
+	year = {2017},
+	edition = {4th},
+	publisher = {Pearson},
+	location = {New York, N.Y.},
+	isbn = {978-1-292-22304-9},
+	chapter = {10.7},
+	pages = {787-797},
+	pagetotal = {1024},
+}
+
+
+@proceedings{HierSurfSeg_for_autobody_painting,
+	author = {Atkar, P.N. and Greenfield, A. and Conner, D.C. and Choset, H. and
+	          Rizzi, A.A.},
+	title = {Hierarchical Segmentation of Surfaces Embedded in R3 for Auto-Body
+	         Painting},
+	booktitle = {Proceedings of the 2005 IEEE International Conference on
+	             Robotics and Automation},
+	year = {2005},
+	month = {04},
+	volume = {},
+	number = {},
+	pages = {572-577},
+	eventtitle = {International Conference on Robotics and Automation},
+	eventdate = {2005-04-18/2005-04-22},
+	organization = {IEEE},
+	publisher = {IEEE},
+	location = {Barcelona, Spain},
+	doi = {10.1109/ROBOT.2005.1570179},
+	url = {https://ieeexplore.ieee.org/abstract/document/1570179},
+	urldate = {2025-02-13},
+	OPTshorthand = {CMU05},
+}
+
+@online{UR_XML-RPC,
+	title = {XML-RPC communication},
+	date = {2024-09-30},
+	url = {
+	       https://www.universal-robots.com/articles/ur/interface-communication/xml-rpc-communication/
+	       },
+	organization = {Universal Robots},
+	OPTdate = {30},
+	OPTmonth = {September},
+	year = {2024},
+	urldate = {2025-02-13},
+	OPTshorthand = {XMLRPC},
+}
+
+@article{ROBBE,
+	title = {ROBBE – Robot-aided processing of assemblies during the dismantling
+	         of nuclear power plants},
+	author = {{Santos, Pedro} and {Recknagel, Jörg} and {Knuth, Martin} and {
+	          Steinbacher, Klaus} and {Ritz, Martin} and {Wassmann, Burkhard} and
+	          {Fellner, Dieter}},
+	DOI = {10.1051/epjn/2022016},
+	url = {https://doi.org/10.1051/epjn/2022016},
+	journal = {EPJ Nuclear Sci. Technol.},
+	year = {2022},
+	volume = {8},
+	pages = {20},
+	OPTshorthand = {ROBBE},
+}
+
+@article{IntEdgeExt,
+	AUTHOR = {Nielsen, Lasse Damtoft and Sung, Inkyung and Nielsen, Peter},
+	TITLE = {Convex Decomposition for a Coverage Path Planning for Autonomous
+	         Vehicles: Interior Extension of Edges},
+	JOURNAL = {Sensors},
+	VOLUME = {19},
+	YEAR = {2019},
+	NUMBER = {19},
+	ARTICLE-NUMBER = {4165},
+	URL = {https://www.mdpi.com/1424-8220/19/19/4165},
+	PubMedID = {31557969},
+	ISSN = {1424-8220},
+	ABSTRACT = {To cover an area of interest by an autonomous vehicle, such as
+	            an Unmanned Aerial Vehicle (UAV), planning a coverage path which
+	            guides the unit to cover the area is an essential process.
+	            However, coverage path planning is often problematic, especially
+	            when the boundary of the area is complicated and the area
+	            contains several obstacles. A common solution for this situation
+	            is to decompose the area into disjoint convex sub-polygons and to
+	            obtain coverage paths for each sub-polygon using a simple
+	            back-and-forth pattern. Aligned with the solution approach, we
+	            propose a new convex decomposition method which is simple and
+	            applicable to any shape of target area. The proposed method is
+	            designed based on the idea that, given an area of interest
+	            represented as a polygon, a convex decomposition of the polygon
+	            mainly occurs at the points where an interior angle between two
+	            edges of the polygon is greater than 180 degrees. The performance
+	            of the proposed method is demonstrated by comparison with
+	            existing convex decomposition methods using illustrative
+	            examples.},
+	DOI = {10.3390/s19194165},
+	OPTshorthand = {IEE19},
+}
+
+
+@online{imrad,
+	title = {IMRAD},
+	url = {https://en.wikipedia.org/wiki/IMRAD},
+	organization = {Wikipedia},
+	urldate = {2018-12-20},
+}
+
+@online{scrguide,
+	title = {KOMA-Script},
+	subtitle = {Die Anleitung},
+	author = {Kohm, Markus},
+	date = {2019-01-14},
+	url = {
+	       http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguide.pdf
+	       },
+	urldate = {2019-02-05},
+}
+
+@online{leaflet,
+	title = {The document class leaflet},
+	author = {Niepraschk, Rolf and Schmidt, Walter and Gäßlein, Hubert},
+	date = {2015-12-27},
+	urldate = {2020-02-12},
+	url = {
+	       http://mirrors.ctan.org/macros/latex/contrib/leaflet/leaflet-manual.pdf
+	       },
+}
+
+@online{TUDaGuideline,
+	title = {Das Bild der TU Darmstadt},
+	subtitle = {Corporate Design Handbuch},
+	edition = {3},
+	month = {06},
+	year = {2011},
+	url = {
+	       https://www.intern.tu-darmstadt.de/media/medien_stabsstelle_km/services/medien_cd/das_bild_der_tu_darmstadt.pdf
+	       },
+	urldate = {2020-05-01},
+}
+
+@online{tudapub,
+	title = {TUDaPub – \LaTeX-Paper im Corporate Design der TU Darmstadt},
+	author = {Marei Peischl},
+	date = {2021-10-12},
+	url = {
+	       http://mirrors.ctan.org/macros/latex/contrib/tuda-ci/doc/DEMO-TUDaPub.pdf
+	       },
+	urldate = {2021-10-12},
+}
+
 @article{NonItFeatPresMeshSmooth,
 	author = {Jones, Thouis R. and Durand, Fr\'{e}do and Desbrun, Mathieu},
 	title = {Non-iterative, feature-preserving mesh smoothing},
@@ -295,3 +601,18 @@
 	keywords = {robust estimation, mesh smoothing, mesh processing, mesh fairing
 	            , bilateral filtering, anisotropic diffusion},
 }
+
+@article{Isovists,
+	author = {Benedikt, Michael},
+	year = {1979},
+	month = {01},
+	pages = {47-65},
+	title = {To Take Hold of Space: Isovists and Isovist Fields},
+	volume = {6},
+	journal = {Environment and Planning B: Planning and Design},
+	doi = {10.1068/b060047},
+	url = {
+	       https://www.researchgate.net/publication/23541752_To_Take_Hold_of_Space_Isovists_and_Isovist_Fields
+	       },
+}
+

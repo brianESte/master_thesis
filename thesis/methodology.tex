@@ -1,5 +1,5 @@
 %! TeX root = thesis.tex
-\chapter{Methodology}
+\chapter{Methodology}\label{methodology}
 \IMRADlabel{methods}
 
 \section{Overview}
@@ -10,25 +10,65 @@ The order in which each region is traversed by the robot is determined via a mod
 Here, the start and end points of the salesman's path need not be the same.
 
 \section{3D Segmentation}
+Segmentation in 3D consists of breaking the model into primitive surfaces,
+which have (easily) solvable mappings from 3D to 2D.
+This is done by applying Watershed segmentation to the mesh as a whole and classifying the resultant mesh sections as a certain primitive.
+Watershed segmentation is imperfect, and sometimes yields mesh sections comprised of multiple primitive types.
+In such cases the composite mesh section undergoes Watershed segmentation again, but with a lower merge threshold (see \ref{ws_seg}), so that it might be split into multiple mesh sections.
 
+$\rightarrow$ Do i need to further describe Seg3D ?
 
-\section{Watershed Segmentation}
+\subsection{Watershed Segmentation}\label{ws_seg}
+A watershed, according to the North American usage, is an area of land, in which all streams and rainfall drain to a common body of water\cite{USGS_Watersheds}, also commonly called catchment basins.
+Somewhat confusingly, the rest of the English speaking world uses "Watershed" to refer to the high elevation regions that separate said catchment basins.
+Watershed segmentation originally comes from image processing, where it is used for image segmentation\cite{ImageSegWS, DigitalImageProc}.
+It works by applying a "height function" to the input image and forming image regions divided by "high" areas.
+A common "height function" in image processing is the gradient of the image\cite{ImageSegWS}.
+Mangan and Whitaker first applied this concept to 3D meshes, replacing pixels for the mesh's vertices and the image gradient for the mesh curvature\cite{Watershed}.
+
 -> Give overview of how WS segmentation works.
+\subsubsection{Basic Procedure}
+Their algorithm consists of 6 steps:
+\begin{enumerate}
+	\item Apply the height function to each vertex
+	\item Find and label each local minima
+	\item Find flat areas and classify them as either a minimum or plateau
+	\item Loop through the plateaus and allow each to descend to a labeled region
+	\item Descend from all remaining vertices to labeled regions
+	\item Merge regions whose watershed depth is below a given threshold
+\end{enumerate}
 
-\subsection{Basic Procedure}
 0. Apply height function at each vertex
 1. Create initial mesh regions from local minima / minima plateaus
 2. "Minima Expansion" Expand outward from each mesh region up to a certain depth, absorbing any regions encountered.
 3. "Descent to Minima" From each un-indexed (check their word for this) vertex, follow the path of steepest descent until an indexed region is encountered.
 All vertices traversed along this descent are added to the encountered region.
 
+The following 2 subsubsections are my main additions to Watershed. @HK/EL: Should these be in \ref{implementation} ?
 -> my modifications
-\subsection{Mini-Merge}
+\subsubsection{Mini-Merge}
 As noted by Mangan and Whitaker(sp?) Descent to Minima Through testing and development it was observed that
 
-\subsection{Boundary Smoothing}
+\subsubsection{Boundary Smoothing}
 Due to noise / other randomness in the mesh,
 
+\subsection{Surface Classification}
 
 \section{Geometry Simplification}
+
+
+\section{2D Segmentation}
+This is Interior Edge Extension
+The idea was that downstream components requried convex shapes to facilitate local path planning.
+In hindsight, surfaces need not be completely convex, but merely \textit{mostly} convex.
+
+\section{Surface Path Planning}
+This is effectively Boustrophedon
+
+\section{Modified Traveling Salesman Problem}
+Normal TSP should have already been described in \ref{background}, so no need to rehash that.
+Only need to talk about the modifications and how it would have been applied...
+
+\section{Inverse Kinematics}
+Talk about how the InvKin from the robot could be used, but a custom one would (likely) be necessary to incorporate the rotary table
 

@@ -19,13 +19,13 @@ could be run without sudo privileges.
 For anyone who tries to follow in my footsteps
 Getting the TUDa template to work required various dependencies. Below are those dependencies, in the order i ran into related errors and then installed them:
 - URspecialopts.sty &rarr; urcls
-- anyfontsize.sty --> anyfontsize
-- roboto.sty --> roboto
+- anyfontsize.sty &rarr;> anyfontsize
+- roboto.sty &rarr;> roboto
 - pdfx.sty &rarr; pdfx
 - `\ifnum\shellescape` &rarr; luatex85 (see [1])
-- xmpincl.sty -> xmpincl
-- Unknown option 'ngerman' -> babel-german
-- The font "XCharter" cannot be found -> xcharter
+- xmpincl.sty &rarr; xmpincl
+- Unknown option 'ngerman' &rarr; babel-german
+- The font "XCharter" cannot be found &rarr; xcharter
 
 #### Warnings
 
