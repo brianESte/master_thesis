@@ -9,8 +9,13 @@ could be run without sudo privileges.
 ## TODO:
 
 - [x] Somehow the final version of the exposé was lost. I would like to update the tracked document from a printed copy
-- [ ] Begin writing background chapter
+- [ ] Write initial version of Related Work chapter
+- [x] Begin writing background chapter
+- [ ] Write initial version of Methodology
 - [ ] Maybe try to clean up the IGD logo svg file?
+
+Reminders:
+- et al. is written with a .
 
 ## Notes
 
@@ -19,8 +24,8 @@ could be run without sudo privileges.
 For anyone who tries to follow in my footsteps
 Getting the TUDa template to work required various dependencies. Below are those dependencies, in the order i ran into related errors and then installed them:
 - URspecialopts.sty &rarr; urcls
-- anyfontsize.sty &rarr;> anyfontsize
-- roboto.sty &rarr;> roboto
+- anyfontsize.sty &rarr; anyfontsize
+- roboto.sty &rarr; roboto
 - pdfx.sty &rarr; pdfx
 - `\ifnum\shellescape` &rarr; luatex85 (see [1])
 - xmpincl.sty &rarr; xmpincl

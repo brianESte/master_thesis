@@ -72,7 +72,9 @@
 %Literaturverzeichnis
 %%%%%%%%%%%%%%%%%%%
 \usepackage[
-	backend=bibtex
+	backend=bibtex,
+	% Year (descending) -> Name -> Title
+	sorting=ydnt
 ]{biblatex}   % Literaturverzeichnis
 \addbibresource{references.bib}
 %\bibliography{references}
@@ -164,8 +166,6 @@
 \include{background}
 
 \include{methodology}
-
-\include{implementation}
 
 \include{results}
 

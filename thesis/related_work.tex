@@ -1,15 +1,42 @@
 %! TeX root = thesis.tex
 \chapter{Related Work}\label{related_work}
 
-Within the topic of "path planning" there exists "pathfinding" and "coverage path planning".
+The main sub-topics within path planning are pathfinding and coverage path planning.
 The goal of pathfinding is to determine the shortest path between two points while avoiding any obstacles.
 Pathfinding has applications ranging from navigation to network routing.
 The primary pathfinding algorithms are: Dijkstra's algorithm\cite{Dijkstra, Improved_Dijkstra} which determines the shortest path between two nodes in a weighted graph, and A* (A-Star)\cite{A_Star_lit_review, A_Star_beginners, A_Star_in_computer_games} which is effectively Dijkstra's algorithm with a heuristic function applied.
 Dijkstra's algorithm is well suited for navigating between cities\cite{Dijkstra_for_railroads}, as a network of connected cities is effectively a graph with edges weighted by distance.
 (maybe talk about A* a little more?)
 
-
 In contrast to this, the goal of coverage path planning (CPP) is to traverse as much of the given working area as possible.
-The objective of applied CPP is often for an agent to perform some function over the entire working area.
-Examples of this include path planning of farmland\cite{CPP_3D_farming_terrain, CPP_alg_agriculture}
-of CPP is to
+The objective of applied CPP is typically for an agent to perform some function over the entire working area.
+Examples of this include spray painting car parts\cite{Automatic_spray_painting_path}, spray forming glass reinforced cement\cite{Robotic_grc_spraying}, metal polishing\cite{Metal_polishing_robot_sys}, floor cleaning\cite{CCPP_guidance_for_cleaning_robots}, demining\cite{CPP_demining}, lawn mowing\cite{CPP_autonomous_lawn_mower}, farming\cite{Vision_perception_auto_harvester, CPP_alg_agriculture}, underwater inspection of ship hulls\cite{CPP_inspect_complex_structures}, and producing mosaicked images of the ocean floor\cite{Terrain_covering_AUV}.
+
+In the past few years drones have become increasing popular, including as CPP agents\cite{CPP_UAV_survey, CPP_2D_convex_regions_uav, CPP_multi_UAV, CPP_spraying_drones}.
+Luna et al. presented a multi-UAV approach to scan a set of disjointed land areas\cite{CPP_multi_UAV}.
+(Maybe talk about UAV CPP more?)
+
+CPP algorithms can be off-line, in which the environment is known at the start and is assumed constant, or on-line, in which the path planning agent must deal with an unknown or changing environment\cite{CPP_survey_for_robotics}.
+On-line applications include the aforementioned car part spray painting, panel spray forming\cite{Robotic_grc_spraying}, and metal polishing.
+Liu et al. propose an algorithm for cleaning robots in an unknown environment by combining random path movement and locally complete coverage paths\cite{CCPP_cleaning_robots}.
+Their locally complete coverage paths follow a ``comb-like'' path that likens a Boustrophedon path.
+
+The spatial complexity of CPP problems extends to 2.5D and 3D, though solutions to such problems typically involve semgenting the working region into sub-regions that can be approximated as 2D without significant loss of precision.
+2D applications of coverage path planning are characterized by the ROI and agent's range of motion being limited to 2D.
+Any 3rd dimension aspects are negligible.
+The classic example thereof is robot vacuum cleaners, such as iRobot's ``Roomba'' and Electrolux's ``Trilobite''\cite{CCPP_cleaning_robots}, whereas less obvious examples include drones that operate at a constant elevation\cite{CPP_2D_convex_regions_uav}.
+Gajjar et al. discretize the given 2D space to a grid in order to simplify agent movement\cite{CCPP_known_2D_env}.
+
+2.5D problems exhibit a working area with non-uniform height, but can otherwise still be mapped to a 2D space.
+Jin and Tang developed a CPP algorithm for uneven farmland terrain which accounted for farmland relevant costs, such as: Headland turning, soil erosion, and curved paths\cite{CPP_farming_terrain}.
+Hameed et al. calculate the height value for their waypoints via bilinear interpolation from the Digital Elevation Model of their target area\cite{CPP_2.5D_agriculture}
+Gao et al. use a 2.5D grid as the basis for their algorithm\cite{CPP_2.5D_grid_map}.
+Galceran and Carreras demonstrate the complexity of a ROI with varying distance to the agent\cite{CPP_2.5D_seabed_2012}, as holding the depth of their AUV constant results in a varying FOV observed.
+They solve this by segmenting the given seabed map into regions of depth constant enough to be approximated as 2D.
+In a subsequent paper Galceran and Carreras tackle a similar problem by segmenting the given bathymetric map into ``high-slope'' regions and relatively planar regions\cite{CPP_2.5D_seabed_2013}.
+
+Three dimensional CPP problems require movement in all 3 dimensions relative to the ROI\cite{CPP_survey_for_robotics}.
+TODO: describe \cite{HiCPP_cplx_3D_env} with a sentence or 2.
+
+Could also talk about different methods of segmentation?
+

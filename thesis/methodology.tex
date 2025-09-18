@@ -20,10 +20,10 @@ $\rightarrow$ Do i need to further describe Seg3D ?
 
 \subsection{Watershed Segmentation}\label{ws_seg}
 A watershed, according to the North American usage, is an area of land, in which all streams and rainfall drain to a common body of water\cite{USGS_Watersheds}, also commonly called catchment basins.
-Somewhat confusingly, the rest of the English speaking world uses "Watershed" to refer to the high elevation regions that separate said catchment basins.
+Somewhat confusingly, the rest of the English speaking world uses ``Watershed'' to refer to the high elevation regions that separate said catchment basins.
 Watershed segmentation originally comes from image processing, where it is used for image segmentation\cite{ImageSegWS, DigitalImageProc}.
-It works by applying a "height function" to the input image and forming image regions divided by "high" areas.
-A common "height function" in image processing is the gradient of the image\cite{ImageSegWS}.
+It works by applying a ``height function'' to the input image and forming image regions divided by ``high'' areas.
+A common ``height function'' in image processing is the gradient of the image\cite{ImageSegWS}.
 Mangan and Whitaker first applied this concept to 3D meshes, replacing pixels for the mesh's vertices and the image gradient for the mesh curvature\cite{Watershed}.
 
 -> Give overview of how WS segmentation works.
@@ -40,11 +40,10 @@ Their algorithm consists of 6 steps:
 
 0. Apply height function at each vertex
 1. Create initial mesh regions from local minima / minima plateaus
-2. "Minima Expansion" Expand outward from each mesh region up to a certain depth, absorbing any regions encountered.
-3. "Descent to Minima" From each un-indexed (check their word for this) vertex, follow the path of steepest descent until an indexed region is encountered.
+2. ``Minima Expansion'' Expand outward from each mesh region up to a certain depth, absorbing any regions encountered.
+3. ``Descent to Minima'' From each un-indexed (check their word for this) vertex, follow the path of steepest descent until an indexed region is encountered.
 All vertices traversed along this descent are added to the encountered region.
 
-The following 2 subsubsections are my main additions to Watershed. @HK/EL: Should these be in \ref{implementation} ?
 -> my modifications
 \subsubsection{Mini-Merge}
 As noted by Mangan and Whitaker(sp?) Descent to Minima Through testing and development it was observed that
@@ -55,7 +54,14 @@ Due to noise / other randomness in the mesh,
 \subsection{Surface Classification}
 
 \section{Geometry Simplification}
+GeoSimp creates simplified geometric representations of the 3D mesh sections it is given
 
+\subsection{Shared Edges}
+see \verb|create_shared_edges()|
+
+\subsection{Shared Corners}
+
+\subsection{Simplified Surfaces}
 
 \section{2D Segmentation}
 This is Interior Edge Extension
