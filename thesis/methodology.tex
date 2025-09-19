@@ -3,20 +3,48 @@
 \IMRADlabel{methods}
 
 \section{Overview}
-The basic premise is to segment the given model into primitive surfaces.
-Each surface is unwrapped to a 2D representation, which undergoes a 2D segmentation to produce convex regions.
+Would this be better as a numbered list?
+The basic premise is to segment the given model into primitive surfaces, such as plane, cylinder, cone, etc.
+Each surface is unwrapped and simplified to its 2D representation, which undergoes a 2D segmentation to produce convex regions.
 Upon each convex region a local path is planned.
-The order in which each region is traversed by the robot is determined via a modified Traveling Salesman Problem.
-Here, the start and end points of the salesman's path need not be the same.
+The order in which each region is traversed by the robot is determined via a modified Traveling Salesman Problem (TSP).
+The classic TSP creates a closed loop of nodes, but in this application the start and end points of the salesman's path need not be the same.
+Finally, the waypoints of the complete path are converted to actuator positions and sent via XMLRPC to the connected robotic arm and rotary table to be executed.
+
+\begin{figure}[h]
+	\centering
+\begin{tikzpicture}[Node/.style={rectangle,semithick,align=center,rounded corners=5pt,draw},
+	Arrow/.style={-{Stealth[round]},semithick,out=0,in=180}]
+	\newdimen\dx
+	\dx=6mm
+	% nodes
+	\node[Node] (Mesh) {Mesh};
+	\node[Node] (3DSeg) [right=\dx of Mesh] {3D Segmentation};
+	\node[Node] (GeoSimp) [right=\dx of 3DSeg] {Geometry Simplification};
+	\node[Node] (2DSeg) [right=\dx of GeoSimp] {2D Segmentation};
+	\node[Node,text width=27mm] (Bpath) [below=10mm of Mesh] {Cellular path planning};
+	\node[Node,text width=30mm] (TSP) [right=\dx of Bpath] {Modified TSP};
+	\node[Node,text width=20mm] (InvKin) [right=\dx of TSP] {Inverse Kinematics};
+	\node[Node,text width=20mm] (Poses) [right=\dx of InvKin] {Actuator Poses};
+	% connections
+	\draw [Arrow] (Mesh) -- (3DSeg);
+	\draw [Arrow] (3DSeg) -- (GeoSimp);
+	\draw [Arrow] (GeoSimp) -- (2DSeg);
+	\draw [Arrow, rounded corners=5pt] (2DSeg.south) |-| (Bpath.north);
+	\draw [Arrow] (Bpath) -- (TSP);
+	\draw [Arrow] (TSP) -- (InvKin);
+	\draw [Arrow] (InvKin) -- (Poses);
+\end{tikzpicture}
+\caption{Graphical overview of the path planning and execution procedure}
+\end{figure}
 
 \section{3D Segmentation}
-Segmentation in 3D consists of breaking the model into primitive surfaces,
-which have (easily) solvable mappings from 3D to 2D.
-This is done by applying Watershed segmentation to the mesh as a whole and classifying the resultant mesh sections as a certain primitive.
+Segmentation in 3D consists of breaking the model into primitive surfaces, which have (easily) solvable mappings from 3D to 2D.
+This is done by applying Watershed segmentation to the mesh as a whole and attempting to classify the resultant mesh sections as a certain primitive.
 Watershed segmentation is imperfect, and sometimes yields mesh sections comprised of multiple primitive types.
 In such cases the composite mesh section undergoes Watershed segmentation again, but with a lower merge threshold (see \ref{ws_seg}), so that it might be split into multiple mesh sections.
 
-$\rightarrow$ Do i need to further describe Seg3D ?
+TODO: add tikz diagram showing the internals of 3DSeg from above
 
 \subsection{Watershed Segmentation}\label{ws_seg}
 A watershed, according to the North American usage, is an area of land, in which all streams and rainfall drain to a common body of water\cite{USGS_Watersheds}, also commonly called catchment basins.
@@ -26,38 +54,73 @@ It works by applying a ``height function'' to the input image and forming image 
 A common ``height function'' in image processing is the gradient of the image\cite{ImageSegWS}.
 Mangan and Whitaker first applied this concept to 3D meshes, replacing pixels for the mesh's vertices and the image gradient for the mesh curvature\cite{Watershed}.
 
--> Give overview of how WS segmentation works.
 \subsubsection{Basic Procedure}
-Their algorithm consists of 6 steps:
+Mangan and Whitaker's algorithm consists of 6 steps:
 \begin{enumerate}
 	\item Apply the height function to each vertex
 	\item Find and label each local minima
 	\item Find flat areas and classify them as either a minimum or plateau
-	\item Loop through the plateaus and allow each to descend to a labeled region
+	\item \label{plateau_step} Loop through the plateaus and allow each to descend to a labeled region
 	\item Descend from all remaining vertices to labeled regions
 	\item Merge regions whose watershed depth is below a given threshold
 \end{enumerate}
 
-0. Apply height function at each vertex
-1. Create initial mesh regions from local minima / minima plateaus
-2. ``Minima Expansion'' Expand outward from each mesh region up to a certain depth, absorbing any regions encountered.
-3. ``Descent to Minima'' From each un-indexed (check their word for this) vertex, follow the path of steepest descent until an indexed region is encountered.
-All vertices traversed along this descent are added to the encountered region.
+Their algorithm was modified throughout this project, as described in the following sections.
+In addition to the mesh to be segmented, a merge threshold value is provided to Watershed.
+This threshold value is described in greater detail in \ref{sec:shallow_merge}.
 
--> my modifications
-\subsubsection{Mini-Merge}
-As noted by Mangan and Whitaker(sp?) Descent to Minima will segment the given mesh, but in all likelihood it will be overly segmented.
+\subsubsection{Region Initialization}\label{sec:ws_reg_init}
+In this work's implementation the curvature and derivative thereof values are calculated once for the whole mesh prior to the first Watershed pass.
+This work's version of Watershed begins by creating mesh regions from each local minima.
+Here, local minima includes local plateaus.
+Thus, if a region of the mesh is found whose vertices' curvature are all roughly equal and less than that of their neighbors, it is a minima plateau.
+
+\subsubsection{Minima Expansion}
+This step was adopted from Atkar et al.'s implementation of Watershed segmentaion\cite{HierSurfSeg_for_autobody_painting}.
+Each mesh region expands up to a pre-set depth, absorbing any regions encountered.
+Although not essential to the segmentation results, it facilitates subsequent steps by effectively filtering high frequency noise and features from the mesh.
+
+\subsubsection{Descent to Minima}
+From each un-assigned vertex a trail following the path of steepest descent is started.
+When a mesh region is encountered, the traversal ends and all path vertices are added to the encountered mesh region.
+Plateaus encountered here are added to the traversal path.
+In this way, Mangan and Whitaker's step \ref{plateau_step} is effectively split between Region Initialization and Descent to Minima.
+At this point all vertices should be assigned to a mesh region and the mesh is segmented.
+Prior to subsequent steps, the depth of each mesh region is updated.
+
+\subsubsection{Mini-Merge}\label{sec:mini_merge}
+As noted by Mangan and Whitaker, Descent to Minima will segment the given mesh, but in all likelihood it will be overly segmented.
+Their solution was to merge shallow regions into adjacent deeper regions (see \ref{sec:shallow_merge}).
 Through testing small high curvature regions were observed, that due to their high curvature did were not merged into any of the larger more useful regions.
 To combat this, the ``Mini Merge'' step was developed to merge regions deemed too small to be worth keeping.
+The merge condition changed throughout development, from a fixed number of vertices threshold, to a threshold relative to the total number of vertices in the mesh undergoing Watershed segmentation, to the condition that the number of perimeter vertices in the region be less than 50\% of the region's vertices.
+(reword previous sentence?)
+Mesh regions that trigger the merge condition are merged into the mesh region adjacent their shallow side.
+The receiving mesh is found by searching the vertices adjacent to the mini region's lowest perimeter vertex.
+If for some reason no valid mesh region adjacent to that vertex is found, the next lowest perimeter vertex's neighborhood is checked, and so on, until a valid mesh region is found.
+
+(I could add pseudocode here, but it feels like overkill?)
+
+\subsubsection{Shallow Merge}\label{sec:shallow_merge}
+This step was adopted without modification from Mangan and Whitaker.
+A merge threshold is calculated from the threshold value provided to the Watershed function.
+Regions with a depth below the threshold are merged into the mesh region adjacent their shallow side, according to the algorithm described in \ref{sec:mini_merge}. % to show name instead of number use \nameref{}
+The threshold value provided to the Watershed function is used in \ref{eq:merge_threshold} to set the merge threshold for this step.
+\begin{equation}\label{eq:merge_threshold}
+	n_{merge threshold} = d_{deepest}^{x}
+\end{equation}
+$d_{deepest}$ is the depth of the deepest region and $x$ is the threshold value provided.
+Due to the threshold value being applied as an exponent, values greater than 1 are pointless.
 
 \subsubsection{Boundary Smoothing}
-This step is more post-processing and ``cleaning'' of the mesh region boudnary than actual segmentation.
+This step is more post-processing and ``cleaning'' of the mesh region boundary than actual segmentation.
 Due to randomness in the mesh there are situations where a vertex is connected to its region by a single edge.
 Such vertices are named ``web1'' points, due to them having a single webbed connection to their region's perimeter.
 In order to smooth the region boundary, an attempt is made to find an adjacent mesh region more suitable to possess each web1 point.
 Because vertices with only 3 edges are exceedingly rare in well meshed models, it is sufficient to transfer ownership of the web1 point to the adjacent region with the highest number of connecing edges.
 Thus, for example, A vertex assigned to region 4 through Minima Descent with edges connecting to regions 4, 10, 12, and 12, would be transferred to region 12.
 No explicit tie breaking mechanism was deemed necessary, but lower numbered regions are likely given priority due to how the code was written.
+Web3?
 TODO: Need to check what other cases could occur...
 
 \subsection{Surface Classification}

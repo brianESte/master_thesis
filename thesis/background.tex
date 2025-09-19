@@ -15,33 +15,103 @@ Things / topics i will cover:
 
 
 \section{Geometric Curvature}
-For segmenting a 3D mesh via Watershed Segmentation each vertex requires a singualr / combined measure of curvature.
+For segmenting a 3D mesh via Watershed Segmentation each vertex requires a singular / combined measure of curvature.
 Various forms and types of curvature were examined throughout this project and are presented in the following sections.
 
 \subsection{Principal Curvatures}
 All combined measures of curvature are based, either in theory or in actuality, on the principal curvatures.
-The principal curvatures at a given point on a surface are simply the maximum and minimum curvature.
-Determining principal curvatures for a continuous surface is relatively clear and unambiguous.TODO: insert citation describing principal curvature on continuous surface
+The principal curvatures at a given point on a surface are simply the maximum and minimum curvature\cite{DDGAppIntro_17_smooth_k}.
+Determining principal curvatures for a continuous surface is unambiguous.
+The principal curvatures of a surface $S$ at point $p$ are defined by the 2nd fundamental form\cite{DiffGeo_curves_surfaces, Basic_diff_geo_of_surfaces, DDGAppIntro_17_smooth_k}:
+\begin{equation}
+	II(X,Y) := \langle dN(X), df(Y)\rangle,
+\end{equation}
+and can be found as the eigenvalues of
+\begin{equation}\label{2nd_fundamental_tensor}
+	\begin{bmatrix}
+		II(X_1, X_2) & II(X_1, X_2) \\
+		II(X_2, X_1) & II(X_2, X_2)
+	\end{bmatrix}.
+\end{equation}
+Similarly, the principal directions are the eigenvectors of \ref{2nd_fundamental_tensor}.
+
 NOTE: maybe also include a graphic showing principal curvatures ?
-There are however various ways of approximating the principal curvatures on a discrete mesh.TODO: insert citations of principal curvature comparisons
 
-\subsection{Mean Curvature}
-Mean curvature is, as the name implies, the mean of the principal curvatures.
-TODO: insert basic graphic re mean curvature
-TODO: talk about pros(?) of mean curvature
-Mean curvature however encodes little information and was not seriously considered by itself in this work.
-Mean curvature can be approximated on a discrete mesh in various ways...TODO
+There are however various ways of approximating the principal curvatures on a discrete mesh\cite{EstCurvOnTriMesh, DiscDiffGeoOpsTriMani}.
+A basic approach is to calculate the mean and Gaussian curvatures, and derive the principal curvatures from them\cite{DDGAppIntro_19_discrete_k_2, Gauss_mean_k_notes}.
+Given the mean curvature $H$ and Gaussian curvature $K$ (see \ref{sec:mean_k} and \ref{sec:gauss_k}), the principal curvatures can be calculated from \ref{eq:mean_k} and \ref{eq:gauss_k}.
+\begin{align}
+	\kappa_1 &= H - \sqrt{H^2 - K} \\
+	\kappa_2 &= H + \sqrt{H^2 - K}
+\end{align}
+Although theoretically impossible, discretization errors can cause $H^2$ to be less than $K$, resulting in ``imaginary'' curvature.
+This tends to occur on planar mesh regions, thus a minimum of 0 can be set for $H^2 - K$, because the root term would have been near 0 regardless, but it does highlight a flaw in this measure of curvature.
 
-\subsection{Gaussian Curvature}
-Gaussian curvature, (where does the name come from?) is the product of the principal curvatures.
-Gaussian curvature has the benefit of being more sensitive to changes in each of the principal curvatures, but it cannot distinguish ``developable'' surfaces, such as cylinders and planes.
-TODO: Insert picture visually detailing gaussian curvature
-Gaussian curvature can be approximated on a discrete mesh in various ways...TODO
+Taubin calculated the principal curvatures directly by estimating the tensor of curvature\cite{TaubinTensor}.
+This has the benefit of direct calculation, but has been shown to be succeptible to noise in the mesh\cite{Comp_k_notes}.
+Thiesel et al. calculate the curvature tensor per triangular face in the mesh, based on the face's corner normals\cite{Norm_based_k_tensor_est}.
+Rusinkiewicz took a slightly different approach, calculating the curvature tensor for each mesh face via the differences between corner normals\cite{SRTensor}.
+From there he computes the per vertex curvature tensor as a weighted sum over the curvature tensors of the vertex's adjoining triangles via coordinate system transformations.
+Gatzke and Grimm examine a variety of other curvature estimation methods\cite{EstCurvOnTriMesh}, most of which were not considered for this work.
+
+\subsection{Mean Curvature}\label{sec:mean_k}
+Mean curvature is, as the name implies, the mean of the principal curvatures\cite{DDGAppIntro_19_discrete_k_2}:
+\begin{equation}\label{eq:mean_k}
+	H = \frac{\kappa_1 + \kappa_2}{2}
+\end{equation}
+Mean curvature can be approximated on a discrete mesh via edge angle product sum:
+\begin{equation}
+	H := \frac{1}{2}\sum_{i j \in E}l_{ij} \phi_{ij}
+\end{equation}.
+Alternatively, the mean curvature can be calculated via the discrete Laplace-Beltrami operator:
+\begin{equation}
+	H := \frac{1}{2}\sum_{i j \in E}(\cot \alpha_{ij} + \cot \beta_{ij})(f_j - f_i).
+\end{equation}
+
+\begin{tikzpicture}[vertex/.style={circle,fill=black}]
+	\newdimen\R
+	\R=1cm
+	\node[vertex] (0, 0) {i};
+	\draw (330: \R) \foreach \x in {30,90,...,330} { -- (\x:\R) };
+	\foreach \x in {30,90,...,330} {
+		\draw (0, 0) -- (\x:\R);
+		\draw [vertex] (\x:\R);
+	}
+\end{tikzpicture}
+\includegraphics[width=0.3\textwidth]{../resources/ddg_disc_k_1_mean_k.png}
+
+\subsection{Gaussian Curvature}\label{sec:gauss_k}
+Gaussian curvature\cite{TheoremaEgregium} is the product of the principal curvatures:
+
+\begin{equation}\label{eq:gauss_k}
+	K = \kappa_1 * \kappa_2
+\end{equation}
+
+The discrete Gaussian curvature at a vertex is typically approximated as the ``angle defect'' divided by the vertex's area:
+\begin{equation}
+	K = \frac{2\pi - \sum \Theta_j}{A_i}.
+\end{equation}
+
+Image comparing mean and gaussian curvature
 
 \subsection{Root Mean Square Curvature}
--> Talk about RMS curvature
+Pulla et al. propsed using the root mean square curvature as the curvature estimate for use during watershed segmentation:
+\begin{equation}
+	\kappa_{rms} = \sqrt{\frac{\kappa_1^2 + \kappa_2^2}{2}}.
+\end{equation}
+They compared different measures of curvature for this purpose and found that it was approximately as good as absolute curvature:
+\begin{equation}
+	\kappa_{abs} = |\kappa_1| + |\kappa_2|,
+\end{equation}
+but cheaper to compute, because they computed $\kappa_{rms}$ from the mean and Gaussian curvatures using:
+\begin{equation}
+	\kappa_{rms} = \sqrt{4H^2 - 2K}.
+\end{equation}
 
 \subsection{Derivative of Curvature}
+Through testing it was determined that supplying the derivative of curvature instead of the curvature itself to watershed segmentation would better preserve the boundaries between semantic regions.
+Rusinkiewicz proposes a method of taking the derivative of the curvature tensor\cite{SRTensor}.
+Because watershed segmentation expects a single value rather than a tensor, the magnitude of the derivative of the curvature tensor was approximated as the sum of squares of said tensor.
 
 \section{UV Mapping}
 UV Mapping is the process of projecting a surface from 3D to 2D, effectively ``unwrapping'' the 3D surface.

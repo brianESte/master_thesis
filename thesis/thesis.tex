@@ -38,6 +38,11 @@
 
 \usepackage{standalone}
 \usepackage{tikz}
+\usetikzlibrary{
+	arrows.meta,
+	positioning,
+	ext.paths.ortho
+}
 \def \globalscale {1.000000}
 % TODO: integrate the color into tikz
 \definecolor{c179c7d}{RGB}{23,156,125}
@@ -60,7 +65,7 @@
 %%%%%%%%%%%%%%%%%%%
 %Sprachanpassung & Verbesserte Trennregeln
 %%%%%%%%%%%%%%%%%%%
-\usepackage[english, main=ngerman]{babel}
+\usepackage[main=english, ngerman]{babel}
 \usepackage[autostyle]{csquotes}% Anführungszeichen vereinfacht
 
 % Falls mit pdflatex kompiliert wird, wird microtype automatisch geladen, in diesem Fall muss diese Zeile entfernt werden, und falls weiter Optionen hinzugefügt werden sollen, muss dies über

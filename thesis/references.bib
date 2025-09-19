@@ -782,7 +782,7 @@
 
 
 // Curvature related sources
-@article{ExtCurvOnTriMesh,
+@article{EstCurvOnTriMesh,
 	author = {Gatzke, Timothy and Grimm, Cindy},
 	year = {2006},
 	month = {06},
@@ -797,22 +797,69 @@
 	OPTnote = {To read},
 }
 
-@inproceedings{SRTensor,
-	author = {Rusinkiewicz, S.},
-	booktitle = {Proceedings. 2nd International Symposium on 3D Data Processing,
-	             Visualization and Transmission, 2004. 3DPVT 2004.},
-	title = {Estimating curvatures and their derivatives on triangle meshes},
-	year = {2004},
-	volume = {},
-	number = {},
-	pages = {486-493},
-	keywords = {Signal processing algorithms;Shape;Robustness;Robust
-	            stability;Finite difference methods;Computational geometry;Solid
-	            modeling;Focusing;Image analysis;Signal analysis},
-	doi = {10.1109/TDPVT.2004.1335277},
-	url = {https://gfx.cs.princeton.edu/pubs/Rusinkiewicz_2004_ECA/curvpaper.pdf
+@unpublished{DDGAppIntro_17_smooth_k,
+	author = {Crane, Keenan},
+	title = {Discrete Differential Geometry: An Applied Introduction},
+	subtitle = {Smooth Curvature},
+	date = {2022-05-02},
+	howpublished = {online},
+	location = {CMU},
+	url = {https://brickisland.net/ddg-web/lectures/DDG-Curvature.pdf},
+}
+
+@unpublished{DDGAppIntro_19_discrete_k_2,
+	author = {Crane, Keenan},
+	title = {Discrete Differential Geometry: An Applied Introduction},
+	subtitle = {Discrete Curvature II},
+	date = {2022-05-02},
+	howpublished = {online},
+	location = {CMU},
+	url = {https://brickisland.net/ddg-web/lectures/DDG-DiscreteCurvatureII.pdf},
+}
+
+@unpublished{Gauss_mean_k_notes,
+	title = {Gaussian and Mean Curvatures},
+	language = {en},
+	author = {Jia, Yan-Bin},
+	keywords = {gaussian curvature, mean curvature},
+	url = {
+	       https://faculty.sites.iastate.edu/jia/files/inline-files/gaussian-curvature.pdf
 	       },
-	note = {TODO},
+}
+
+@unpublished{Basic_diff_geo_of_surfaces,
+	author = {},
+	title = {Chapter 20 Basics of the Differential Geometry of Surfaces},
+	subtitle = {Smooth Curvature},
+	date = {2024-07-06},
+	howpublished = {online},
+	location = {University of Pennsylvania},
+	url = {https://www.cis.upenn.edu/~cis6100/gma-v2-chap20.pdf},
+}
+
+@unpublished{Comp_k_notes,
+	author = {},
+	title = {Computing Curvature CS468 Lecture 8 Notes},
+	scribe = {Nguyen, Andy},
+	date = {2013-04-24},
+	howpublished = {online},
+	location = {Stanford},
+	url = {
+	       https://graphics.stanford.edu/courses/cs468-13-spring/assets/lecture8-nguyen.pdf
+	       },
+}
+
+@book{DiffGeo_curves_surfaces,
+	author = {Do Carmo, Manfredo P.},
+	title = {Differential Geometry of Curves and Surfaces},
+	date = {2016},
+	edition = {2},
+	publisher = {Dover Publications},
+	OPTlocation = {Rio de Janeiro, Brazil},
+	isbn = {78-0-486-80699-0},
+	chapter = {3-2},
+	pages = {136-147},
+	pagetotal = {529},
 }
 
 @inproceedings{TaubinTensor,
@@ -835,7 +882,7 @@
 	note = {TODO},
 }
 
-@inproceedings{1348359,
+@inproceedings{Norm_based_k_tensor_est,
 	author = {Theisel, H. and Rossi, C. and Zayer, R. and Seidel, H.P.},
 	booktitle = {12th Pacific Conference on Computer Graphics and Applications,
 	             2004. PG 2004. Proceedings.},
@@ -886,17 +933,69 @@
 	note = {TODO},
 }
 
+@inbook{TheoremaEgregium,
+	author = {Pressley, Andrew},
+	title = {Gauss' Theorema Egregium},
+	bookTitle = {Elementary Differential Geometry},
+	year = {2010},
+	publisher = {Springer London},
+	address = {London},
+	pages = {247--268},
+	abstract = {One of Gauss' most important discoveries about surfaces is that
+	            the Gaussian curvature is unchanged when the surface is bent
+	            without stretching. Gauss called this result `egregium', and the
+	            Latin word for `remarkable' has remained attached to his theorem
+	            ever since. We shall deduce the Theorema Egregium from two
+	            results which relate the first and second fundamental forms of a
+	            surface, and which have other important consequences.},
+	isbn = {978-1-84882-891-9},
+	doi = {10.1007/978-1-84882-891-9_10},
+	url = {https://doi.org/10.1007/978-1-84882-891-9_10},
+}
+
+@article{Simple_k_estimation,
+	author = {Wu, Jyh-Yang and Chen, Sheng-Gwo and Chi, Mei-Hsiu},
+	year = {2005},
+	month = {11},
+	pages = {},
+	title = {A simple effective method for curvatures estimation on triangular
+	         meshes},
+}
+
+@inproceedings{SRTensor,
+	author = {Rusinkiewicz, S.},
+	booktitle = {Proceedings. 2nd International Symposium on 3D Data Processing,
+	             Visualization and Transmission, 2004. 3DPVT 2004.},
+	title = {Estimating curvatures and their derivatives on triangle meshes},
+	year = {2004},
+	volume = {},
+	number = {},
+	pages = {486-493},
+	keywords = {Signal processing algorithms;Shape;Robustness;Robust
+	            stability;Finite difference methods;Computational geometry;Solid
+	            modeling;Focusing;Image analysis;Signal analysis},
+	doi = {10.1109/TDPVT.2004.1335277},
+	url = {https://gfx.cs.princeton.edu/pubs/Rusinkiewicz_2004_ECA/curvpaper.pdf
+	       },
+	note = {TODO},
+}
+
 // Watershed related sources
 @article{Watershed,
-	author = {Alan P. Mangan and Ross T. Whitaker},
+	author = {Mangan, A.P. and Whitaker, R.T.},
 	title = {Partitioning 3D Surface Meshes Using Watershed Segmentation},
-	journaltitle = {IEEE TRANSACTIONS ON VISUALIZATION AND COMPUTER GRAPHICS},
+	journal = {IEEE Transactions on Visualization and Computer Graphics},
 	date = {1999-10/1999-12},
 	volume = {5},
 	number = {4},
 	pages = {308-321},
 	url = {https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=817348},
 	urldate = {2025-02-13},
+	keywords = {Image segmentation;Surface morphology;Application
+	            software;Surface treatment;Visualization;Solid modeling;Feature
+	            extraction;Surface texture;Algorithm design and
+	            analysis;Partitioning algorithms},
+	doi = {10.1109/2945.817348},
 	OPTshorthand = {MW99},
 }
 
@@ -915,7 +1014,6 @@
 	date = {2025-05-24},
 	url = {https://en.wikipedia.org/wiki/Drainage_divide},
 }
-
 
 @article{ImageSegWS,
 	author = {N.H. Salman and C.-Q. Liu},
@@ -962,6 +1060,16 @@
 	pagetotal = {1024},
 }
 
+@article{Imp_k_estimation_for_WS,
+	author = {Pulla, Sandeep and Razdan, Anshuman and Farin, Gerald},
+	year = {2001},
+	month = {05},
+	pages = {},
+	title = {Improved Curvature Estimation for Watershed Segmentation of
+	         3-Dimensional Meshes},
+	volume = {5},
+	journal = {IEEE Transactions on Visualization and Computer Graphics - TVCG},
+}
 
 @proceedings{HierSurfSeg_for_autobody_painting,
 	author = {Atkar, P.N. and Greenfield, A. and Conner, D.C. and Choset, H. and
