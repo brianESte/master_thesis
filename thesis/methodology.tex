@@ -46,10 +46,19 @@ All vertices traversed along this descent are added to the encountered region.
 
 -> my modifications
 \subsubsection{Mini-Merge}
-As noted by Mangan and Whitaker(sp?) Descent to Minima Through testing and development it was observed that
+As noted by Mangan and Whitaker(sp?) Descent to Minima will segment the given mesh, but in all likelihood it will be overly segmented.
+Through testing small high curvature regions were observed, that due to their high curvature did were not merged into any of the larger more useful regions.
+To combat this, the ``Mini Merge'' step was developed to merge regions deemed too small to be worth keeping.
 
 \subsubsection{Boundary Smoothing}
-Due to noise / other randomness in the mesh,
+This step is more post-processing and ``cleaning'' of the mesh region boudnary than actual segmentation.
+Due to randomness in the mesh there are situations where a vertex is connected to its region by a single edge.
+Such vertices are named ``web1'' points, due to them having a single webbed connection to their region's perimeter.
+In order to smooth the region boundary, an attempt is made to find an adjacent mesh region more suitable to possess each web1 point.
+Because vertices with only 3 edges are exceedingly rare in well meshed models, it is sufficient to transfer ownership of the web1 point to the adjacent region with the highest number of connecing edges.
+Thus, for example, A vertex assigned to region 4 through Minima Descent with edges connecting to regions 4, 10, 12, and 12, would be transferred to region 12.
+No explicit tie breaking mechanism was deemed necessary, but lower numbered regions are likely given priority due to how the code was written.
+TODO: Need to check what other cases could occur...
 
 \subsection{Surface Classification}
 

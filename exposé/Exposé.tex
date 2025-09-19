@@ -73,8 +73,8 @@ The primary goal of the proposed algorithm is to produce simple, convex, unwrapp
 The specific steps are outlined below and in Fig~\ref{fig:procedure_overview}.
 \begin{enumerate}
 	\item Apply Watershed Segmentation to the mesh, yielding surfaces that are unwrappable to 2D.
-		Watershed Segmentation applies a "height" function to each vertex in the mesh.
-		Regions are formed from "low" areas separated by "high" areas \cite{Watershed, Hier_seg_autobody_painting}.
+		Watershed Segmentation applies a ``height'' function to each vertex in the mesh.
+		Regions are formed from ``low'' areas separated by ``high'' areas \cite{Watershed, Hier_seg_autobody_painting}.
 	\item The resulting surfaces are classified as planar, cylindric, convex, or multi-planar.
 		Multi-planar indicates that a region could not be classified as one of the three primitive surfaces, and needs to undergo Watershed segmentation again.
 	\item Surfaces with a concave outline are subject to Interior Edge Extension, a 2D segmentation process that produces compact convex shapes from a concave one \cite{IntEdgeExt}.
