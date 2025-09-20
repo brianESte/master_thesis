@@ -10,30 +10,30 @@ Upon each convex region a local path is planned.
 The order in which each region is traversed by the robot is determined via a modified Traveling Salesman Problem (TSP).
 The classic TSP creates a closed loop of nodes, but in this application the start and end points of the salesman's path need not be the same.
 Finally, the waypoints of the complete path are converted to actuator positions and sent via XMLRPC to the connected robotic arm and rotary table to be executed.
+Figure \ref{fig:overview} gives a graphical overview of the procedure's main steps.
 
-\begin{figure}[h]
+\begin{figure}[h]\label{fig:overview}
 	\centering
-\begin{tikzpicture}[Node/.style={rectangle,semithick,align=center,rounded corners=5pt,draw},
-	Arrow/.style={-{Stealth[round]},semithick,out=0,in=180}]
+\begin{tikzpicture}
 	\newdimen\dx
 	\dx=6mm
 	% nodes
-	\node[Node] (Mesh) {Mesh};
-	\node[Node] (3DSeg) [right=\dx of Mesh] {3D Segmentation};
-	\node[Node] (GeoSimp) [right=\dx of 3DSeg] {Geometry Simplification};
-	\node[Node] (2DSeg) [right=\dx of GeoSimp] {2D Segmentation};
-	\node[Node,text width=27mm] (Bpath) [below=10mm of Mesh] {Cellular path planning};
-	\node[Node,text width=30mm] (TSP) [right=\dx of Bpath] {Modified TSP};
-	\node[Node,text width=20mm] (InvKin) [right=\dx of TSP] {Inverse Kinematics};
-	\node[Node,text width=20mm] (Poses) [right=\dx of InvKin] {Actuator Poses};
+	\node[] (Mesh) {Mesh};
+	\node[FC-Node] (3DSeg) [right=\dx of Mesh] {3D Segmentation};
+	\node[FC-Node] (GeoSimp) [right=\dx of 3DSeg] {Geometry Simplification};
+	\node[FC-Node] (2DSeg) [right=\dx of GeoSimp] {2D Segmentation};
+	\node[FC-Node,text width=27mm] (Bpath) [below=10mm of Mesh, xshift=10mm] {Cellular path planning};
+	\node[FC-Node,text width=30mm] (TSP) [right=\dx of Bpath] {Modified TSP};
+	\node[FC-Node,text width=20mm] (InvKin) [right=\dx of TSP] {Inverse Kinematics};
+	\node[text width=20mm] (Poses) [right=\dx of InvKin] {Actuator Poses};
 	% connections
-	\draw [Arrow] (Mesh) -- (3DSeg);
-	\draw [Arrow] (3DSeg) -- (GeoSimp);
-	\draw [Arrow] (GeoSimp) -- (2DSeg);
-	\draw [Arrow, rounded corners=5pt] (2DSeg.south) |-| (Bpath.north);
-	\draw [Arrow] (Bpath) -- (TSP);
-	\draw [Arrow] (TSP) -- (InvKin);
-	\draw [Arrow] (InvKin) -- (Poses);
+	\draw [FC-Arrow] (Mesh) -- (3DSeg);
+	\draw [FC-Arrow] (3DSeg) -- (GeoSimp);
+	\draw [FC-Arrow] (GeoSimp) -- (2DSeg);
+	\draw [FC-Arrow, rounded corners=5pt] (2DSeg.south) |-| (Bpath.north);
+	\draw [FC-Arrow] (Bpath) -- (TSP);
+	\draw [FC-Arrow] (TSP) -- (InvKin);
+	\draw [FC-Arrow] (InvKin) -- (Poses);
 \end{tikzpicture}
 \caption{Graphical overview of the path planning and execution procedure}
 \end{figure}
@@ -43,8 +43,33 @@ Segmentation in 3D consists of breaking the model into primitive surfaces, which
 This is done by applying Watershed segmentation to the mesh as a whole and attempting to classify the resultant mesh sections as a certain primitive.
 Watershed segmentation is imperfect, and sometimes yields mesh sections comprised of multiple primitive types.
 In such cases the composite mesh section undergoes Watershed segmentation again, but with a lower merge threshold (see \ref{ws_seg}), so that it might be split into multiple mesh sections.
+This procedure is displayed visually in figure \ref{fig:Seg3D}.
 
-TODO: add tikz diagram showing the internals of 3DSeg from above
+\begin{figure}\label{fig:Seg3D}
+	\centering
+\begin{tikzpicture}[]
+	\newdimen\dx
+	\dx=6mm
+	% nodes
+	\node (Mesh) {Complete Mesh};
+	\node[FC-Node, text width=30mm] (WS) [right=\dx of Mesh] {Watershed Segmentation};
+	\node[FC-Node, text width=30mm] (PrimCl) [right=\dx of WS] {Primitive Classification};
+	\node[text width=25mm, align=center] (MRs) [right=\dx of PrimCl] {Classified Mesh Sections};
+	% connections
+	\draw [FC-Arrow] (Mesh) -- (WS);
+	\draw [FC-Arrow] (WS) -- (PrimCl);
+	\draw [FC-Arrow] (PrimCl) -- (MRs);
+	% \path (PrimCl.south) -- node[below=5mm of PrimCl] (CompPrim) {Composite Primitive} (WS.south);
+	% \draw [FC-Arrow, rounded corners=5pt] (PrimCl.south) |- (CompPrim) -| (WS.south);
+	\draw [FC-Arrow, rounded corners=5pt] (PrimCl.south) -- +(0,-0.4) -| (WS.south)
+		node[pos=0.5,below right]{Composite primitives};
+	% Segmentation 3D container node
+	\draw[thick, dashed, rounded corners=8pt] ($(WS.north west)+(-0.3,0.3)$) rectangle ($(PrimCl.south east)+(0.3,-1.2)$);
+	\node [] at (5.7, 1.1) {3D Segmentation};
+	% TODO: make this diagram more flexible
+\end{tikzpicture}
+\caption{Graphic depiction of the 3D segmentation procedure}
+\end{figure}
 
 \subsection{Watershed Segmentation}\label{ws_seg}
 A watershed, according to the North American usage, is an area of land, in which all streams and rainfall drain to a common body of water\cite{USGS_Watersheds}, also commonly called catchment basins.
@@ -107,9 +132,9 @@ A merge threshold is calculated from the threshold value provided to the Watersh
 Regions with a depth below the threshold are merged into the mesh region adjacent their shallow side, according to the algorithm described in \ref{sec:mini_merge}. % to show name instead of number use \nameref{}
 The threshold value provided to the Watershed function is used in \ref{eq:merge_threshold} to set the merge threshold for this step.
 \begin{equation}\label{eq:merge_threshold}
-	n_{merge threshold} = d_{deepest}^{x}
+	d_{th} = d_{deepest}^{x}
 \end{equation}
-$d_{deepest}$ is the depth of the deepest region and $x$ is the threshold value provided.
+$d_{th}$ is the merge threshold, $d_{deepest}$ is the depth of the deepest region and $x$ is the threshold value provided.
 Due to the threshold value being applied as an exponent, values greater than 1 are pointless.
 
 \subsubsection{Boundary Smoothing}
@@ -120,18 +145,203 @@ In order to smooth the region boundary, an attempt is made to find an adjacent m
 Because vertices with only 3 edges are exceedingly rare in well meshed models, it is sufficient to transfer ownership of the web1 point to the adjacent region with the highest number of connecing edges.
 Thus, for example, A vertex assigned to region 4 through Minima Descent with edges connecting to regions 4, 10, 12, and 12, would be transferred to region 12.
 No explicit tie breaking mechanism was deemed necessary, but lower numbered regions are likely given priority due to how the code was written.
-Web3?
-TODO: Need to check what other cases could occur...
+% At one point perimeter vertices with 3 or more connections to other same-region perimeter vertices were considered a problem,...
 
 \subsection{Surface Classification}
+Mesh regions received from Watershed segmentation need to be classified so that the appropriate UV map is assigned to them.
+The primitives against which each mesh region is tested are: planes, cylinders, and ellipsoids.
+Because Watershed segments along regions of high curvature, perimeter vertices were excluded from the tests described below.
+The main idea was to perform some tests on a the mesh region's vertices to obtain an educated guess as to the surface's class, and confirm or reject the guess by attempting to fit the assumed shape to the surface and examining the resultant error value.
+This works well for planar classification because measuring the distance of a given point from the regression plane is trivial.
+Computing the distance from a given point to an ellipse or other conic shape is non-trivial and, at the time of writing, no exact algebraic solution was found.
+In place of an exact distance function, the sum of squared residuals was used.
+For example, a point on a conic section should satisfy equation \ref{eq:gen_conic}, but for a point \textit{almost} on a conic section, the result will be non-zero:
+\begin{equation}
+	R(x,y) = Ax^2 + Bxy + Cy^2 + Dx + Ey + F,
+\end{equation}
+where $R(x,y)$ is the residual. The error function then becomes:
+\begin{equation}
+	e = \sum_i \left(Ax_i^2 + Bx_i y_i + Cy_i^2 + Dx_i + Ey_i + F\right)^2
+\end{equation}
+While easy to calculate, this value is unreliable as an indicator of whether or not the given surface is actually a conic surface.
+Through testing cases were in which obviously non-cylindric surfaces yielded extremely low error values.
+Due to this realization greater emphasis was placed on the initial classification step.
+
+\subsubsection{Planar Classification}
+Various tests were devised to determine if a given mesh region can be classified as planar.
+An early idea was to cluster the normals of the given mesh region, and perform a sort of statistical analysis on them.
+By clustering all normals within a set allowable deviation, the spread in the number of vertices in each cluster should provide insight into the surface type.
+One would expect a plane to have a normal-cluster with an overwehelming number of vertices relative to other normal-clusters produced.
+By comparison, a cylinder would be expected to have multiple ``significant'' normal-clusters, with similar vertex counts.
+This idea was later deemed unnecessarily complex and too susceptible to mesh deviations, and retired in favor of other ideas.
+
+Another idea was to calculate an overall normal vector by performing Principal Component Analysis (PCA) on the vertices' normals.
+The vertice's normals were then compared to this overall normal via their dot product.
+If too many vertex normals deviated beyond a set angular threshold, the mesh region was determined to be non-planar.
+This test works well for ``perfect'' models, such as those from CAD, but is less useful when dealing with noisy meshes and can yield false negatives.
+
+Later, a test that compared the vertices' mean principal curvatures against set thresholds was developed.
+Theoretically, the vertices in a planar mesh would exhibit 0 curvature.
+Thus, the vertices' 1st principal curvature could be compared against a near-zero threshold, with those above the threshold rejected as non-planar.
+Again, this works well for ``clean'' geometry, but not for noisy meshes, because even small deviations in the mesh can inflate the mean curvature.
+It \textit{is} possible to set useful curvature thresholds for noisy meshes, but they will be significantly higher than those set for clean meshes, meaning the test does not generalize between clean and unclean meshes.
+
+The second planar test was deemed the most reliable and is used in the submitted algorithm.
+As a check on the test, planar regression via Singular Value Decomposition is performed on the mesh region's vertices, and the root mean squared error is reported.
+If the RMSE is within a set threshold, the region passes the second check and is classified as planar.
+
+NOTE: perhaps talk about other (untested) ideas?
+
+\subsubsection{Cylindric Classification}
+``Cylinder'' (and cylindric) in this context means a surface whose cross section is a conic shape, and has a single axis.
+% The single axis criterion was central to later tests conceived during development.
+
+As mentioned in the planar classification section, an early idea was to perform statistical analysis on clustered normals.
+An issue with using that method for cylindric classification is that a sphere and a cylinder would yield similar normal-cluster histograms.
+(I could probably go into greater detail about why this was a foolish notion, but i would rather write about ideas that had a higher chance of success.)
+
+A test that examined the mean principal curvature values of the mesh region was also considered, but it failed to prove useful for the same reasons outlined in Planar Classification(ref?).
+Theoretically, the first principal curvature on the surface of a cylinder would fulfill $|\kappa_1| >> 0$ and the second principal curvature would be approximately 0.
+Setting reliable thresholds proved overly difficult.
+
+Another test sought to make use of the vertices' normals by determining the axis direction via PCA, and checking that the dot product between each vertex's normal and the axis was roughly 0:
+\begin{equation}
+	\vec{v}_{axis} \cdot \vec{n_i} \approx 0.
+\end{equation}
+This approach has 2 glaring flaws: planes pass this test, and cones do not pass.
+% Various tests that take into account the vertices' normals were conceived, but all were either abandoned due to inefficacy, or simply unimplemented due to time constraints.
+
+Currently, the test chosen for planar classification doubles as a cylindric identification.
+If a mesh region fails that test, it is non-planar, and thus most likely cylindric.
+
+(?) Talk about future ideas?
+
+? talk about other flaws? This was definitely a weak point in my work
+
+\subsubsection{Ellipsoidal Classification}
+The third primitive type would have been ellipsoids, but due to their complexity and time constraints no ellipsoidal indentification or classification functions were developed.
+Theoretically, the prinicipal curvature values could also be applied here.
+An ellipsoid curves in both surface directions, thus both $|\kappa_1|$ and $|\kappa_2|$ should be noticeably greater than 0.
+
+A flaw with the cylindric tests and this principal curvature test is that they are unable to differentiate between the target surface class and a composite shape.
 
 \section{Geometry Simplification}
-GeoSimp creates simplified geometric representations of the 3D mesh sections it is given
+The purpose of the geometry simplification step is to create a simplified form for each mesh region provided by Segmentation 3D.
+Geometry Simplification's output is a ``simple surface'' is created from each mesh region.
+A simple surface contains, among other things, a reference to the mesh region from which it was created, a UV map, and the unwrapped 2D region outline.
+To accomplish this, first the edges between mesh regions are ascertained, which are then used to determine the region corners.
+This process is described in greater detail in the following sections.
 
 \subsection{Shared Edges}
-see \verb|create_shared_edges()|
+The boundary between two mesh regions is termed a ``shared edge'', because its information is shared between its adjacent mesh regions.
+Each shared edge is made up of a list of line segments that approximate the boundary between two mesh regions.
+Given mesh regions $i$ and $j$, a shared edge between $i$ and $j$ is formed from the list of vertices that are either in $i$ and adjacent to $j$ or in $j$ and adjacent to $i$.
+The complete list of vertices is simplified via the Ramer-Douglas-Peucker (RDP) algorithm\cite{RDP_line_reduction}.
+The mesh's mean edge length is used as the tolerance width in the RDP algorithm.
+Obtaining said list of vertices is done by finding a start point on a valid boundary and spreading out along the boundary therefrom.
+When a vertex adjacent to 3 mesh regions is encountered ..
+
+TODO: maybe continue describing this fn?
+
+The region edges are found by spreading out along region boundaries, with vertices added to the current edge, and new edges started when a corner is encountered.
+The first vertex on the perimeter of a mesh region and adjacent to a valid mesh region is used as the starting vertex.
+This procedure is described in algorithm \ref{alg:shared_edges}.
+
+\begin{algorithm}
+	\caption{create\_shared\_edges() part 1}\label{alg:shared_edges}
+\begin{algorithmic}[1]
+	\Function{create\_shared\_edges}{mesh\_surfaces}
+	\State new list \texttt{edges} \Comment{To hold created edges}
+	\State new set \texttt{unchecked\_edge\_pts} from all mesh region perimeter points
+	\State new queue \texttt{edge\_start\_kyu} \Comment{For the beginning of each edge}
+	\While{\texttt{unchecked\_edge\_pts} not empty}
+		\State temporary \texttt{edge\_pt} = first value in \texttt{unchecked\_edge\_pts}
+		\State \texttt{edge\_start\_kyu.enqueue(edge\_pt)}
+		\While{\texttt{edge\_start\_kyu} not empty}
+		\State \texttt{edge\_start} = \texttt{edge\_start\_kyu.dequeue()}
+			\If{\texttt{edge\_start} in \texttt{edges}}
+				\State continue
+			\EndIf
+			\State \texttt{src\_idx} = first region index, \texttt{adj\_idx} = second region index
+			\State new list \texttt{edge\_pts} \Comment{For the current edge}
+			\State new queue \texttt{search\_pt\_kyu}
+			\State new set \texttt{local\_pts}
+			\While{\texttt{search\_pt\_kyu} not empty}
+				\State \texttt{pt} = \texttt{search\_pt\_kyu.dequeue()}
+				\If{\texttt{pt} in \texttt{local\_pts}}
+					\State continue
+				\EndIf
+				\algstore{shared_edges}
+\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}
+	\caption{create\_shared\_edges() part 2}
+\begin{algorithmic}[1]
+	\algrestore{shared_edges}
+				\State \texttt{local\_pts.insert(pt)}
+				\State \texttt{edge\_pts.append(pt)}
+				% \State \Comment{Search points adjacent to current point for boundary points}
+				\For{\texttt{adj\_pt} in \texttt{pt.neighbors}}
+					\If{\texttt{adj\_pt} out of bounds OR not a perimeter point}
+						\State continue
+					\EndIf
+					\State new set \texttt{adj\_regions} = \texttt{adj\_pt.adj\_regions()}
+					\If{\texttt{src\_idx} AND \texttt{adj\_reg\_idx} in \texttt{adj\_regions}}
+						\State \texttt{search\_pt\_kyu.enqueue(adj\_pt)}
+					\EndIf
+					\If{\texttt{adj\_regions.size()} > 2}
+						\State Add edge starts to \texttt{edge\_start\_kyu} from \texttt{adj\_regions}
+					\EndIf
+				\EndFor
+			\EndWhile
+		\EndWhile
+	\EndWhile
+	\EndFunction
+	\State \Comment{Function continues...}
+\end{algorithmic}
+\end{algorithm}
 
 \subsection{Shared Corners}
+The shared corners are created by looping through all edges and attempting to create a corner from each end of the current edge (see \ref{alg:shared_corners}).
+The function \verb|insert_corner()| is described in algorithm \ref{alg:insert_corner}.
+\begin{algorithm}
+	\caption{create shared corners}\label{alg:shared_corners}
+\begin{algorithmic}[1]
+%function create_shared_edges()
+	\State new list $shared\_corners$ \Comment{To hold the created corners}
+	\For{$edge$ in $edges$}
+		\State $insert\_corner(edge, START, max\_edge\_length, shared\_corners)$
+		\State $insert\_corner(edge, END, max\_edge\_length, shared\_corners)$
+	\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+	\caption{insert corner}\label{alg:insert_corner}
+\begin{algorithmic}[1]
+	\Function{insert\_corner}{e, end, l, corners}
+		\State new boolean $found$ = false
+		\State new position $p$
+		\If{$end$ = START}
+			\State $p = edge.start\_pt$
+		\Else
+			\State $p = edge.end\_pt$
+		\EndIf
+		\For{$corner$ in $corners$}
+			\State $d$ = distance between $p$ and $corner.pos$
+			\If{$d > l$}
+				\State continue
+			\EndIf
+			\State $corner.insert\_end\_pt(edge, end)$ \Comment{Add the edge information to the corner}
+			\State $found$ = true
+			\State break
+		\EndFor
+		\If{not $found$} \Comment{If no matching corner found, create a new one}
+			\State $corners.append(Corner(shared\_edge\_idx, edge\_end))$
+		\EndIf
+	\EndFunction
+\end{algorithmic}
+\end{algorithm}
 
 \subsection{Simplified Surfaces}
 

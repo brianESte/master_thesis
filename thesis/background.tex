@@ -5,11 +5,11 @@ Here i will discuss background knowledge of Coverage Path Planning and surface c
 Things / topics i will cover:
 \begin{enumerate}
 	\item watershed segmentation... -> background, methodology
-	\item geometric curvature -> background
 	\item UV Mapping -> background
 	\item Geometry simplification -> methodology?
 	\item Interior Edge Extension (and my modifications, if any) -> methodology
 	\item boustrophedon -> methodology
+	\item TSP -> background
 	\item Modified TSP -> methodology
 \end{enumerate}
 
@@ -120,7 +120,7 @@ The UV map for planar surfaces is trivial, as the 3D surface is already ``unwrap
 
 \subsection{Conic Surfaces}
 General equation of a conic is:
-\begin{equation}
+\begin{equation}\label{eq:gen_conic}
 	Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0
 \end{equation}
 

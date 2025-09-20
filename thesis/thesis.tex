@@ -40,8 +40,14 @@
 \usepackage{tikz}
 \usetikzlibrary{
 	arrows.meta,
+	calc,
 	positioning,
 	ext.paths.ortho
+}
+% Define global styles
+\tikzset{
+	FC-Node/.style={rectangle,semithick,align=center,rounded corners=5pt,draw},
+	FC-Arrow/.style={-{Stealth[round]},semithick,out=0,in=180}
 }
 \def \globalscale {1.000000}
 % TODO: integrate the color into tikz
@@ -57,11 +63,11 @@
 		\node[font=\fontsize{10}{1}\selectfont] at (3.8,1.8){!};
 		\node[font=\fontsize{10}{1}\selectfont] at (3.5,0.2){Goal};
 }}
-\tikzset{IGDLogo/.pic={
-% \begin{tikzpicture}[y=1cm, x=1cm, yscale=\globalscale,xscale=\globalscale, every node/.append style={scale=\globalscale}, inner sep=0pt, outer sep=0pt]
 
-% \end{tikzpicture}
-}}
+% Pseudocode
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+
 %%%%%%%%%%%%%%%%%%%
 %Sprachanpassung & Verbesserte Trennregeln
 %%%%%%%%%%%%%%%%%%%
