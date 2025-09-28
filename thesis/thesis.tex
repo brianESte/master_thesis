@@ -41,28 +41,22 @@
 \usetikzlibrary{
 	arrows.meta,
 	calc,
+	fit,
+	matrix,
 	positioning,
 	ext.paths.ortho
 }
 % Define global styles
 \tikzset{
 	FC-Node/.style={rectangle,semithick,align=center,rounded corners=5pt,draw},
-	FC-Arrow/.style={-{Stealth[round]},semithick,out=0,in=180}
+	FC-Arrow/.style={-{Stealth[round]},semithick,rounded corners=4pt}
 }
 \def \globalscale {1.000000}
 % TODO: integrate the color into tikz
 \definecolor{c179c7d}{RGB}{23,156,125}
-\tikzset{gridworld/.pic={
-		\draw[step=1cm] (0,0) grid (4,3);
-		\foreach \r in {0,1,2}
-		\foreach \c [evaluate={\s=int(4*\r+\c+1)}] in {0,1,2,3}{
-			\draw(\c, 3-\r) node[anchor=north west] {\s};
-			%\node at (\c+0.5,2.5-\r) {\pgfmathparse{\CardinalDirs[\PolicyDirs[\s-1]]}\pgfmathresult};
-		}
-		\node[font=\fontsize{10}{1}\selectfont] at (1.8,1.8){?};
-		\node[font=\fontsize{10}{1}\selectfont] at (3.8,1.8){!};
-		\node[font=\fontsize{10}{1}\selectfont] at (3.5,0.2){Goal};
-}}
+% for multifigure environments
+\usepackage{subcaption}
+% \usepackage{svg}
 
 % Pseudocode
 \usepackage{algpseudocode}
@@ -89,7 +83,6 @@
 ]{biblatex}   % Literaturverzeichnis
 \addbibresource{references.bib}
 %\bibliography{references}
-
 
 %%%%%%%%%%%%%%%%%%%
 %Paketvorschläge Tabellen

@@ -4,12 +4,8 @@ Here i will discuss background knowledge of Coverage Path Planning and surface c
 
 Things / topics i will cover:
 \begin{enumerate}
-	\item watershed segmentation... -> background, methodology
-	\item UV Mapping -> background
-	\item Geometry simplification -> methodology?
 	\item Interior Edge Extension (and my modifications, if any) -> methodology
 	\item boustrophedon -> methodology
-	\item TSP -> background
 	\item Modified TSP -> methodology
 \end{enumerate}
 
@@ -21,6 +17,7 @@ Various forms and types of curvature were examined throughout this project and a
 \subsection{Principal Curvatures}
 All combined measures of curvature are based, either in theory or in actuality, on the principal curvatures.
 The principal curvatures at a given point on a surface are simply the maximum and minimum curvature\cite{DDGAppIntro_17_smooth_k}.
+The principal curvatures at the top of a hill-like surface are illustrated in figure \ref{fig:principal_k}.
 Determining principal curvatures for a continuous surface is unambiguous.
 The principal curvatures of a surface $S$ at point $p$ are defined by the 2nd fundamental form\cite{DiffGeo_curves_surfaces, Basic_diff_geo_of_surfaces, DDGAppIntro_17_smooth_k}:
 \begin{equation}
@@ -35,7 +32,19 @@ and can be found as the eigenvalues of
 \end{equation}
 Similarly, the principal directions are the eigenvectors of \ref{2nd_fundamental_tensor}.
 
-NOTE: maybe also include a graphic showing principal curvatures ?
+\begin{figure}
+	\centering
+	% \includegraphics[width=0.7\textwidth]{../resources/minimal_surface_curvature_planes-en.svg.png}
+	\includegraphics[width=0.7\textwidth]{../resources/principal_curvatures.png}
+	% \includesvg[width=0.9\textwidth]{../resources/Minimal_surface_curvature_planes-en.svg}
+	\caption{
+Principal curvatures shown on an ellipsoidally round surface\cite{Digital_geom_proc_w_disc_ext_calc}.
+$X_1$ and $X_2$ show the principal directions.
+The curvature of a curve at a given point is the inverse of the radius of said curve.
+The cutaway views show this as an osculated circle in each projection of the surface.
+	}
+	\label{fig:principal_k}
+\end{figure}
 
 There are however various ways of approximating the principal curvatures on a discrete mesh\cite{EstCurvOnTriMesh, DiscDiffGeoOpsTriMani}.
 A basic approach is to calculate the mean and Gaussian curvatures, and derive the principal curvatures from them\cite{DDGAppIntro_19_discrete_k_2, Gauss_mean_k_notes}.
@@ -59,40 +68,109 @@ Mean curvature is, as the name implies, the mean of the principal curvatures\cit
 \begin{equation}\label{eq:mean_k}
 	H = \frac{\kappa_1 + \kappa_2}{2}
 \end{equation}
-Mean curvature can be approximated on a discrete mesh via edge angle product sum:
-\begin{equation}
-	H := \frac{1}{2}\sum_{i j \in E}l_{ij} \phi_{ij}
-\end{equation}.
-Alternatively, the mean curvature can be calculated via the discrete Laplace-Beltrami operator:
-\begin{equation}
-	H := \frac{1}{2}\sum_{i j \in E}(\cot \alpha_{ij} + \cot \beta_{ij})(f_j - f_i).
+Mean curvature can be approximated on a discrete mesh via sum of dihedral edge angle length products:
+\begin{equation}\label{eq:dihedral_angle}
+	H_i := \frac{1}{2}\sum_{j \in E}l_{ij} \phi_{ij}
 \end{equation}
+where $H_i$ is the mean curvature at vertex $i$, $j$ is a vertex in the ring of $i$, $l_{ij}$ is the length of the edge from $i$ to $j$, and $\phi_{ij}$ is the dihedral angle between the faces adjacent to edge $ij$.
+See \ref{sfig:dihedral_angle} for a graphical depiction.
 
-\begin{tikzpicture}[vertex/.style={circle,fill=black}]
-	\newdimen\R
-	\R=1cm
-	\node[vertex] (0, 0) {i};
-	\draw (330: \R) \foreach \x in {30,90,...,330} { -- (\x:\R) };
-	\foreach \x in {30,90,...,330} {
-		\draw (0, 0) -- (\x:\R);
-		\draw [vertex] (\x:\R);
-	}
+Alternatively, the mean curvature normal $\Delta f$ can be calculated via the discrete Laplace-Beltrami operator\cite{DDGAppIntro_18_discrete_k_1}:
+\begin{equation}\label{eq:lap_beltrami_op}
+	(\Delta f)_i := \frac{1}{2}\sum_{j \in E}(\cot \alpha_{ij} + \cot \beta_{ij})(p_j - p_i),
+\end{equation}
+and the absolute mean curvature can be calculated as half of the magnitude thereof:
+\begin{equation}
+	|H_i| = \frac{\|(\Delta f)_i \|}{2}.
+\end{equation}
+In equation \ref{eq:lap_beltrami_op} above $p_j$ is a vertex in the ring of vertex $p_i$ which indicates the current edge, $\alpha_{ij}$ and $\beta_{ij}$ are the angles opposite the current edge (see \ref{sfig:mesh_neighborhood}).
+
+\begin{figure}[t]
+	\centering
+	\begin{subfigure}{0.45\textwidth}
+		\centering
+\begin{tikzpicture}[
+	vertex/.style={circle, radius=2pt,fill, inner sep=2pt,outer sep=0pt},
+	hidden/.style={inner sep=0, outer sep=0}]
+	\node [vertex,label=180:i] (node_i) at (-0.4,2.2) {};
+	\node [vertex,label=215:j] (node_j) at (0.4,-2.2) {};
+	\node [hidden] (node_l) at (-2.3,-0.8) {};
+	\node [hidden] (node_r) at (1.7,0.5) {};
+	\draw (node_i) -- (node_j) -- (node_r) -- (node_i) -- (node_l) -- (node_j);
+	\draw [dashed,gray!60] (node_l) -- (node_r);
+	% try to draw curved arrow
+	\draw [-Stealth,thick] (20:4mm) arc [start angle=20, delta angle=-180, x radius=5mm, y radius=3mm];
+		% node [pos=0.8, label={250:$\phi_{ij}$}] {};
+	\node [] at (-0.3, -0.6) {$\phi_{ij}$};
+	\draw [|-|, thick] ($(node_i.east)+(0.1,0.05)$) -- ($(node_j.east)+(0.1,0.05)$)
+		node [pos=0.65,label={0:$l_{ij}$}] {};
 \end{tikzpicture}
-\includegraphics[width=0.3\textwidth]{../resources/ddg_disc_k_1_mean_k.png}
+		\caption{Dihedral angle of adjacent mesh faces. Inspired by \cite{DDGAppIntro_19_discrete_k_2}.}
+		\label{sfig:dihedral_angle}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.45\textwidth}
+		\centering
+\begin{tikzpicture}[
+	scale=1.1,
+	vertex/.style={circle, radius=2pt,fill, inner sep=2pt,outer sep=0pt}]
+	% based on resources/ddg_disc_k_1_mean_k.png
+	\newdimen\hexR
+	\hexR=2cm
+	\newlength\arcR
+	\arcR=4mm
+	\node[vertex,label=south west:i] (0, 0) {};
+	\draw [thick] (330: \hexR) \foreach \x in {30,90,...,330} { -- (\x:\hexR) };
+	\foreach \x in {30,90,...,330} {
+		\draw (0, 0) -- (\x:\hexR) node[vertex]{};
+	}
+	% Vertex j
+	\node [label=270:j] at (270:\hexR) {};
+	\node [label=330:k] at (330:\hexR) {};
+	% Inner main angle
+	\draw (270:\arcR) arc [radius=\arcR, start angle=270, end angle=330]
+		node [pos=0.5, label={[xshift=-3.5mm, yshift=1mm]300:$\Theta{ijk}$}] {};
+	% Inner angles
+	\draw (210:\hexR) +(330:\arcR) arc [radius=\arcR, start angle=-30, end angle=30]
+		node [pos=0.5, label={[xshift=-2.2mm]0:$\alpha_{ij}$}] {};
+	\draw (330:\hexR) +(150:\arcR) arc [radius=\arcR, start angle=150, end angle=210]
+		node [pos=0.5, label={[xshift=2.5mm]180:$\beta_{ij}$}] {};
+\end{tikzpicture}
+		\caption{\raggedright The triangular mesh neighborhood around vertex $i$.}
+		\label{sfig:mesh_neighborhood}
+	\end{subfigure}
+\caption{
+(a) depicts two adjacent triangular faces connected by edge $ij$, with angle the dihedral angle between them denoted $\phi_{ij}$ and the length of edge $ij$ as $l_{ij}$.
+(b) depicts the neighborhood of faces around vertex $i$ on some triangular mesh.
+The angle between adjacent edges radiating from vertex $i$ is denoted $\Theta_{ijk}$.
+The angles opposite edge $ij$ are indicated as $\alpha_{ij}$ and $\beta_{ij}$.
+}
+\end{figure}
 
 \subsection{Gaussian Curvature}\label{sec:gauss_k}
 Gaussian curvature\cite{TheoremaEgregium} is the product of the principal curvatures:
 
 \begin{equation}\label{eq:gauss_k}
-	K = \kappa_1 * \kappa_2
+	K = \kappa_1 \cdot \kappa_2
 \end{equation}
 
 The discrete Gaussian curvature at a vertex is typically approximated as the ``angle defect'' divided by the vertex's area:
 \begin{equation}
-	K = \frac{2\pi - \sum \Theta_j}{A_i}.
+	K = \frac{2\pi - \sum \Theta_j}{A_i}
 \end{equation}
+where $\Theta_j$ is the angle between adjacent edges from the central vertex ($\Theta_{ijk}$ in \ref{sfig:mesh_neighborhood}), and $A_i$ is the vertex area.
 
-Image comparing mean and gaussian curvature
+Mean and Gaussian curvature are compared visually in figure \ref{fig:mean_gauss_k} from Pulla et al.
+Note that the Gaussian curvature is approximately 0 over the entire surface, because the surface curves in only 1 direction, thus the 2nd principal curvature is ~0.
+The colors shown in the mean curvature plot are effectively due entirely to the 1st principal curvature values.
+
+\begin{figure}
+	\centering
+	% TODO: create a tikz picture to replace this image
+	\includegraphics[width=0.9\textwidth]{../resources/gaussian_mean_k.png}
+	\caption{Comparison of Gaussian (a) and mean (b) curvature\cite{Imp_k_estimation_for_WS}}
+	\label{fig:mean_gauss_k} % NOTE: Label should be declared after caption
+\end{figure}
 
 \subsection{Root Mean Square Curvature}
 Pulla et al. propsed using the root mean square curvature as the curvature estimate for use during watershed segmentation:
@@ -107,6 +185,7 @@ but cheaper to compute, because they computed $\kappa_{rms}$ from the mean and G
 \begin{equation}
 	\kappa_{rms} = \sqrt{4H^2 - 2K}.
 \end{equation}
+RMS curvature was used during developement prior to implementing the derivative of curvature.
 
 \subsection{Derivative of Curvature}
 Through testing it was determined that supplying the derivative of curvature instead of the curvature itself to watershed segmentation would better preserve the boundaries between semantic regions.
@@ -234,6 +313,8 @@ Setting 3.7 into 3.8:
 		\cos^2\theta B &= 2 \cos\theta\sin\theta(A + (\sin^2\theta - \cos^2\theta) \frac{\cos^2\theta(A-C)}{(\cos^4\theta - \sin^4\theta)}) \\
 	\end{split}
 \end{equation}
+
+\section{Ramer-Douglas-Peucker Algoritm}
 
 \section{Traveling Salesman Problem}
 

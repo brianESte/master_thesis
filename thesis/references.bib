@@ -250,6 +250,7 @@
 	Unique-ID = {WOS:000268150200003},
 }
 
+// Robot arm based CPP
 @inproceedings{Automatic_spray_painting_path,
 	author = {Asakawa, N. and Takeuchi, Y.},
 	booktitle = {Proceedings of International Conference on Robotics and
@@ -264,6 +265,22 @@
 	            control;Robotics and automation;Painting;Shape;Buildings;Design
 	            automation;Control engineering},
 	doi = {10.1109/ROBOT.1997.619061},
+}
+
+@inproceedings{Automatic_spray_painting_unknown_parts,
+	author = {Pichler, A. and Vincze, M. and Andersen, H. and Madsen, O. and
+	          Hausler, K.},
+	booktitle = {Proceedings 2002 IEEE International Conference on Robotics and
+	             Automation (Cat. No.02CH37292)},
+	title = {A method for automatic spray painting of unknown parts},
+	year = {2002},
+	volume = {1},
+	number = {},
+	pages = {444-449 vol.1},
+	keywords = {Spraying;Painting;Robotics and automation;Service robots;Robot
+	            sensing systems;Paints;Face detection;Educational
+	            robots;Automatic programming;Robot programming},
+	doi = {10.1109/ROBOT.2002.1013400},
 }
 
 @article{Robotic_grc_spraying,
@@ -301,6 +318,63 @@
 	            evaluated from the ease of the rebots’ motion The experiments
 	            inclusive of the polishing force control are illustrated and a
 	            brief conclusion made.},
+}
+
+@inproceedings{Exact_cell_decomp_orientable_surfaces,
+	author = {Atkar, P.N. and Choset, H. and Rizzi, A.A. and Acar, E.U.},
+	booktitle = {Proceedings 2001 ICRA. IEEE International Conference on
+	             Robotics and Automation (Cat. No.01CH37164)},
+	title = {Exact cellular decomposition of closed orientable surfaces embedded
+	         in /spl Rfr//sup 3/},
+	year = {2001},
+	volume = {1},
+	number = {},
+	pages = {699-704 vol.1},
+	keywords = {Path planning;Robot vision systems;Cameras;Mechanical
+	            engineering;Paints;Face detection;Cleaning;Computer numerical
+	            control;Inspection;Orbital robotics},
+	doi = {10.1109/ROBOT.2001.932632},
+}
+
+@article{Uniform_cov_auto_surfaces,
+	author = {Prasad N. Atkar and Aaron Greenfield and David C. Conner and Howie
+	          Choset and Alfred A. Rizzi},
+	title = {Uniform Coverage of Automotive Surface Patches},
+	journal = {The International Journal of Robotics Research},
+	volume = {24},
+	number = {11},
+	pages = {883-898},
+	year = {2005},
+	doi = {10.1177/0278364905059058},
+	URL = { https://doi.org/10.1177/0278364905059058 },
+	eprint = { https://doi.org/10.1177/0278364905059058 },
+	abstract = { In spray painting applications, it is essential to generate a
+	            spray gun trajectory such that the entire surface is completely
+	            covered and receives an acceptably uniform layer of paint
+	            deposition; we call this the “uniform coverage” problem. The
+	            uniform coverage problem is challenging because the atomizer
+	            emits a non-trivial paint distribution, thus making the
+	            relationships between the spray gun trajectory and the deposition
+	            uniformity complex. To understand the key issues involved in
+	            uniform coverage, we consider surface patches that are
+	            geodesically convex and topologically simple as representative of
+	            subsets of realistic automotive surfaces. In addition to ensuring
+	            uniform paint deposition on the surface, our goal is to also
+	            minimize the associated process cycle time and paint waste. Based
+	            on the relationships between the spray gun trajectory and the
+	            output characteristics (i.e., uniformity, cycle time and paint
+	            waste), our approach decomposes the coverage trajectory
+	            generation problem into three subproblems: (1) selecting a seed
+	            curve, (2) determining a speed profile along each pass, and (3)
+	            selecting the spacing between successive passes. Using concepts
+	            such as area magnification and the Gauss-Bonnet theorem from
+	            differential geometry, as well as standard optimization
+	            procedures, we present procedures to solve each subproblem
+	            independently from the others. We demonstrate our trajectory
+	            planning procedures by approximating real automotive surfaces by
+	            simple surfaces in simulation, and finally evaluate the
+	            effectiveness of our algorithms experimentally on real automotive
+	            surfaces. },
 }
 
 @article{Terrain_covering_AUV,
@@ -598,6 +672,7 @@
 	            the literature. Note that the proposal is not limited to
 	            disinfection applications, but can be applied to other ones, such
 	            as painting or precision agriculture.},
+	note = {overfull hbox},
 }
 
 // CPP 2D
@@ -765,6 +840,82 @@
 	            a side-to-side 3D coverage is used.},
 }
 
+@article{CPP_2.5D_SAA_grid_based_UAV_3D_recons,
+	AUTHOR = {Xiao, Sichen and Tan, Xiaojun and Wang, Jinping},
+	TITLE = {A Simulated Annealing Algorithm and Grid Map-Based UAV Coverage
+	         Path Planning Method for 3D Reconstruction},
+	JOURNAL = {Electronics},
+	VOLUME = {10},
+	YEAR = {2021},
+	NUMBER = {7},
+	ARTICLE-NUMBER = {853},
+	URL = {https://www.mdpi.com/2079-9292/10/7/853},
+	ISSN = {2079-9292},
+	ABSTRACT = {With the extensive application of 3D maps, acquiring
+	            high-quality images with unmanned aerial vehicles (UAVs) for
+	            precise 3D reconstruction has become a prominent topic of study.
+	            In this research, we proposed a coverage path planning method for
+	            UAVs to achieve full coverage of a target area and to collect
+	            high-resolution images while considering the overlap ratio of the
+	            collected images and energy consumption of clustered UAVs. The
+	            overlap ratio of the collected image set is guaranteed through a
+	            map decomposition method, which can ensure that the
+	            reconstruction results will not get affected by model breaking.
+	            In consideration of the small battery capacity of common
+	            commercial quadrotor UAVs, ray-scan-based area division was
+	            adopted to segment the target area, and near-optimized paths in
+	            subareas were calculated by a simulated annealing algorithm to
+	            find near-optimized paths, which can achieve balanced task
+	            assignment for UAV formations and minimum energy consumption for
+	            each UAV. The proposed system was validated through a site
+	            experiment and achieved a reduction in path length of
+	            approximately 12.6% compared to the traditional zigzag path.},
+	DOI = {10.3390/electronics10070853},
+	note = {overfull hbox},
+}
+
+@article{CPP_2.5D_UAV_3D_terrain_recons,
+	title = {Coverage path planning with unmanned aerial vehicles for 3D terrain
+	         reconstruction},
+	journal = {Expert Systems with Applications},
+	volume = {55},
+	pages = {441-451},
+	year = {2016},
+	issn = {0957-4174},
+	doi = {https://doi.org/10.1016/j.eswa.2016.02.007},
+	url = {https://www.sciencedirect.com/science/article/pii/S0957417416300306},
+	author = {Marina Torres and David A. Pelta and José L. Verdegay and Juan C.
+	          Torres},
+	keywords = {Coverage path planning, Unmanned aerial vehicle, Heuristics,
+	            Non-convex areas, 3D terrain reconstruction},
+	abstract = {Three-dimensional terrain reconstruction from 2D aerial images
+	            is a problem of utmost importance due its wide level of
+	            applications. It is relevant in the context of intelligent
+	            systems for disaster managements (for example to analyze a
+	            flooded area), soil analysis, earthquake crisis, civil
+	            engineering, urban planning, surveillance and defense research.
+	            It is a two level problem, being the former the acquisition of
+	            the aerial images and the later, the 3D reconstruction. We focus
+	            here in the first problem, known as coverage path planning, and
+	            we consider the case where the camera is mounted on an unmanned
+	            aerial vehicle (UAV). In contrast with the case when ground
+	            vehicles are used, coverage path planning for a UAV is a lesser
+	            studied problem. As the areas to cover become complex, there is a
+	            clear need for algorithms that will provide good enough solutions
+	            in affordable times, while taking into account certain
+	            specificities of the problem at hand. Our algorithm can deal with
+	            both convex and non-convex areas and their main aim is to obtain
+	            a path that reduces the battery consumption, through minimizing
+	            the number of turns. We comment on line sweep calculation and
+	            propose improvements for the path generation and the polygon
+	            decomposition problems such as coverage alternatives and the
+	            interrupted path concept. Illustrative examples show the
+	            potential of our algorithm in two senses: ability to perform the
+	            coverage when complex regions are considered, and achievement of
+	            better solution than a published result (in terms of the number
+	            of turns used).},
+}
+
 // CPP 3D
 @inproceedings{HiCPP_cplx_3D_env,
 	author = {Cao, Chao and Zhang, Ji and Travers, Matt and Choset, Howie},
@@ -780,6 +931,123 @@
 	doi = {10.1109/ICRA40945.2020.9196575},
 }
 
+@article{CPP_3D_dyn_opt_online,
+	AUTHOR = {Melo, Aurelio G. and Pinto, Milena F. and Marcato, Andre L. M. and
+	          Honório, Leonardo M. and Coelho, Fabrício O.},
+	TITLE = {Dynamic Optimization and Heuristics Based Online Coverage Path
+	         Planning in 3D Environment for UAVs},
+	JOURNAL = {Sensors},
+	VOLUME = {21},
+	YEAR = {2021},
+	NUMBER = {4},
+	ARTICLE-NUMBER = {1108},
+	URL = {https://www.mdpi.com/1424-8220/21/4/1108},
+	PubMedID = {33562647},
+	ISSN = {1424-8220},
+	ABSTRACT = {Path planning is one of the most important issues in the
+	            robotics field, being applied in many domains ranging from
+	            aerospace technology and military tasks to manufacturing and
+	            agriculture. Path planning is a branch of autonomous navigation.
+	            In autonomous navigation, dynamic decisions about the path have
+	            to be taken while the robot moves towards its goal. Among the
+	            navigation area, an important class of problems is Coverage Path
+	            Planning (CPP). The CPP technique is associated with determining
+	            a collision-free path that passes through all viewpoints in a
+	            specific area. This paper presents a method to perform CPP in 3D
+	            environment for Unmanned Aerial Vehicles (UAVs) applications,
+	            namely 3D dynamic for CPP applications (3DD-CPP). The proposed
+	            method can be deployed in an unknown environment through a
+	            combination of linear optimization and heuristics. A model to
+	            estimate cost matrices accounting for UAV power usage is proposed
+	            and evaluated for a few different flight speeds. As linear
+	            optimization methods can be computationally demanding to be used
+	            on-board a UAV, this work also proposes a distributed execution
+	            of the algorithm through fog-edge computing. Results showed that
+	            3DD-CPP had a good performance in both local execution and
+	            fog-edge for different simulated scenarios. The proposed
+	            heuristic is capable of re-optimization, enabling execution in
+	            environments with local knowledge of the environments.},
+	DOI = {10.3390/s21041108},
+}
+
+// 3D Segmentation
+@article{Mesh_segm_technik_survey,
+	author = {Shamir, Ariel},
+	title = {A survey on Mesh Segmentation Techniques},
+	journal = {Computer Graphics Forum},
+	volume = {27},
+	number = {6},
+	pages = {1539-1556},
+	keywords = {mesh segmentation, mesh partioning, clustering, 1.3.5 Computing
+	            Methodologies: Computer Graphics Computational Geometry and
+	            Object Modeling, I.3.6 Computing Methodologies: Computer Graphics
+	            Methodology and Techniques},
+	doi = {https://doi.org/10.1111/j.1467-8659.2007.01103.x},
+	url = {
+	       https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1467-8659.2007.01103.x
+	       },
+	eprint = {
+	          https://onlinelibrary.wiley.com/doi/pdf/10.1111/j.1467-8659.2007.01103.x
+	          },
+	abstract = {Abstract We present a review of the state of the art of
+	            segmentation and partitioning techniques of boundary meshes.
+	            Recently, these have become a part of many mesh and object
+	            manipulation algorithms in computer graphics, geometric modelling
+	            and computer aided design. We formulate the segmentation problem
+	            as an optimization problem and identify two primarily distinct
+	            types of mesh segmentation, namely part segmentation and
+	            surface-patch segmentation. We classify previous segmentation
+	            solutions according to the different segmentation goals, the
+	            optimization criteria and features used, and the various
+	            algorithmic techniques employed. We also present some generic
+	            algorithms for the major segmentation techniques.},
+	year = {2008},
+}
+
+// 2D Segmentation
+@book{Robot_motion_planning,
+	author = {Latombe, Jean-Claude},
+	title = {Robot Motion Planning},
+	year = {1991},
+	isbn = {079239206X},
+	publisher = {Kluwer Academic Publishers},
+	address = {USA},
+}
+
+@conference{Boustrophedon_decomposition,
+	author = {Howie Choset and Philippe Pignon},
+	title = {Coverage Path Planning: The Boustrophedon Decomposition},
+	booktitle = {Proceedings of 1st International Conference on Field and
+	             Service Robotics (FSR '97)},
+	year = {1997},
+	month = {December},
+	pages = {216 - 222},
+}
+
+@inproceedings{Cell_decomposition_survey,
+	author = {Jan, Gene Eu and Luo, Chaomin and Yang, Chan-Yun and Hsieh,
+	          Hui-Ching},
+	booktitle = {2023 4th International Conference on Artificial Intelligence,
+	             Robotics and Control (AIRC)},
+	title = {A Survey of Cell Decomposition-based Path Planning},
+	year = {2023},
+	volume = {},
+	number = {},
+	pages = {83-87},
+	keywords = {Surveys;Navigation;Routing;Path planning;Planning;Complexity
+	            theory;Mobile robots;Dijkstra;path planning;shortest free
+	            path;cell decomposition},
+	doi = {10.1109/AIRC57904.2023.10303086},
+}
+
+@inproceedings{Windmill_decomp_for_free_pp,
+	author = {Jan, Gene and Luo, Chaomin and Lee, Ming and Hsieh, Hui-Ching},
+	year = {2022},
+	month = {05},
+	pages = {35-39},
+	title = {The Free Path Planner Based on Windmill Decomposition},
+	doi = {10.1109/AIRC56195.2022.9836984},
+}
 
 // Curvature related sources
 @article{EstCurvOnTriMesh,
@@ -797,6 +1065,46 @@
 	OPTnote = {To read},
 }
 
+@inproceedings{Digital_geom_proc_w_disc_ext_calc,
+	author = {Crane, Keenan and de Goes, Fernando and Desbrun, Mathieu and Schr
+	          \"{o}der, Peter},
+	title = {Digital geometry processing with discrete exterior calculus},
+	year = {2013},
+	isbn = {9781450323390},
+	publisher = {Association for Computing Machinery},
+	OPTaddress = {New York, NY, USA},
+	url = {https://doi.org/10.1145/2504435.2504442},
+	doi = {10.1145/2504435.2504442},
+	abstract = {An introduction to geometry processing using discrete exterior
+	            calculus (DEC), which provides a simple, flexible, and efficient
+	            framework for building a unified geometry-processing platform.
+	            The course provides essential mathematical background as well as
+	            a large array of real-world examples. It also provides a short
+	            survey of the most relevant recent developments in digital
+	            geometry processing and discrete differential geometry. Compared
+	            to previous SIGGRAPH courses, this course focuses heavily on
+	            practical aspects of DEC, with an emphasis on implementation and
+	            applications.The course begins with the core ideas from exterior
+	            calculus, in both the smooth and discrete setting. Then it shows
+	            how a large number of fundamental geometry-processing tools
+	            (smoothing, parameterization, geodesics, mesh optimization, etc.)
+	            can be implemented quickly, robustly, and efficiently within this
+	            single common framework. It concludes with a discussion of recent
+	            extensions of DEC that improve efficiency, accuracy, and
+	            versatility.The course notes grew out of the discrete
+	            differential geometry course taught over the past five years at
+	            the California Institute of Technology, for undergraduates and
+	            beginning graduate students in computer science, applied
+	            mathematics, and associated fields. The notes also provide guided
+	            exercises (both written and coding) that attendees can later use
+	            to deepen their understanding of the material.},
+	booktitle = {ACM SIGGRAPH 2013 Courses},
+	articleno = {7},
+	numpages = {126},
+	location = {Anaheim, California},
+	series = {SIGGRAPH '13},
+}
+
 @unpublished{DDGAppIntro_17_smooth_k,
 	author = {Crane, Keenan},
 	title = {Discrete Differential Geometry: An Applied Introduction},
@@ -805,6 +1113,16 @@
 	howpublished = {online},
 	location = {CMU},
 	url = {https://brickisland.net/ddg-web/lectures/DDG-Curvature.pdf},
+}
+
+@unpublished{DDGAppIntro_18_discrete_k_1,
+	author = {Crane, Keenan},
+	title = {Discrete Differential Geometry: An Applied Introduction},
+	subtitle = {Discrete Curvature I},
+	date = {2022-05-02},
+	howpublished = {online},
+	location = {CMU},
+	url = {https://brickisland.net/ddg-web/lectures/DDG-DiscreteCurvatureI.pdf},
 }
 
 @unpublished{DDGAppIntro_19_discrete_k_2,
@@ -821,7 +1139,7 @@
 	title = {Gaussian and Mean Curvatures},
 	author = {Jia, Yan-Bin},
 	keywords = {gaussian curvature, mean curvature},
-	note = {Causes overfull hbox},
+	note = {overfull hbox},
 	url = {
 	       https://faculty.sites.iastate.edu/jia/files/inline-files/gaussian-curvature.pdf
 	       },
@@ -980,6 +1298,12 @@
 	note = {TODO},
 }
 
+@online{PrincipalCurvature,
+	title = {Principal curvature - Wikipedia},
+	date = {2024-05-01},
+	url = {https://en.wikipedia.org/wiki/Principal_curvature},
+}
+
 // Watershed related sources
 @article{Watershed,
 	author = {Mangan, A.P. and Whitaker, R.T.},
@@ -1000,13 +1324,13 @@
 }
 
 @online{USGS_Watersheds,
-	ALTauthor = {Water Science School},
+	author = {Water Science School},
 	title = {Watersheds and Drainage Basins | U.S. Geological Survey},
 	date = {2019-06-08},
 	url = {
 	       https://www.usgs.gov/water-science-school/science/watersheds-and-drainage-basins
 	       },
-	OPTorganization = {U.S. Geological Survey},
+	organization = {U.S. Geological Survey},
 }
 
 @online{DrainageDivideWiki,

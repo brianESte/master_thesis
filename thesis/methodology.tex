@@ -12,7 +12,7 @@ The classic TSP creates a closed loop of nodes, but in this application the star
 Finally, the waypoints of the complete path are converted to actuator positions and sent via XMLRPC to the connected robotic arm and rotary table to be executed.
 Figure \ref{fig:overview} gives a graphical overview of the procedure's main steps.
 
-\begin{figure}[h]\label{fig:overview}
+\begin{figure}[h]
 	\centering
 \begin{tikzpicture}
 	\newdimen\dx
@@ -35,7 +35,8 @@ Figure \ref{fig:overview} gives a graphical overview of the procedure's main ste
 	\draw [FC-Arrow] (TSP) -- (InvKin);
 	\draw [FC-Arrow] (InvKin) -- (Poses);
 \end{tikzpicture}
-\caption{Graphical overview of the path planning and execution procedure}
+	\caption{Graphical overview of the path planning and execution procedure}
+	\label{fig:overview}
 \end{figure}
 
 \section{3D Segmentation}
@@ -45,7 +46,7 @@ Watershed segmentation is imperfect, and sometimes yields mesh sections comprise
 In such cases the composite mesh section undergoes Watershed segmentation again, but with a lower merge threshold (see \ref{ws_seg}), so that it might be split into multiple mesh sections.
 This procedure is displayed visually in figure \ref{fig:Seg3D}.
 
-\begin{figure}\label{fig:Seg3D}
+\begin{figure}
 	\centering
 \begin{tikzpicture}[]
 	\newdimen\dx
@@ -68,7 +69,8 @@ This procedure is displayed visually in figure \ref{fig:Seg3D}.
 	\node [] at (5.7, 1.1) {3D Segmentation};
 	% TODO: make this diagram more flexible
 \end{tikzpicture}
-\caption{Graphic depiction of the 3D segmentation procedure}
+	\caption{Graphic depiction of the 3D segmentation procedure}
+	\label{fig:Seg3D}
 \end{figure}
 
 \subsection{Watershed Segmentation}\label{ws_seg}
@@ -227,19 +229,58 @@ A flaw with the cylindric tests and this principal curvature test is that they a
 
 \section{Geometry Simplification}
 The purpose of the geometry simplification step is to create a simplified form for each mesh region provided by Segmentation 3D.
-Geometry Simplification's output is a ``simple surface'' is created from each mesh region.
+Geometry Simplification's output is a ``simple surface'' created from each mesh region.
 A simple surface contains, among other things, a reference to the mesh region from which it was created, a UV map, and the unwrapped 2D region outline.
-To accomplish this, first the edges between mesh regions are ascertained, which are then used to determine the region corners.
-This process is described in greater detail in the following sections.
+The Geometry Simplification follows the block diagram shown in figure \ref{fig:GeoSimp}.
+First the \verb|SharedEdges|, edges between mesh regions, are ascertained.
+These are used to determine the region corners (``shared corners''), which are then used to finish preparing the shared edges (Extend shared edges).
+Finally, the completed shared edges plus the mesh regions are used to create the \verb|simple surfaces|.
+
+\begin{figure}[h]
+	\centering
+\begin{tikzpicture}[inner sep=0,
+	vertex/.style={circle, radius=2pt,fill, inner sep=2pt,outer sep=0pt}]
+	% Nodes
+	\matrix (table) [
+		matrix of nodes,
+		nodes in empty cells,
+		row sep=8mm, column sep=6mm,
+		nodes={anchor=center}
+	] {
+		\node[text width=24mm] (MRs) {Classified Mesh Sections}; &[7mm]
+		\node[FC-Node, text width=20mm, minimum size=15mm] (cEdges) {Create shared edges}; &
+		\node[FC-Node, text width=20mm, minimum size=15mm] (exEdges) {Extend shared edges}; &
+		\node[FC-Node, text width=20mm, minimum size=15mm] (cSurfaces) {Create simple surfaces}; &
+		\node[text width=24mm, align=left] (SSurfaces) {Simplified Surfaces}; \\
+		& & & & \\
+	};
+\node[FC-Node, fit=(table-2-2)(table-2-3),minimum size=7mm, text width=46mm,label={center:Create shared corners}] (cCorners) {};
+	% Connections
+	\draw[FC-Arrow] (MRs) -- (cEdges)
+		node[pos=0.7, vertex] (split) {};
+	\draw[FC-Arrow] (split) -- ($(split |- cEdges.north west)+(0,0.3)$) -| (cSurfaces.north)
+		node[pos=0.5] (top) {};
+	\draw[FC-Arrow] (cEdges.south) -- (cEdges.south |- cCorners.north);
+	\draw[FC-Arrow] (cEdges) -- (exEdges);
+	\draw[FC-Arrow] (cEdges) -- (exEdges);
+	% \draw [FC-Arrow] ($(cEdges.east)+(0,0.4)$) -- ($(cSurfaces.west)+(0,0.4)$);
+	\draw[FC-Arrow] (cCorners.north -| exEdges.south) -- (exEdges.south);
+	\draw[FC-Arrow] (exEdges) -- (cSurfaces);
+	\draw[FC-Arrow] (cSurfaces) -- (SSurfaces);
+	% GeoSimp container node
+	\node[thick, dashed,draw, rounded corners=8pt,inner sep=7pt, fit=(split)(top)(cCorners)(cSurfaces),label={90:Geometry Simplification}]{};
+\end{tikzpicture}
+	\caption{Graphic depiction of the 3D segmentation procedure. Simple surfaces require both shared edges and shared corners, hence the connection from each.}
+	\label{fig:GeoSimp}
+\end{figure}
 
 \subsection{Shared Edges}
 The boundary between two mesh regions is termed a ``shared edge'', because its information is shared between its adjacent mesh regions.
 Each shared edge is made up of a list of line segments that approximate the boundary between two mesh regions.
-Given mesh regions $i$ and $j$, a shared edge between $i$ and $j$ is formed from the list of vertices that are either in $i$ and adjacent to $j$ or in $j$ and adjacent to $i$.
+Given mesh regions $A$ and $B$, a shared edge between $A$ and $B$ is formed from the list of vertices that are either in $A$ and adjacent to $B$ or in $B$ and adjacent to $A$.
 The complete list of vertices is simplified via the Ramer-Douglas-Peucker (RDP) algorithm\cite{RDP_line_reduction}.
 The mesh's mean edge length is used as the tolerance width in the RDP algorithm.
-Obtaining said list of vertices is done by finding a start point on a valid boundary and spreading out along the boundary therefrom.
-When a vertex adjacent to 3 mesh regions is encountered ..
+Obtaining said list of vertices is done by finding a start point on a valid boundary and spreading out along the boundary from there.
 
 TODO: maybe continue describing this fn?
 
@@ -250,77 +291,80 @@ This procedure is described in algorithm \ref{alg:shared_edges}.
 \begin{algorithm}
 	\caption{create\_shared\_edges() part 1}\label{alg:shared_edges}
 \begin{algorithmic}[1]
-	\Function{create\_shared\_edges}{mesh\_surfaces}
-	\State new list \texttt{edges} \Comment{To hold created edges}
-	\State new set \texttt{unchecked\_edge\_pts} from all mesh region perimeter points
-	\State new queue \texttt{edge\_start\_kyu} \Comment{For the beginning of each edge}
-	\While{\texttt{unchecked\_edge\_pts} not empty}
-		\State temporary \texttt{edge\_pt} = first value in \texttt{unchecked\_edge\_pts}
-		\State \texttt{edge\_start\_kyu.enqueue(edge\_pt)}
-		\While{\texttt{edge\_start\_kyu} not empty}
-		\State \texttt{edge\_start} = \texttt{edge\_start\_kyu.dequeue()}
-			\If{\texttt{edge\_start} in \texttt{edges}}
-				\State continue
-			\EndIf
-			\State \texttt{src\_idx} = first region index, \texttt{adj\_idx} = second region index
-			\State new list \texttt{edge\_pts} \Comment{For the current edge}
-			\State new queue \texttt{search\_pt\_kyu}
-			\State new set \texttt{local\_pts}
-			\While{\texttt{search\_pt\_kyu} not empty}
-				\State \texttt{pt} = \texttt{search\_pt\_kyu.dequeue()}
-				\If{\texttt{pt} in \texttt{local\_pts}}
-					\State continue
-				\EndIf
-				\algstore{shared_edges}
-\end{algorithmic}
-\end{algorithm}
-\begin{algorithm}
-	\caption{create\_shared\_edges() part 2}
-\begin{algorithmic}[1]
-	\algrestore{shared_edges}
-				\State \texttt{local\_pts.insert(pt)}
-				\State \texttt{edge\_pts.append(pt)}
-				% \State \Comment{Search points adjacent to current point for boundary points}
-				\For{\texttt{adj\_pt} in \texttt{pt.neighbors}}
-					\If{\texttt{adj\_pt} out of bounds OR not a perimeter point}
-						\State continue
+\Function{CreateSharedEdges}{Surfaces $S$, UV maps $M$}
+	\State new list $E_{points}$ \Comment{Each entry is an edge's list of points}
+	\State new set $P_{remaining} \leftarrow$ all mesh region perimeter points
+	\While{$P_{remaining}$ not empty}
+		\State point $p_{edge} \leftarrow$ first value in $P_{remaining}$
+		\State new queue $K_{tips} \leftarrow p_{edge}$ \Comment{For the beginning of each edge}
+		\While{$K_{tips}$ not empty}
+			\State $e_{start} \leftarrow K_{tips}$.dequeue()
+			\State \textbf{skip if} $e_{start}$ already in $E_{points}$
+			\State new list $P_{edge}$ \Comment{List of points in the current edge}
+			\State new queue $P_{search}$ \Comment{Queue of points to search along current edge}
+			\While{$P_{search}$ not empty}
+				\State $p_{edge} \leftarrow P_{search}$.dequeue()
+				\State \textbf{skip if} $p_{edge}$ already in $P_{edge}$
+				\State $P_{edge}$.append($p_{edge}$)
+				\For{$p_{adj}$ in $p_{edge}$.adjacent\_points}
+					\If{$p_adj$ on current region boundary}
+						\State $P_{search}$.enqueue($p_{adj}$)
 					\EndIf
-					\State new set \texttt{adj\_regions} = \texttt{adj\_pt.adj\_regions()}
-					\If{\texttt{src\_idx} AND \texttt{adj\_reg\_idx} in \texttt{adj\_regions}}
-						\State \texttt{search\_pt\_kyu.enqueue(adj\_pt)}
-					\EndIf
-					\If{\texttt{adj\_regions.size()} > 2}
-						\State Add edge starts to \texttt{edge\_start\_kyu} from \texttt{adj\_regions}
+					\If{$p_{adj}$ adjacent to 3+ regions}
+						\State $K_{tips}$.enqueue(EdgeStart from $p_{adj}$)
 					\EndIf
 				\EndFor
 			\EndWhile
+			\State Remove $P_{edge}$ points from $P_{remaining}$
+			\State $E_{points}$.append($P_{edge}$)
 		\EndWhile
 	\EndWhile
-	\EndFunction
-	\State \Comment{Function continues...}
+	% \State comment about source of muv1/2
+	\State new list $E$ \Comment{List of shared edges}
+	\For{$P_{edge}$ in $E_{points}$}
+		\State ClampPointsToSurfaces($P_{edge}$, $m_{UV1}$, $m_{UV2}$)
+		\State SortEdgePoints($P_{edge}$)
+		\State $E$.append(SharedEdge($P_{edge}$))
+	\EndFor
+	\State \textbf{return} $E$
+\EndFunction
 \end{algorithmic}
 \end{algorithm}
 
+\subsection{Extend Shared Edges}
+Describe what happens in \verb|clamp shared edges|.
+
 \subsection{Shared Corners}
-The shared corners are created by looping through all edges and attempting to create a corner from each end of the current edge (see \ref{alg:shared_corners}).
-The function \verb|insert_corner()| is described in algorithm \ref{alg:insert_corner}.
-\begin{algorithm}
-	\caption{create shared corners}\label{alg:shared_corners}
+Shared corners are used to simplify the process of extending the shared edges to the regions they abut.
+The process of creating shared corners $C$ is outlined in algorithms \ref{alg:shared_corners} and \ref{alg:insert_corner}.
+In algorithm \ref{alg:shared_corners} length $l_{max}$ is the maximum distance 2 points may be to be considered coincident, and is set to 1.3 times the maximum edge length of the source mesh.
+The idea behind this value was to make it proprtional to the underlying mesh, and to give the edge tips enough working distance to successfully connect to adjacent ones.
+% in hindsight, a better idea would be to create a map of vecs of idcs, where each map entry corresponds to the edges bounding a given mesh region. From there the edge tips could be connected based simply on which is closest to the given edge tip...
+The function \texttt{InsertCorner()} loops through the existing corners, checking if the given tip $t$ of edge $e$ is within the threshold distance $l$.
+If one is found, $e$ and $t$ are added to the found corner, otherwise a new shared corner is created from $e$ and $t$.
+\begin{algorithm}[h]
+	\caption{Create shared corners}\label{alg:shared_corners}
 \begin{algorithmic}[1]
+	%TODO: update this
 %function create_shared_edges()
-	\State new list $shared\_corners$ \Comment{To hold the created corners}
-	\For{$edge$ in $edges$}
-		\State $insert\_corner(edge, START, max\_edge\_length, shared\_corners)$
-		\State $insert\_corner(edge, END, max\_edge\_length, shared\_corners)$
+	% $math$ for variables, normal or ttt for everything else?
+	\State new list $C$ \Comment{To hold the created corners}
+	\For{$e$ in $E$}
+		\State InsertCorner($e$, START, $l_{max}$, $C$)
+			\Comment{Attempt to insert corner at start of edge}
+		\State InsertCorner($e$, END, $l_{max}$, $C$)
+			\Comment{Attempt to insert corner at end of edge}
 	\EndFor
 \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}
-	\caption{insert corner}\label{alg:insert_corner}
+%They are created by looping through all edges and attempting to create a corner from each end of the current edge (see \ref{alg:shared_corners}).
+%The function \verb|insert_corner()| is described in algorithm \ref{alg:insert_corner}.
+\begin{algorithm}[h]
+\caption{Insert corner}\label{alg:insert_corner}
 \begin{algorithmic}[1]
-	\Function{insert\_corner}{e, end, l, corners}
-		\State new boolean $found$ = false
+	\Function{InsertCorner}{edge $e$, tip $t$, threshold $l$, corners $C$}
+		\State $found \leftarrow false$
 		\State new position $p$
 		\If{$end$ = START}
 			\State $p = edge.start\_pt$
