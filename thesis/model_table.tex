@@ -1,0 +1,39 @@
+%! TeX root = thesis.tex
+\chapter{Test Objects}\label{App:model_table}
+
+The following are the 3D models used to test the program.
+The values listed under `source' have the following meanings:
+\begin{itemize}
+	\item \textbf{GC-PF}: Model downloaded from GrabCAD created by user paulocferreira 3D\cite{GC-PF}.
+		User paulocferreira 3D numbers their basic models, which makes finding the source for a given model fairly straightforward.
+		A specific model can be found by finding the model that corresponds to the number from the ID of a \textbf{GC-PF} sourced model: \verb|fcXXX|.
+	\item \textbf{10k}: Model downloaded from Thinki10k, a database of 3D models\cite{Thingi10k_paper, Thingi10k_app}.
+		To find the specific webpage for a given model, replace \verb|XXX| in \verb|https://ten-thousand-models.appspot.com/detail.html?file_id=XXX| with the ID from the table.
+	\item \textbf{Thing}: Model downloaded from Thingiverse.
+		Specific Thingiverse webpages can be found by replacing the \verb|XXX| in \verb|https://www.thingiverse.com/thing:XXX| with the ID from the table.
+\end{itemize}
+
+\csvreader[%
+	longtable = |lcccl|,
+	respect underscore = true,
+	table head = \hline
+	\textbf{ID} &
+	\textbf{Source} &
+	\textbf{Mesh} &
+	\textbf{Class} &
+	% \textbf{Explanation} &
+	\textbf{Outcome}\\\hline\hline,
+	late after line = \\\hline,
+	late after last line = \\\hline
+]{../resources/model_table.csv}{
+	Filename=\id,
+	% Description=\desc,
+	Source=\src,
+	Mesh=\mesh,
+	Class=\class,
+	% Reason=\reason,
+	Outcome=\outcome
+} {% Comment to prevent first couple lines from being shifted right slightly
+	\id & \src & \mesh & \class & \outcome
+}% https://tex.stackexchange.com/a/619232
+
