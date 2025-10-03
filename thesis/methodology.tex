@@ -12,7 +12,7 @@ The classic TSP creates a closed loop of nodes, but in this application the star
 Finally, the waypoints of the complete path are converted to actuator positions and sent via XMLRPC to the connected robotic arm and rotary table to be executed.
 Figure \ref{fig:overview} gives a graphical overview of the procedure's main steps.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering
 \begin{tikzpicture}
 	\newdimen\dx
@@ -93,51 +93,215 @@ Mangan and Whitaker's algorithm consists of 6 steps:
 \end{enumerate}
 
 Their algorithm was modified throughout this project, as described in the following sections.
-In addition to the mesh to be segmented, a merge threshold value is provided to Watershed.
-This threshold value is described in greater detail in \ref{sec:shallow_merge}.
+Atkar et al's Watershed segmentation implementation also helped inspire the implementation in this work\cite{HierSurfSeg_for_autobody_painting}.
+Their graphical depiction of Watershed segmentation is shown below in figure \ref{fig:ws_1570179_steps}.
+% In addition to the mesh to be segmented, a merge threshold value is provided to Watershed.
+% This threshold value is described in greater detail in \ref{sec:shallow_merge}.
+\begin{figure}[htb]
+	\centering
+	% TODO: recreate this image with tikz
+	\includegraphics[width=0.5\linewidth]{../resources/watershed/1570179_WS_steps.png}
+\caption{
+Graphical depiction of Atkar et al.'s Watershed segmentation implementation.\cite{HierSurfSeg_for_autobody_painting}
+}
+	\label{fig:ws_1570179_steps}
+\end{figure}
 
-\subsubsection{Region Initialization}\label{sec:ws_reg_init}
-In this work's implementation the curvature and derivative thereof values are calculated once for the whole mesh prior to the first Watershed pass.
+In figure \ref{fig:ws_1570179_steps} subfigure (a) shows Mangan and Whitaker's step 2: locating and labeling each local minima.
+Region 1 in subfigure (c) depicts the original step 5: descent to a minimum, and regions 2 and 3 in the same subfigure show step 6: the merging of shallow regions into deep ones.
+The step shown in subfigure (b) is of Atkar et al.'s own design, and due to its adaptation in this work, is described in the section on \textit{minima expansion}.
+Figure \ref{fig:ws_1570179_steps} concludes with the end result of Watershed in subfigure (d).
+
+\subsubsection{Region Initialization}
+In this work's implementation the curvature values and derivative thereof are calculated once for the whole mesh prior to the first Watershed pass.
+Watershed step 0, applying the height function to the mesh, is shown in figure \ref{sfig:ws_dk}.
 This work's version of Watershed begins by creating mesh regions from each local minima.
 Here, local minima includes local plateaus.
 Thus, if a region of the mesh is found whose vertices' curvature are all roughly equal and less than that of their neighbors, it is a minima plateau.
 
+\begin{figure}[htb]
+	\centering
+	\begin{subfigure}{0.45\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{../resources/watershed/fc028_WS0.png}
+		\caption{Watershed step 0: Apply height function to mesh. White indicates high curvature and black indicates low curvature.}
+		\label{sfig:ws_dk}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.45\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{../resources/watershed/fc028_WS1.png}
+		\caption{Watershed step 1: Mesh region initialization. Each color is a separate mesh region.}
+		\label{sfig:ws_1}
+	\end{subfigure}
+\caption{
+Watershed segmentation steps 0 and 1 shown applied to test object ``fc028\_e''.
+}
+\end{figure}
+
+Figure \ref{sfig:ws_1} shows the result of region initialization on the test object ``fc028\_e''.
+Because the surfaces of the test object are perfectly flat, the horizontal and vertical surfaces exhibit large plateaus.
+The lack of plateaus on the inclined surface is most likely due to floating point errors in the vertex positions on the inclined surface.
+
 \subsubsection{Minima Expansion}
-This step was adopted from Atkar et al.'s implementation of Watershed segmentaion\cite{HierSurfSeg_for_autobody_painting}.
+This step was adopted from Atkar et al.'s implementation of Watershed segmentation\cite{HierSurfSeg_for_autobody_painting}.
 Each mesh region expands up to a pre-set depth, absorbing any regions encountered.
 Although not essential to the segmentation results, it facilitates subsequent steps by effectively filtering high frequency noise and features from the mesh.
+It is worth noting that Watershed segmentation overall would work without \textit{minima expansion}, but would be slightly slower because the region merging in steps 4.1 and 4.2 are a little more computationally expensive than region merges during \textit{minima expansion}.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=0.5\linewidth]{../resources/watershed/fc028_WS2.png}
+\caption{
+Test object ``fc028\_e'' post Watershed segmentation step 2.
+}
+	\label{fig:ws_2}
+\end{figure}
+
+Figure \ref{fig:ws_2} shows the result of \textit{minima expansion} on the test object.
+Because the variation in height among the vertices of the inclined surface was minimal, one of the initial local minima was able to expand to most of the inclined surface's area.
 
 \subsubsection{Descent to Minima}
 From each un-assigned vertex a trail following the path of steepest descent is started.
 When a mesh region is encountered, the traversal ends and all path vertices are added to the encountered mesh region.
-Plateaus encountered here are added to the traversal path.
+Plateaus encountered during the descent are added to the traversal path.
 In this way, Mangan and Whitaker's step \ref{plateau_step} is effectively split between Region Initialization and Descent to Minima.
-At this point all vertices should be assigned to a mesh region and the mesh is segmented.
-Prior to subsequent steps, the depth of each mesh region is updated.
+A way to visualize this step is by placing an imaginary drop of water at an un-assigned vertex of the object.
+All vertices touched by the water droplet as it descends the height map of the object's surface are added to the region that eventually catches the droplet.
+Post \textit{descent to minima} all vertices have been assigned to a mesh region and the mesh has been segmented.
+Figure \ref{fig:ws_3} shows the result of \textit{descent to minima} on the test object.
 
-\subsubsection{Mini-Merge}\label{sec:mini_merge}
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=0.5\linewidth]{../resources/watershed/fc028_WS3.png}
+\caption{
+Test object ``fc028\_e'' post Watershed segmentation step 3: Descent to minima
+}
+	\label{fig:ws_3}
+\end{figure}
+
+\subsubsection{Mini-Merge}
 As noted by Mangan and Whitaker, Descent to Minima will segment the given mesh, but in all likelihood it will be overly segmented.
-Their solution was to merge shallow regions into adjacent deeper regions (see \ref{sec:shallow_merge}).
+Their solution was to merge shallow regions into adjacent deeper regions (see subsequent section on \textit{shallow merge}).
 Through testing small high curvature regions were observed, that due to their high curvature did were not merged into any of the larger more useful regions.
-To combat this, the ``Mini Merge'' step was developed to merge regions deemed too small to be worth keeping.
-The merge condition changed throughout development, from a fixed number of vertices threshold, to a threshold relative to the total number of vertices in the mesh undergoing Watershed segmentation, to the condition that the number of perimeter vertices in the region be less than 50\% of the region's vertices.
+To combat this, the ``Mini-Merge'' step was developed to merge regions deemed too small to be worth keeping.
+The merge condition changed throughout development, from a fixed number of vertices threshold, to a threshold relative to the total number of vertices in the mesh undergoing Watershed segmentation, to the condition that the number of perimeter vertices in the region be fewer than 50\% of the region's vertices.
 (reword previous sentence?)
-Mesh regions that trigger the merge condition are merged into the mesh region adjacent their shallow side.
-The receiving mesh is found by searching the vertices adjacent to the mini region's lowest perimeter vertex.
-If for some reason no valid mesh region adjacent to that vertex is found, the next lowest perimeter vertex's neighborhood is checked, and so on, until a valid mesh region is found.
+The \textit{mini-merge} procedure is shown in algorithm \ref{alg:WS:mini_merge}.
 
-(I could add pseudocode here, but it feels like overkill?)
+\begin{algorithm}[htb]
+\caption{Mini-Merge}\label{alg:WS:mini_merge}
+\begin{algorithmic}[1]
+\Function{MiniMerge}{Mesh sections $S$}
+	% \State Sort $S$ by vertex count in ascending order
+	\For{$s$ in $S$}
+		% \State $s_{small} \leftarrow S$.first
+		\If{$s$.small()}
+			\State $s_{lowside} \leftarrow s$.findLowSideNeighbor()
+			\State $s_{lowside}$.absorb($s$)
+			% \State $S$.erase($s$)
+		\EndIf
+	\EndFor
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
 
-\subsubsection{Shallow Merge}\label{sec:shallow_merge}
+\textit{Mini-merge} iterates through each mesh section, checking each if it meets the aforementioned merge condition.
+When a small region is found, the region adjacent its low side is sought, which then absorbs the small region.
+% Mesh regions that trigger the merge condition are merged into the mesh region adjacent their shallow side.
+The method to find the low-side adjacent neighboring mesh region is shown below in algorithm \ref{alg:MR:low_side_neighbor}.
+
+\begin{algorithm}[htb]
+\caption{Find low side neighbor}\label{alg:MR:low_side_neighbor}
+\begin{algorithmic}[1]
+\Function{findLowSideNeighbor}{}
+	\For{$p_{perimeter}$ in $P_{perimeter}$}
+		\For{point $p_{adj}$ adjacent to $p_{perimeter}$}
+			\If{$p_{adj}$ not in this region AND $p_{adj}$ is in bounds}
+				\State \textbf{return} $p_{adj}$.meshRegion
+			\EndIf
+		\EndFor
+	\EndFor
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+The receiving mesh region is found by searching the vertices adjacent to the mini region's lowest perimeter vertex.
+If for some reason no valid mesh region adjacent to that vertex is found, the neighborhoods of the remaining perimter vertices are checked in ascending order until a valid mesh region is found.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=0.5\linewidth]{../resources/watershed/fc028_WS4.1.png}
+\caption{
+Watershed segmentation step 4.1 shown applied to test object ``fc028\_e''.
+}
+	\label{fig:ws_4.1}
+\end{figure}
+
+As can be seen in figure \ref{fig:ws_4.1} the segmentation results post \textit{mini-merge} are noticeably cleaner than after the previous step.
+(...should i find a test object that appears to require merging post WS4.1 ?)
+Had the test object been more complex, the need for further merging would have been apparent.
+
+\subsubsection{Shallow Merge}
 This step was adopted without modification from Mangan and Whitaker.
-A merge threshold is calculated from the threshold value provided to the Watershed function.
-Regions with a depth below the threshold are merged into the mesh region adjacent their shallow side, according to the algorithm described in \ref{sec:mini_merge}. % to show name instead of number use \nameref{}
-The threshold value provided to the Watershed function is used in \ref{eq:merge_threshold} to set the merge threshold for this step.
+The implementation of \textit{shallow merge} used in this work is detailed in algorithm \ref{alg:WS:shallow_merge}.
+
+\begin{algorithm}[!b]
+\caption{Shallow-Merge}\label{alg:WS:shallow_merge}
+\begin{algorithmic}[1]
+	\Function{ShallowMerge}{Mesh sections $S$, real $t_e$}
+		\State Sort $S$ by mesh section depth in ascending order
+		% \State $d_{th} \leftarrow d_{deepest}^{t_e}$\Comment{See equation \ref{eq:merge_threshold} for explanation}
+		\State calculate merge threshold $d_{th}$
+		\While{$S$.first.depth < $d_{th}$}
+			% \State \Comment{While the depth of the shallowest mesh is below the merge threshold}
+			\State $s_{shallow} \leftarrow S$.first
+			\State $s_{lowside} \leftarrow s_{shallow}$.findLowSideNeighbor()
+			\State $s_{lowside}$.absorb($s_{shallow}$)
+			% \State $M$.erase($m_{shallow}$)
+			\State $s_{lowside}$.updateDepth()
+		\EndWhile
+	\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+First the mesh sections are sorted by depth in ascending order, so that as soon as the first mesh section is above the merge threshold, the others are guaranteed to be above it as well.
+On line 3 \verb|ShallowMerge|'s second argument $e$ is used in equation \ref{eq:merge_threshold} to calculate the merge threshold $d_{th}$.
 \begin{equation}\label{eq:merge_threshold}
-	d_{th} = d_{deepest}^{x}
+	d_{th} = d_{max}^{e}
 \end{equation}
-$d_{th}$ is the merge threshold, $d_{deepest}$ is the depth of the deepest region and $x$ is the threshold value provided.
+where $d_{max}$ is the depth of the deepest region and $e$ is the threshold value provided to \textit{shallow-merge}.
 Due to the threshold value being applied as an exponent, values greater than 1 are pointless.
+Regions with a depth below the merge threshold are merged into the mesh region adjacent their shallow side, using the algorithm \ref{alg:MR:low_side_neighbor}.
+The \textit{mini-merge} and \textit{shallow-merge} procedures are quite similar, with the main difference being that the absorbing mesh section in \textit{shallow-merge} must update its depth in order to maintain the depth ordering.
+
+\begin{figure}[htb]
+	\centering
+	\begin{subfigure}{0.45\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{../resources/watershed/fc028_WS4.2.0.png}
+		\caption{Shallow merge with a high merge threshold}
+		\label{sfig:ws_4.2.0}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.45\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{../resources/watershed/fc028_WS4.2.1.png}
+		\caption{\raggedright Shallow merge with a lower merge threshold}
+		\label{sfig:ws_4.2.1}
+	\end{subfigure}
+\caption{
+Results from Watershed segmentation step 4.2 with a high merge threshold (a) and a lower merge threshold (b).
+}
+\end{figure}
+
+Figures \ref{sfig:ws_4.2.0} and \ref{sfig:ws_4.2.1} show the results post \textit{shallow-merge}.
+If the merge threshold is too high, useful regions will be merged together into a large composite mesh section, as can be seen in figure \ref{sfig:ws_4.2.0}.
+figure \ref{sfig:ws_4.2.1} shows the result of a merge threshold more appropriate for the mesh shown.
+Because each model has different geometry and meshing, a certain merge threshold may work well for one model, yet work poorly for another.
+A certain merge threshold may not even work well for the entirety of a single model.
+This is why the \textit{3D Segmentation} process is iterative.
+By starting with a relatively high merge threshold exponent (0.95) and decreasing, all surfaces should eventually be classified as a certain primitive.
 
 \subsubsection{Boundary Smoothing}
 This step is more post-processing and ``cleaning'' of the mesh region boundary than actual segmentation.
@@ -148,6 +312,8 @@ Because vertices with only 3 edges are exceedingly rare in well meshed models, i
 Thus, for example, A vertex assigned to region 4 through Minima Descent with edges connecting to regions 4, 10, 12, and 12, would be transferred to region 12.
 No explicit tie breaking mechanism was deemed necessary, but lower numbered regions are likely given priority due to how the code was written.
 % At one point perimeter vertices with 3 or more connections to other same-region perimeter vertices were considered a problem,...
+
+% TODO: take a pair of screenshots to illustrate WS5:boundary smoothing?
 
 \subsection{Surface Classification}
 Mesh regions received from Watershed segmentation need to be classified so that the appropriate UV map is assigned to them.
@@ -228,15 +394,8 @@ An ellipsoid curves in both surface directions, thus both $|\kappa_1|$ and $|\ka
 A flaw with the cylindric tests and this principal curvature test is that they are unable to differentiate between the target surface class and a composite shape.
 
 \section{Geometry Simplification}
-The purpose of the geometry simplification step is to create a simplified form for each mesh region provided by Segmentation 3D.
-Geometry Simplification's output is a ``simple surface'' created from each mesh region.
-A simple surface contains, among other things, a reference to the mesh region from which it was created, a UV map, and the unwrapped 2D region outline.
-The Geometry Simplification follows the block diagram shown in figure \ref{fig:GeoSimp}.
-First the \verb|SharedEdges|, edges between mesh regions, are ascertained.
-These are used to determine the region corners (``shared corners''), which are then used to finish preparing the shared edges (Extend shared edges).
-Finally, the completed shared edges plus the mesh regions are used to create the \verb|simple surfaces|.
 
-\begin{figure}[h]
+\begin{figure}[htb]
 	\centering
 \begin{tikzpicture}[inner sep=0,
 	vertex/.style={circle, radius=2pt,fill, inner sep=2pt,outer sep=0pt}]
@@ -274,30 +433,35 @@ Finally, the completed shared edges plus the mesh regions are used to create the
 	\label{fig:GeoSimp}
 \end{figure}
 
+The purpose of the geometry simplification step is to create a simplified form for each mesh region provided by Segmentation 3D.
+Geometry Simplification's output is a set of ``simple surfaces'' created from the provided mesh regions.
+A simple surface contains, among other things, a reference to the mesh region from which it was created, a UV map, and the unwrapped 2D region outline.
+Geometry Simplification follows the block diagram shown in figure \ref{fig:GeoSimp}.
+First the \verb|SharedEdges|, edges between mesh regions, are ascertained.
+These are used to determine the region corners (``shared corners''), which are then used to finish preparing the shared edges (Extend shared edges).
+Finally, the completed shared edges plus the mesh regions are used to create the \verb|simple surfaces|, which are passed on to the next high-level step.
+
 \subsection{Shared Edges}
-The boundary between two mesh regions is termed a ``shared edge'', because its information is shared between its adjacent mesh regions.
+The boundary between two mesh regions is termed a ``shared edge'', because its information is shared between the two mesh regions it divides.
 Each shared edge is made up of a list of line segments that approximate the boundary between two mesh regions.
-Given mesh regions $A$ and $B$, a shared edge between $A$ and $B$ is formed from the list of vertices that are either in $A$ and adjacent to $B$ or in $B$ and adjacent to $A$.
-The complete list of vertices is simplified via the Ramer-Douglas-Peucker (RDP) algorithm\cite{RDP_line_reduction}.
-The mesh's mean edge length is used as the tolerance width in the RDP algorithm.
-Obtaining said list of vertices is done by finding a start point on a valid boundary and spreading out along the boundary from there.
+The algorithm to obtain the shared edges is shown split into algorithms \ref{alg:shared_edges_1} and \ref{alg:shared_edges_2}.
+The function \textbf{CreateSharedEdges()} can be broken into \textbf{edge discovery} and \textbf{edge refinement}.
+% Line 2 sets up list $E_{points}$, in which each entry $i$ is the list of all points for the $i-th$ discovered edge.
+% $E_{points}$ is filled throughout \textbf{edge discovery} and in \textbf{edge refinement}
+In \textbf{edge discovery} the list of vertices found along each edge is appended to list $E_{points}$.
+In \textbf{edge refinement} each edge's list of vertices in $E_{points}$ is transformed into a concise shared edge.
 
-TODO: maybe continue describing this fn?
-
-The region edges are found by spreading out along region boundaries, with vertices added to the current edge, and new edges started when a corner is encountered.
-The first vertex on the perimeter of a mesh region and adjacent to a valid mesh region is used as the starting vertex.
-This procedure is described in algorithm \ref{alg:shared_edges}.
-
-\begin{algorithm}
-	\caption{create\_shared\_edges() part 1}\label{alg:shared_edges}
+\begin{algorithm}[!htb]
+	\caption{CreateSharedEdges() Part 1: Edge discovery}\label{alg:shared_edges_1}
 \begin{algorithmic}[1]
 \Function{CreateSharedEdges}{Surfaces $S$, UV maps $M$}
 	\State new list $E_{points}$ \Comment{Each entry is an edge's list of points}
+	% "edge discovery" section
 	\State new set $P_{remaining} \leftarrow$ all mesh region perimeter points
-	\While{$P_{remaining}$ not empty}
+	\While{$P_{remaining}$ not empty}\label{alg:shared_edges:while_k_remaining}
 		\State point $p_{edge} \leftarrow$ first value in $P_{remaining}$
 		\State new queue $K_{tips} \leftarrow p_{edge}$ \Comment{For the beginning of each edge}
-		\While{$K_{tips}$ not empty}
+		\While{$K_{tips}$ not empty}\label{alg:shared_edges:while_k_tips}
 			\State $e_{start} \leftarrow K_{tips}$.dequeue()
 			\State \textbf{skip if} $e_{start}$ already in $E_{points}$
 			\State new list $P_{edge}$ \Comment{List of points in the current edge}
@@ -307,7 +471,7 @@ This procedure is described in algorithm \ref{alg:shared_edges}.
 				\State \textbf{skip if} $p_{edge}$ already in $P_{edge}$
 				\State $P_{edge}$.append($p_{edge}$)
 				\For{$p_{adj}$ in $p_{edge}$.adjacent\_points}
-					\If{$p_adj$ on current region boundary}
+					\If{$p_{adj}$ on current region boundary}
 						\State $P_{search}$.enqueue($p_{adj}$)
 					\EndIf
 					\If{$p_{adj}$ adjacent to 3+ regions}
@@ -319,10 +483,36 @@ This procedure is described in algorithm \ref{alg:shared_edges}.
 			\State $E_{points}$.append($P_{edge}$)
 		\EndWhile
 	\EndWhile
+	\algstore{create_shared_edges}
+\end{algorithmic}
+\end{algorithm}
+
+The \textbf{edge discovery} section, spanning lines 3-28, consists of traversing each mesh section boundary to collect all vertices relevant to that edge and storing them in a list in $E_{points}$.
+The outermost \verb|while| loop, beginning on line \ref{alg:shared_edges:while_k_remaining}, ensures that all perimeter points, of all mesh regions, are accounted for.
+Each cycle of this loop completely processes a single edge graph.
+Edge graph in this context means the collection of edges that are linked to one another.
+For example, a cube has a single edge graph, whereas a cylinder has 2 edge graphs, each containing a single edge.
+The queue $K_{tips}$ stores potential edge starts.
+The next \verb|while| loop, on line \ref{alg:shared_edges:while_k_tips}, processes each potential edge start in $K_{tips}$.
+Because multiple edge starts could describe the same edge, it is necessary to check if the current edge start $e_{start}$ is already contained in an edge in $E_{points}$ (line 9).
+The queue $P_{search}$ created on line 11 handles the points found to be on the current edge.
+The subsequent \verb|while| loop processes $P_{search}$ until empty, first checking for duplicates, appending the current edge point $p_{edge}$ to the list of current edge points $P_{edge}$, and finally checking its neighbors for new edge points.
+A vertex is deemed to be on the edge between regions $A$ and $B$ if it is either in $A$ and adjacent to $B$ or in $B$ and adjacent to $A$.
+Lines 20-22 show that if a vertex adjacent to 3 or more regions is found, an edge start is created from it and enqueued to $K_{tips}$.
+After $P_{search}$ is exhausted, $P_{edge}$ is assumed to contain all points on the current edge.
+These points are then removed from the overall point set $P_{remaining}$ and appended to $E_{points}$, concluding the $K_{tips}$ \verb|while| loop.
+
+\begin{algorithm}[htb]
+	\caption{CreateSharedEdges() Part 2: Edge refinement}\label{alg:shared_edges_2}
+\begin{algorithmic}[1]
+	\algrestore{create_shared_edges}
+	% "edge refinement" section
 	% \State comment about source of muv1/2
 	\State new list $E$ \Comment{List of shared edges}
-	\For{$P_{edge}$ in $E_{points}$}
-		\State ClampPointsToSurfaces($P_{edge}$, $m_{UV1}$, $m_{UV2}$)
+	\For{$P_{edge}$ in $E_{points}$}\label{alg:edge_refinement_for}
+		\State Determine the surfaces $s_1$ and $s_2$ adjacent current point line $P_{edge}$
+		\State Obtain UV maps $m_{UV1}$ and $m_{UV1}$ from $s_1$, $s_2$ and $M$
+		\State ClampPointsToSurfaces($P_{edge}$, $m_{UV1}$, $m_{UV2}$)\label{alg:edge_refinement_clamp_pts}
 		\State SortEdgePoints($P_{edge}$)
 		\State $E$.append(SharedEdge($P_{edge}$))
 	\EndFor
@@ -331,8 +521,17 @@ This procedure is described in algorithm \ref{alg:shared_edges}.
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Extend Shared Edges}
-Describe what happens in \verb|clamp shared edges|.
+\textbf{Edge refinement} is, relative to \textbf{edge discovery}, fairly simple.
+A new list $E$ is created to store the final shared edges.
+The \verb|for| loop on line \ref{alg:edge_refinement_for} iterates through the lists of edge vertices in $E_{points}$, attempting to create a shared edge from each.
+On line \ref{alg:edge_refinement_clamp_pts} \verb|ClampPointsToSurfaces()| forces the edge points onto an idealized representation of the two bordering mesh sections.
+For an edge between two planar surfaces, this would force all points to be colinear.
+Next the clamped points are sorted according to position along the line using \verb|SortEdgePoints()|.
+Finally a shared edge is created from the edge points, and then appended to $E$.
+Within the creation of a shared edge the RDP algorithm is used to simplify the line down to only the critical points.
+% The complete list of vertices is simplified via the Ramer-Douglas-Peucker (RDP) algorithm\cite{RDP_line_reduction}.
+The mesh's mean edge length is used as the tolerance width in the RDP algorithm.
+Once all point lists in $E_{points}$ have been processed, the list $E$ is returned, and \verb|CreateSharedEdges()| is complete.
 
 \subsection{Shared Corners}
 Shared corners are used to simplify the process of extending the shared edges to the regions they abut.
@@ -340,7 +539,7 @@ The process of creating shared corners $C$ is outlined in algorithms \ref{alg:sh
 In algorithm \ref{alg:shared_corners} length $l_{max}$ is the maximum distance 2 points may be to be considered coincident, and is set to 1.3 times the maximum edge length of the source mesh.
 The idea behind this value was to make it proprtional to the underlying mesh, and to give the edge tips enough working distance to successfully connect to adjacent ones.
 % in hindsight, a better idea would be to create a map of vecs of idcs, where each map entry corresponds to the edges bounding a given mesh region. From there the edge tips could be connected based simply on which is closest to the given edge tip...
-The function \texttt{InsertCorner()} loops through the existing corners, checking if the given tip $t$ of edge $e$ is within the threshold distance $l$.
+The function \verb|InsertCorner()| loops through the existing corners, checking if the given tip $t$ of edge $e$ is within the threshold distance $l$.
 If one is found, $e$ and $t$ are added to the found corner, otherwise a new shared corner is created from $e$ and $t$.
 \begin{algorithm}[h]
 	\caption{Create shared corners}\label{alg:shared_corners}

@@ -12,7 +12,7 @@ Things / topics i will cover:
 
 \section{Geometric Curvature}
 For segmenting a 3D mesh via Watershed Segmentation each vertex requires a singular / combined measure of curvature.
-Various forms and types of curvature were examined throughout this project and are presented in the following sections.
+The various forms and types of curvature examined throughout this project are presented in the following sections.
 
 \subsection{Principal Curvatures}
 All combined measures of curvature are based, either in theory or in actuality, on the principal curvatures.
@@ -114,7 +114,7 @@ In equation \ref{eq:lap_beltrami_op} above $p_j$ is a vertex in the ring of vert
 \begin{tikzpicture}[
 	scale=1.1,
 	vertex/.style={circle, radius=2pt,fill, inner sep=2pt,outer sep=0pt}]
-	% based on resources/ddg_disc_k_1_mean_k.png
+	% based on image in slide 26/44 in DDG-DiscreteCurvatureI.pdf
 	\newdimen\hexR
 	\hexR=2cm
 	\newlength\arcR
@@ -314,7 +314,50 @@ Setting 3.7 into 3.8:
 	\end{split}
 \end{equation}
 
-\section{Ramer-Douglas-Peucker Algoritm}
+\section{Ramer-Douglas-Peucker Algorithm}
+The Ramer-Douglas-Peucker (RDP) algorithm is a method to interatively simplify a line defined by a set of points.
+The only arguments to RDP are a list of points and a tolerance width, within which points will be considered unnecessary and discarded.
+% The algorithm looks at a list of points, draws an imaginary line from the first to the last, finds the point with the farthest normal distance to the comparison line, and if the point's distance to the comparison line is greater than a pre-defined tolerance width, splits the lin
+The algorithm iteratively finds the point farthest from the straight line from point 0 to n-1, and if said distance is greater than the tolerance width, the line is split at the farthest point and the line sections before and after the split are reconsidered individually.
+The procedure is described in greater detail in algorithm \ref{alg:RDP}.
+
+\begin{algorithm}[H]
+\caption{Ramer-Douglas-Peucker}\label{alg:RDP}
+\begin{algorithmic}[1]
+\Function{SimplifyLineRDP}{points $P$, real $w$}
+	\State new list $P_{core}$\Comment{To store the important point indices}
+	\State new RDPNode $n_0 \leftarrow$ RDPNode($P$.first, $P$.last)
+	\State new list $N_{stack} \leftarrow n_0$
+	\While{$N_{stack}$ not empty}
+		\State new RDPNode $n \leftarrow N_{stack}$.last
+		\State $N_{stack}$.popLast()
+		\State new uint $i \leftarrow$ index of point farthest from $n$.line
+		\State new real $d \leftarrow$ distance of $P$[$i$] from $n$.line
+		\If{$d \le w$} \Comment{If farthest point is within tolerance}
+			\State $P_{core}$.append($n$.srcPt) \Comment{line section is complete}
+			\State \textbf{continue}
+		\EndIf
+		\State new RDPNode $n_{left} \leftarrow$ RDPNode($n$.srcPt, $P$[$i$])
+		\State new RDPNode $n_{right} \leftarrow$ RDPNode($P$[$i$], $n$.endPt)
+		\State $N_{stack}$.append($n_{right}$)
+		\State $N_{stack}$.append($n_{left}$)
+	\EndWhile
+	\State $P_{core}$.append($P$.last)
+	\State \textbf{return} $P_{core}$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+The RDP implementation used in this work uses a struct \textbf{RDPNode} that represents a section of the line.
+It contains a start and end point, as well as a line spanning these two points.
+A stack is used to manage the \textbf{RDPNode}s.
+In each iteration of the \verb|while| loop, starting on line 5, the item at the top of the stack is removed and stored in $n$.
+The point farthest from this line section is found, and on line 10 the distance thereof is compared against the tolerance width.
+If the perpendicular distance is within the tolerance width then the current line section is complete and the initial point in the section is added to $P_{core}$ (line 11).
+If not, then the current line section is split at the farthest point, with the two new sections represented by RDPNodes $n_{left}$ and $n_{right}$.
+These are then placed on the stack, $n_{right}$ first, so that $n_{left}$ is processed next, ensuring the list of important points $P_{core}$ is always sorted.
+After the \textbf{RDPNode} stack is exhausted the last point in $P$ is appended to $P_{core}$ because only the start point in each node is added to $P_{core}$.
+An alternative implementation that uses recursion may be found on wikipedia.
 
 \section{Traveling Salesman Problem}
 

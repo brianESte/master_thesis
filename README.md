@@ -9,13 +9,14 @@ could be run without sudo privileges.
 ## TODO:
 
 - [x] Somehow the final version of the exposé was lost. I would like to update the tracked document from a printed copy
-- [ ] Write initial version of Related Work chapter
+- [x] Write initial version of Related Work chapter
 - [x] Begin writing background chapter
 - [ ] Write initial version of Methodology
 - [ ] Maybe try to clean up the IGD logo svg file?
 
 Reminders:
 - et al. is written with a .
+- Conforming to this template, there is no point in referencing a subsubsection by `\label{}` / `\ref{}` because the number shown will be at most that of the containing subsection. Thus it is (probably) better to reference subsubsections by name instead.
 
 ## Notes
 

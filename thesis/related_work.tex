@@ -92,6 +92,8 @@ They term a convex polygon composed from one or more adjacent sub-polygon cells 
 The set of convex merge options is created from the initial sub-polygons cells.
 To determine which subset of convex merge options constitutes the \textit{optimal} sub-polygons is a set partitioning problem with the optimal sub-polygons selected via an integer programming model.
 
+(I could not find a source documenting the following, as such it is just my thoughts, and should probably be moved to methodology...)
+
 To plan a path within a convex or semi-convex (as is the case via BCD) polygon two motion planning options are immediately apparent: a spiral patter and a back-and-forth pattern also known as a boustrophedon path.
 Between these, the boustrophedon path is generally favored over the spiral pattern because it is simpler and because the spiral pattern requires a direction change at each corner, whereas an omnidirectional agent, such as a UAV or robotic arm, following a boustrophedon path need not change orientation between sweep lines, only position.
 

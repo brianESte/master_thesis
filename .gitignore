@@ -22,4 +22,8 @@ creationdate.lua
 # log files
 *.log
 
+# Compressed files
 *.zip
+
+# Notes files
+*notes

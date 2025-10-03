@@ -1049,6 +1049,40 @@
 	doi = {10.1109/AIRC56195.2022.9836984},
 }
 
+@article{IntEdgeExt,
+	AUTHOR = {Nielsen, Lasse Damtoft and Sung, Inkyung and Nielsen, Peter},
+	TITLE = {Convex Decomposition for a Coverage Path Planning for Autonomous
+	         Vehicles: Interior Extension of Edges},
+	JOURNAL = {Sensors},
+	VOLUME = {19},
+	YEAR = {2019},
+	NUMBER = {19},
+	ARTICLE-NUMBER = {4165},
+	URL = {https://www.mdpi.com/1424-8220/19/19/4165},
+	PubMedID = {31557969},
+	ISSN = {1424-8220},
+	ABSTRACT = {To cover an area of interest by an autonomous vehicle, such as
+	            an Unmanned Aerial Vehicle (UAV), planning a coverage path which
+	            guides the unit to cover the area is an essential process.
+	            However, coverage path planning is often problematic, especially
+	            when the boundary of the area is complicated and the area
+	            contains several obstacles. A common solution for this situation
+	            is to decompose the area into disjoint convex sub-polygons and to
+	            obtain coverage paths for each sub-polygon using a simple
+	            back-and-forth pattern. Aligned with the solution approach, we
+	            propose a new convex decomposition method which is simple and
+	            applicable to any shape of target area. The proposed method is
+	            designed based on the idea that, given an area of interest
+	            represented as a polygon, a convex decomposition of the polygon
+	            mainly occurs at the points where an interior angle between two
+	            edges of the polygon is greater than 180 degrees. The performance
+	            of the proposed method is demonstrated by comparison with
+	            existing convex decomposition methods using illustrative
+	            examples.},
+	DOI = {10.3390/s19194165},
+	OPTshorthand = {IEE19},
+}
+
 %% Curvature related sources
 @article{EstCurvOnTriMesh,
 	author = {Gatzke, Timothy and Grimm, Cindy},
@@ -1419,7 +1453,7 @@
 }
 
 %% Math algorithms
-@article{RDP_line_reduction,
+@article{RDP_line_reduction_DP,
 	author = {Douglas, David H and Peucker, Thomas K},
 	title = {Algorithms for the Reduction of the Number of Points Required to
 	         Represent a Digitized Line or its Caricature},
@@ -1440,6 +1474,33 @@
 	            of automated generalization. },
 }
 
+@article{RDP_line_reduction_R,
+	title = {An iterative procedure for the polygonal approximation of plane
+	         curves},
+	journal = {Computer Graphics and Image Processing},
+	volume = {1},
+	number = {3},
+	pages = {244-256},
+	year = {1972},
+	issn = {0146-664X},
+	doi = {https://doi.org/10.1016/S0146-664X(72)80017-0},
+	url = {https://www.sciencedirect.com/science/article/pii/S0146664X72800170},
+	author = {Urs Ramer},
+	abstract = {The approximation of arbitrary two-dimensional curves by
+	            polygons is an importanttechnique in image processing. For many
+	            applications, the apparent ideal procedure is to represent lines
+	            and boundaries by means of polygons with minimum number of
+	            vertices and satisfying a given fit criterion. In this paper, an
+	            approximation algorithm is presented which uses an iterative
+	            method to produce polygons with a small—but not minimum—number of
+	            vertices that lie on the given curve. The maximum distance of the
+	            curve from the approximating polygon is chosen as the fit
+	            criterion. The results obtained justify the abandonment of the
+	            minimum-vertices criterion which is computationally much more
+	            expensive.},
+}
+
+%% Robot
 @online{UR_XML-RPC,
 	title = {XML-RPC communication},
 	date = {2024-09-30},
@@ -1467,40 +1528,6 @@
 	volume = {8},
 	pages = {20},
 	OPTshorthand = {ROBBE},
-}
-
-@article{IntEdgeExt,
-	AUTHOR = {Nielsen, Lasse Damtoft and Sung, Inkyung and Nielsen, Peter},
-	TITLE = {Convex Decomposition for a Coverage Path Planning for Autonomous
-	         Vehicles: Interior Extension of Edges},
-	JOURNAL = {Sensors},
-	VOLUME = {19},
-	YEAR = {2019},
-	NUMBER = {19},
-	ARTICLE-NUMBER = {4165},
-	URL = {https://www.mdpi.com/1424-8220/19/19/4165},
-	PubMedID = {31557969},
-	ISSN = {1424-8220},
-	ABSTRACT = {To cover an area of interest by an autonomous vehicle, such as
-	            an Unmanned Aerial Vehicle (UAV), planning a coverage path which
-	            guides the unit to cover the area is an essential process.
-	            However, coverage path planning is often problematic, especially
-	            when the boundary of the area is complicated and the area
-	            contains several obstacles. A common solution for this situation
-	            is to decompose the area into disjoint convex sub-polygons and to
-	            obtain coverage paths for each sub-polygon using a simple
-	            back-and-forth pattern. Aligned with the solution approach, we
-	            propose a new convex decomposition method which is simple and
-	            applicable to any shape of target area. The proposed method is
-	            designed based on the idea that, given an area of interest
-	            represented as a polygon, a convex decomposition of the polygon
-	            mainly occurs at the points where an interior angle between two
-	            edges of the polygon is greater than 180 degrees. The performance
-	            of the proposed method is demonstrated by comparison with
-	            existing convex decomposition methods using illustrative
-	            examples.},
-	DOI = {10.3390/s19194165},
-	OPTshorthand = {IEE19},
 }
 
 %% CAD / 3D model sources
