@@ -35,13 +35,15 @@ Getting the TUDa template to work required various dependencies. Below are those
 
 #### Warnings
 
-- XCharter (apparently) depends on fontaxes, even though it has been deprecated... -> fontaxes
+- XCharter (apparently) depends on fontaxes, even though it has been deprecated... &rarr; fontaxes
 - Biblatex warns the user if BibTeX is used in place of Biber, because Biber has more functionality than BibTeX / others[7]. Simply switching to Biber quells the warning.
-- Missing German hyphenation patterns -> hyphen-german
+- Missing German hyphenation patterns &rarr; hyphen-german
 
 ### NeoVim
 
 I am in the process of setting up NeoVim to work properly with LaTeX. So far VimTeX and TexLab have been integrated, and auto-completion and syntax highlighting works. The following resources helped me thus far: [2,3,5,6].
+I noticed that when trying to use a new package, even after installing with `tlmgr`, the TeX LSP continues to insist that it cannot find the sought package. Running vim-tex clean: `<leader>lc` fixes this.
+
 
 ## References
 

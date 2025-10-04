@@ -192,7 +192,7 @@ The \textit{mini-merge} procedure is shown in algorithm \ref{alg:WS:mini_merge}.
 \begin{algorithm}[htb]
 \caption{Mini-Merge}\label{alg:WS:mini_merge}
 \begin{algorithmic}[1]
-\Function{MiniMerge}{Mesh sections $S$}
+\Function{miniMerge}{Mesh sections $S$}
 	% \State Sort $S$ by vertex count in ascending order
 	\For{$s$ in $S$}
 		% \State $s_{small} \leftarrow S$.first
@@ -249,7 +249,7 @@ The implementation of \textit{shallow merge} used in this work is detailed in al
 \begin{algorithm}[!b]
 \caption{Shallow-Merge}\label{alg:WS:shallow_merge}
 \begin{algorithmic}[1]
-	\Function{ShallowMerge}{Mesh sections $S$, real $t_e$}
+	\Function{shallowMerge}{Mesh sections $S$, real $t_e$}
 		\State Sort $S$ by mesh section depth in ascending order
 		% \State $d_{th} \leftarrow d_{deepest}^{t_e}$\Comment{See equation \ref{eq:merge_threshold} for explanation}
 		\State calculate merge threshold $d_{th}$
@@ -316,7 +316,7 @@ No explicit tie breaking mechanism was deemed necessary, but lower numbered regi
 % TODO: take a pair of screenshots to illustrate WS5:boundary smoothing?
 
 \subsection{Surface Classification}
-Mesh regions received from Watershed segmentation need to be classified so that the appropriate UV map is assigned to them.
+Mesh regions received from Watershed segmentation need to be classified so that the appropriate UV-map is assigned to them.
 The primitives against which each mesh region is tested are: planes, cylinders, and ellipsoids.
 Because Watershed segments along regions of high curvature, perimeter vertices were excluded from the tests described below.
 The main idea was to perform some tests on a the mesh region's vertices to obtain an educated guess as to the surface's class, and confirm or reject the guess by attempting to fit the assumed shape to the surface and examining the resultant error value.
@@ -435,13 +435,13 @@ A flaw with the cylindric tests and this principal curvature test is that they a
 
 The purpose of the geometry simplification step is to create a simplified form for each mesh region provided by Segmentation 3D.
 Geometry Simplification's output is a set of ``simple surfaces'' created from the provided mesh regions.
-A simple surface contains, among other things, a reference to the mesh region from which it was created, a UV map, and the unwrapped 2D region outline.
+A simple surface contains, among other things, a reference to the mesh region from which it was created, a UV-map, and the unwrapped 2D region outline.
 Geometry Simplification follows the block diagram shown in figure \ref{fig:GeoSimp}.
 First the \verb|SharedEdges|, edges between mesh regions, are ascertained.
 These are used to determine the region corners (``shared corners''), which are then used to finish preparing the shared edges (Extend shared edges).
 Finally, the completed shared edges plus the mesh regions are used to create the \verb|simple surfaces|, which are passed on to the next high-level step.
 
-\subsection{Shared Edges}
+\subsection{Create Shared Edges}
 The boundary between two mesh regions is termed a ``shared edge'', because its information is shared between the two mesh regions it divides.
 Each shared edge is made up of a list of line segments that approximate the boundary between two mesh regions.
 The algorithm to obtain the shared edges is shown split into algorithms \ref{alg:shared_edges_1} and \ref{alg:shared_edges_2}.
@@ -452,9 +452,9 @@ In \textbf{edge discovery} the list of vertices found along each edge is appende
 In \textbf{edge refinement} each edge's list of vertices in $E_{points}$ is transformed into a concise shared edge.
 
 \begin{algorithm}[!htb]
-	\caption{CreateSharedEdges() Part 1: Edge discovery}\label{alg:shared_edges_1}
+	\caption{createSharedEdges() Part 1: Edge discovery}\label{alg:shared_edges_1}
 \begin{algorithmic}[1]
-\Function{CreateSharedEdges}{Surfaces $S$, UV maps $M$}
+\Function{createSharedEdges}{Surfaces $S$, UV-maps $M$}
 	\State new list $E_{points}$ \Comment{Each entry is an edge's list of points}
 	% "edge discovery" section
 	\State new set $P_{remaining} \leftarrow$ all mesh region perimeter points
@@ -511,7 +511,7 @@ These points are then removed from the overall point set $P_{remaining}$ and app
 	\State new list $E$ \Comment{List of shared edges}
 	\For{$P_{edge}$ in $E_{points}$}\label{alg:edge_refinement_for}
 		\State Determine the surfaces $s_1$ and $s_2$ adjacent current point line $P_{edge}$
-		\State Obtain UV maps $m_{UV1}$ and $m_{UV1}$ from $s_1$, $s_2$ and $M$
+		\State Obtain UV-maps $m_{UV1}$ and $m_{UV1}$ from $s_1$, $s_2$ and $M$
 		\State ClampPointsToSurfaces($P_{edge}$, $m_{UV1}$, $m_{UV2}$)\label{alg:edge_refinement_clamp_pts}
 		\State SortEdgePoints($P_{edge}$)
 		\State $E$.append(SharedEdge($P_{edge}$))
@@ -533,60 +533,238 @@ Within the creation of a shared edge the RDP algorithm is used to simplify the l
 The mesh's mean edge length is used as the tolerance width in the RDP algorithm.
 Once all point lists in $E_{points}$ have been processed, the list $E$ is returned, and \verb|CreateSharedEdges()| is complete.
 
-\subsection{Shared Corners}
-Shared corners are used to simplify the process of extending the shared edges to the regions they abut.
-The process of creating shared corners $C$ is outlined in algorithms \ref{alg:shared_corners} and \ref{alg:insert_corner}.
-In algorithm \ref{alg:shared_corners} length $l_{max}$ is the maximum distance 2 points may be to be considered coincident, and is set to 1.3 times the maximum edge length of the source mesh.
-The idea behind this value was to make it proprtional to the underlying mesh, and to give the edge tips enough working distance to successfully connect to adjacent ones.
-% in hindsight, a better idea would be to create a map of vecs of idcs, where each map entry corresponds to the edges bounding a given mesh region. From there the edge tips could be connected based simply on which is closest to the given edge tip...
-The function \verb|InsertCorner()| loops through the existing corners, checking if the given tip $t$ of edge $e$ is within the threshold distance $l$.
-If one is found, $e$ and $t$ are added to the found corner, otherwise a new shared corner is created from $e$ and $t$.
-\begin{algorithm}[h]
+\subsection{Create Shared Corners}
+
+\begin{algorithm}[!b]
 	\caption{Create shared corners}\label{alg:shared_corners}
 \begin{algorithmic}[1]
-	%TODO: update this
-%function create_shared_edges()
-	% $math$ for variables, normal or ttt for everything else?
-	\State new list $C$ \Comment{To hold the created corners}
-	\For{$e$ in $E$}
-		\State InsertCorner($e$, START, $l_{max}$, $C$)
-			\Comment{Attempt to insert corner at start of edge}
-		\State InsertCorner($e$, END, $l_{max}$, $C$)
-			\Comment{Attempt to insert corner at end of edge}
-	\EndFor
-\end{algorithmic}
-\end{algorithm}
-
-%They are created by looping through all edges and attempting to create a corner from each end of the current edge (see \ref{alg:shared_corners}).
-%The function \verb|insert_corner()| is described in algorithm \ref{alg:insert_corner}.
-\begin{algorithm}[h]
-\caption{Insert corner}\label{alg:insert_corner}
-\begin{algorithmic}[1]
-	\Function{InsertCorner}{edge $e$, tip $t$, threshold $l$, corners $C$}
-		\State $found \leftarrow false$
-		\State new position $p$
-		\If{$end$ = START}
-			\State $p = edge.start\_pt$
-		\Else
-			\State $p = edge.end\_pt$
-		\EndIf
-		\For{$corner$ in $corners$}
-			\State $d$ = distance between $p$ and $corner.pos$
-			\If{$d > l$}
-				\State continue
-			\EndIf
-			\State $corner.insert\_end\_pt(edge, end)$ \Comment{Add the edge information to the corner}
-			\State $found$ = true
-			\State break
+\Function{createSharedCorners}{Region edges list $E_{R,E}$}
+	\State new list $C$ \Comment{To store the shared corners}
+	\For{$E_r$ in $E_{R,E}$}
+		\State new list $T$ \Comment{Set of all line tips relevant to a given region}
+		\For{edge $e$ in $E_r$}
+			\State $T$.append($e$.start)
+			\State $T$.append($e$.end)
 		\EndFor
-		\If{not $found$} \Comment{If no matching corner found, create a new one}
-			\State $corners.append(Corner(shared\_edge\_idx, edge\_end))$
-		\EndIf
-	\EndFunction
+		\While{$T$ not empty}
+			\State new line tip $t_{target} \leftarrow$ first in $T$
+			\State $T$.erase($t_{target}$)
+			\State new line tip $t_{near} \leftarrow T$.closestTo($t_{target}$)
+			% \State new line tip $t_{near} \leftarrow$ first in $T$
+			% \State new point $p_{target} \leftarrow l_{target}$.position
+			% \State new float $d \leftarrow \infty$
+			% \For{$t$ in $T$} \Comment{Find the line tip closest to $t_{target}$}
+			% 	\State new point $p \leftarrow t$.position
+			% 	\If{distance($p_{target}$, $p$) < $d$}
+			% 		\State $d \leftarrow$ distance($p_{target}$, $p$)
+			% 		\State $t_{near} \leftarrow t$
+			% 	\EndIf
+			% \EndFor
+			% check existing shared corners if any contain near/target l
+			\State new boolean $b_{found} \leftarrow$ false
+			\For{$c$ in $C$}
+				\If{$c$.contains($t_{target}$) or $c$.contains($t_{near}$)}
+					\State $c$.insert($t_{target}$)
+					\State $c$.insert($t_{near}$)
+					\State $b_{found} \leftarrow$ true
+					\State \textbf{break}
+				\EndIf
+			\EndFor
+			\If{not $b_{found}$}
+				\State new shared corner $c$($t_{target}$, $t_{near}$)
+				\State $C$.append($c$)
+			\EndIf
+			\State $T$.erase($t_{near}$)
+		\EndWhile
+	\EndFor
+	\State \textbf{return} $C$
+\EndFunction
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Simplified Surfaces}
+Shared corners are used to simplify the process of extending the shared edges to the regions they abut.
+The process of creating shared corners $C$ is outlined in algorithm \ref{alg:shared_corners}.
+The \verb|CreateSharedCorners()| argument $E_{R,E}$ is a list, where each entry is the list of edges that border the mesh region indexed by the $E_{R,E}$ index.
+That is, the $i$-th item in $E_{R,E}$ is the list of edges that border mesh region $i$.
+Determining which line tips match is facilitated by each item in $E_{R,E}$ only containing the edges relevant to a given mesh region.
+% Having a list of the edges relevant to a single mesh region facilitates determining which line tips match.
+
+% \verb|CreateSharedCorners()| is primarily a \verb|for| loop loop
+Each iteration of the main \verb|for| loop attempts to create corners from that region's edges.
+% The \verb|for| loop starting on line 3 iterates through each list of edges $E_r$ in $E_{R,E}$.
+Lines 4-8 create the set $T$ of line tips and initialize it with both line tips from each edge in $E_r$.
+The \verb|while| loop starts by finding a pair of matching line tips (lines 10-12).
+% Lines 10-12 pull the first line tip from $T$ and find the closest line tip to the removed one.
+% The remainder of the while loop serves to check if any existing shared corner $c$ in $C$ already contain either of the matching line tips $t_{target}$ or $t_{near}$.
+Next an existing shared corner $c$ that already contains either matching line tip is sought.
+If such a shared corner is found $t_{target}$ and $t_{near}$ are added to it.
+Otherwise a new shared corner is created from the matching line tips and appended to $C$.
+Finally, the list of shared corners $C$ is returned.
+
+\subsection{Extend Shared Edges}
+% Another meaningful name for this would be "force line tip coincidence", at least for the fn
+At this point the shared edges align with the regions they divide, but likely do not extend to meet the shared corners or each other.
+\verb|ClampLineTips()|, described in algorithm \ref{alg:clamp_line_tips}, exists to rectify this.
+
+\begin{algorithm}[hb]
+\caption{Clamp Line Tips}\label{alg:clamp_line_tips}
+\begin{algorithmic}[1]
+\Function{clampLineTips}{$C$, $S$, $M_{UV}$}
+	\For{$c$ in $C$}
+		\State new set $S_{corner} \leftarrow c$.adjoiningSurfaces() \Comment{The set of surfaces that adjoin $c$}
+		\For{line tip $t$ in $c$.lineTips()}
+			\State new set $S_{edge} \leftarrow E$[$t$].adjacentRegions()
+			\State new set $S_{diff} \leftarrow S_{corner} - S_{edge}$ \Comment{The set difference of $S_{corner}$ and $S_{edge}$}
+			% \State new uint $i_{UV} \leftarrow S$[$S_{diff}$.first].UVMapIndex
+			\State Obtain new UV-map $m_{UV}$ representing $S_{diff}$ from $M_{UV}$
+			% \State new UV-map $m_{UV} \leftarrow M_{UV}$[$i_{UV}$]
+			% \State $E$[$t$.edgeIndex].clampTipPoint($m_{UV}$, $t$.tipType)\label{alg:clamp_tip_point}
+			\State $t$.clampTipPoint($m_{UV}$)\label{alg:clamp_tip_point}
+		\EndFor
+	\EndFor
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+The \verb|ClampLineTips| arguments are as follows:
+% $E$: the shared edges,
+$C$: the shared corners, $S$: the mesh surfaces, and $M_{UV}$: the list of UV-maps.
+% The objective is to find for a given line tip the region, and its corresponding UV-map, that set the line tip's position along the line tip direction.
+The objective is to find the surface that a given line tip points to, and use that surface's UV-map to force the line tip onto said surface.
+The inner \verb|for| loop iterates through the line tips of the current shared corner.
+To determine to which surface a line tip points, the set $S_{edge}$ of surfaces adjacent to the line tip $t$ is subtracted from the set $S_{corner}$ of surfaces adjacent to the current shared corner $c$.
+% For a typical 3-surface corner, the set difference $S_{diff}$ will contain a single element,
+The number of elements in the set difference $S_{diff}$ is dependent on the number surfaces joined by the current shared corner.
+Although $S_{diff}$ can contain more than one element, it matters not which is chosen as the extension target for the line tip.
+Next the UV-map belonging to the surface in $S_{diff}$ is obtained.
+On line \ref{alg:clamp_tip_point} the line tip $t$ is forced to lie at the intersection of its tangent and the extension target surface.
+Figure \ref{fig:extend_shared_edges} below shows the before and after of applying \verb|ClampLineTips| to a set of shared edges.
+
+\begin{figure}[htb]
+	\centering
+	\begin{subfigure}{0.45\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{../resources/geo_simp/1505020_shared_edges.png}
+		\caption{Shared edges post \textit{create shared edges}}
+		\label{sfig:gs_shared_edges}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.45\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{../resources/geo_simp/1505020_shared_edges_clamped.png}
+		\caption{Shared edges post \textit{extend shared edges}}
+		\label{sfig:gs_shared_edges_clamped}
+	\end{subfigure}
+\caption{
+The shared edges from test object ``1505020'' Before and after \textit{extend shared edges}
+}
+	\label{fig:extend_shared_edges}
+\end{figure}
+
+As can be seen in figure \ref{sfig:gs_shared_edges} ``unclamped'' shared edges are decent, but noticeably unconnected.
+Figure \ref{sfig:gs_shared_edges_clamped} shows the same edges post \textit{extend shared edges} and noticeably connected.
+
+\subsection{Create Simple Surfaces}
+A simple surface is created from a mesh region and the shared edges that border said mesh region.
+% How are simple surfaces formed?
+The bulk of the procedure to create a simple surface is the process to form the surface's outlines from the given shared edges.
+This process is described in detail in algorithm \ref{alg:find_outlines}.
+% Given a mesh region and the previously created shared edges as input, the simple surface first collects the edges and corners that border the source mesh region.
+% Next the outlines of the mesh region are generated from the shared edges (see below...)
+
+% find_outlines(shared_corners, corner_indices, edge_indices, uv_map_index, uv_mappings);
+\begin{algorithm}[!htb]
+	\caption{Find outlines}\label{alg:find_outlines}
+\begin{algorithmic}[1]
+\Function{findOutlines}{Shared edges $E_{shared}$, Line tips $T$, UV-map $m$}
+	\State new set O \Comment{To store the created outlines}
+	\State new list $T_{sorted} \leftarrow T$ \Comment{Local copy of $T$ to be sorted throughout function}
+	% \State new uint $vii \leftarrow 0$
+	\State new set $E$ from each edge associated with $T$
+
+	\While{$E$ not empty}
+		\State new list $T_{outline}$ \Comment{For the outline's line tips}
+		\State new edge $e_0 \leftarrow E$.first
+		% \State new line tip $t_{target} \leftarrow$ LineTip{$e_0$, END}
+		\State new line tip $t_{target}$ derived from END of $e_0$
+		\Repeat
+			\State $t_{target} \leftarrow$ findNextLineTip($t_{target}$, $E_{shared}$)
+			\State $T_{outline}$.append($t_{target}$)
+			\State $E$.erase($t_{target}$.edge)
+		\Until{$t_{target}$.edge = $e_0$}
+		\State Update $T_{sorted}$ from $T_{outline}$
+		\State new list $P_{corner}$
+		\For{$t$ in $T_{outline}$}
+			\State new list $P$ from $t$'s shared edge's points
+			\If{$t$ is a line tip END}
+				\State reverse(P)
+			\EndIf
+			\For{$p$ in $P$}
+				\State new $p_{UV} \leftarrow m$.transformToUV($p$)
+				\State $P_{corner}$.append($p_{UV}$)
+			\EndFor
+		\EndFor
+		\State $O$.append($P_{corner}$)
+	\EndWhile
+	\State $T \leftarrow T_{sorted}$
+	\State \textbf{return} $O$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+The purpose of \verb|FindOutlines| is to determine all outlines associated with the simple surface under construction.
+An outline in this context is the surface's boundary lines \textit{and} any holes the surface may have.
+Line 4 sets up the set of edges associated with line tips $T$.
+Each iteration of the function's \verb|while| loop produces a new outline.
+On line 8 a line tip $t_{target}$ is created as the end line tip of edge $e_0$.
+This serves as the initial line tip ``targeted'', and as the end condition for the \verb|repeat-until| loop.
+The function to find the next sequential line tip, \verb|findNextLineTip|, is shown in algorithm \ref{alg:next_line_tip}.
+When a new $t_{target}$ is found it is added to the outline and its edge is erased from $E$ to show that it has been accounted for.
+When $t_{target}$'s edge equates to $e_0$ the loop and outline are complete.
+The remainder of the \verb|while| loop converts the outline as a list of line tips to a list of points.
+On line 17 $P$ is the list of points from the shared edge associated with line tip $t$.
+For a straight line this is only 2 points, but for a curve there could be a much larger number of points.
+The \verb|if| statement on line 18 ensures that the outline's points are properly sequential, by reversing $P$ if the associated line tip is an END line tip.
+Once $P$ is complete, each point $p$ therein	is transformed to the surface's local coordinate system and appended to $P_{corner}$.
+The completed list of local points is then added to	the list of outlines $O$.
+Once all edges in $E$ have been accounted for in an outline, the outlines are returned and the function finished.
+% The outlines created are sorted by descending area size, so that the first outline is guaranteed to be the surface's outline and the remaining outlines are holes in the surface.
+
+\begin{algorithm}[htb]
+	\caption{Find next line tip}\label{alg:next_line_tip}
+\begin{algorithmic}[1]
+\Function{findNextLineTip}{Line tip $t_{target}$, edges $E$}
+	\State new point $p_{target} \leftarrow$ position of $t_{target}$
+	\State new real $d_{nearest} \leftarrow \infty$
+	\State new line tip $t_{nearest}$
+	\For{$e$ in $E$}
+		\For{$t_{type}$ in [START, END]}
+			\State new line tip $t_{temp}$ from $e$ and $t_{type}$
+			\State new real $d \leftarrow$ distance from $p_{target}$ to $t_{temp}$'s position
+			\If{$t_{temp}$ is not $t_{target}$ AND $d$ < $d_{nearest}$}
+				\State $d_{nearest} \leftarrow d$
+				\State $t_{closest} \leftarrow t_{temp}$
+			\EndIf
+		\EndFor
+	\EndFor
+	\If{line tip $t_{nearest}$ is START type}
+		\State \textbf{return} line tip from END of $t_{nearest}$.edge
+	\Else
+		\State \textbf{return} line tip from START of $t_{nearest}$.edge
+	\EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+The purpose of \verb|findNextLineTip| is to find the next sequential line tip given the current one ($t_{target}$) and a list edges.
+% To do so, the line tip closest but not equal to $t_{target}$ is sought,...from the given list of edges.
+The nested \verb|for| loops iterate both ends of each edge in $E$ to find the line tip closest but not equal to $t_{target}$.
+This yields the sequential next edge, but $t_{nearest}$ is not the line tip sought, because it is still approximately coincident to $t_{target}$.
+Thus, the line tip sought, is the one \textit{opposite} along the edge of $t_{nearest}$.
+Hence the \verb|if-else| statements on lines 15-18.
+
+Once the creation of simple surfaces is complete, they are passed on to the next high-level step: \textit{2D Segmentation}.
+(Is there anything else i should say about simple surfaces?)
 
 \section{2D Segmentation}
 This is Interior Edge Extension
