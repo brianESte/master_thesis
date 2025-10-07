@@ -42,14 +42,18 @@
 	arrows.meta,
 	calc,
 	fit,
+	intersections,
 	matrix,
 	positioning,
+	shapes.geometric,
 	ext.paths.ortho
 }
 % Define global styles
 \tikzset{
 	FC-Node/.style={rectangle,semithick,align=center,rounded corners=5pt,draw},
-	FC-Arrow/.style={-{Stealth[round]},semithick,rounded corners=4pt}
+	FC-Arrow/.style={-{Stealth[round]},semithick,rounded corners=4pt},
+	vertex/.style={circle, radius=2pt,fill, inner sep=2pt,outer sep=0pt},
+	Vine/.style={-Stealth}
 }
 \def \globalscale {1.000000}
 % TODO: integrate the color into tikz

@@ -360,5 +360,27 @@ After the \textbf{RDPNode} stack is exhausted the last point in $P$ is appended 
 An alternative implementation that uses recursion may be found on wikipedia.
 
 \section{Traveling Salesman Problem}
-
+The Traveling Salesman Problem (TSP) is a well known problem in combinatorial optimization.
+The original problem was posed as the following:
+A salesman wishes to visit every city in a given region once, to spend the least amount of time traveling between cities, and to end at his home city.
+It was initially formulated in the 1800s by mathematicians William Rowan Hamilton and Thomas Kirkman\cite{Graph_theory}.
+The problem can be stripped down to simply the optimal round-trip traversal of a set of nodes in a graph, where the traversal represents the salesman's movement, and each node represents a city.
+It can be shown\cite{TSP_in_pursuit_of} that for $n$ nodes the number of possible route permutations is
+\begin{equation*}
+	n_{\text{routes}} = (n-1)!.
+\end{equation*}
+For the vast majority of applications symmetric node-to-node costs can be assumed, and the number of permutations is reduced to \textit{only}
+\begin{equation*}
+	n_{\text{routes}} = \frac{(n-1)!}{2}.
+\end{equation*}
+The number of real world TSP applications is similarly large\cite{TSP_theory_applications}, ranging from determining the drill order of holes in printed circuit board manufacturing\cite{TSP_PCB_manufacturing}, to mail delivery and vehicle routing in general\cite{TSP_mail_delivery}, to X-ray crystallography\cite{TSP_xray_crystallography}.
+The algorithm described in this work produces a set of convex surfaces from the target object.
+Within each convex surface region a simple path is planned.
+% NOTE the verb tense/case! "would" because it is not implemented
+It is the traversal of these surface regions that would be formulated as a TSP with the distance between each region and the change in end-effector orientation serving as the travel costs.
+Considering only the traversal of the surface regions, the start and end nodes need not be the same, and the situation can be modeled as a modified TSP.
+The common way to modify a TSP to achieve different start and end nodes is to introduce a dummy node with 0-cost edges to the other nodes\cite{TSP_dummy_node_mod}.
+After insertion of the dummy node, the TSP can be solved like normal.
+Once the TSP has been solved the nodes adjacent to the dummy node are the start and end nodes.
+If the robot's starting or home position is included as a node, the application can be handled as a classic TSP.
 

@@ -239,7 +239,6 @@ Watershed segmentation step 4.1 shown applied to test object ``fc028\_e''.
 \end{figure}
 
 As can be seen in figure \ref{fig:ws_4.1} the segmentation results post \textit{mini-merge} are noticeably cleaner than after the previous step.
-(...should i find a test object that appears to require merging post WS4.1 ?)
 Had the test object been more complex, the need for further merging would have been apparent.
 
 \subsubsection{Shallow Merge}
@@ -774,10 +773,112 @@ In hindsight, surfaces need not be completely convex, but merely \textit{mostly}
 \section{Surface Path Planning}
 This is effectively Boustrophedon
 
+\iffalse
 \section{Modified Traveling Salesman Problem}
 Normal TSP should have already been described in \ref{background}, so no need to rehash that.
 Only need to talk about the modifications and how it would have been applied...
+\fi
 
 \section{Inverse Kinematics}
 Talk about how the InvKin from the robot could be used, but a custom one would (likely) be necessary to incorporate the rotary table
+
+\section{Graphical User Interface}
+At the beginning of this project, a bare bones graphical user interface (GUI) implemented using wxWidgets\cite{wxWidgets} was provided as the basis for the a program to test the algorithms and procedures developed.
+The GUI as initially provided featured two dummy buttons, and the display window.
+The scene rendering in the display window was originally implemented using OpenGL version 1.1, but was eventually updated to version 3.3.
+Throughout the project the GUI was significantly expanded support development and testing of the core research goals.
+An overview of the GUI and its controls are shown in figure \ref{fig:gui_overview}, and the callouts are described in the list below.
+
+When the application is first opened the only GUI controls enabled are the \textbf{Load Model} and \textbf{Reload Models} buttons.
+Without a mesh loaded the remaining controls are meaningless, hence they are enabled only after a mesh has been loaded.
+
+\begin{figure}[htb]
+	\centering
+\begin{tikzpicture}[scale=0.9,
+	every node/.style={transform shape},
+	nBalloon/.style={circle,fill=white,draw=black,in front of path,inner sep=1pt,outer sep=0},
+	nbAreaLine/.style={draw,rounded corners=6pt}]
+	% \draw[step=5mm,blue!50,very thin] (-9,-5) grid (7, 5);
+	\node[] (GUIFull) {\includegraphics[width=\textwidth]{../resources/gui/gui_full_enabled.png}};
+	% \node[left=of GUIFull] (GUIDisabled) {\includegraphics[width=0.2\textwidth]{../resources/gui/gui_disabled.png}};
+	\node[nBalloon] at (-6,4.6) {1}; % Load model
+	\node[nBalloon] at (-4,4.6) {2}; % Reload models
+	\draw[draw,-{Latex[round]}] (-7.5,3.7) node[nBalloon] {3} -- +(340:3.8mm); % Check mesh quality
+	% \node[nBalloon] at (-7.5,2.8) {4}; % Start
+	% \node[nBalloon] at (-2.5,2.8) {5}; % Stop
+	% Path planning controls
+	\node[shape=rectangle,minimum height=59mm,minimum width=43mm,
+		fill=gray!20,opacity=0.0] (PPControls) at (-5,0.35) {};
+	\node[nBalloon,left=10mm of PPControls] (PPCnb) {4};
+	\draw[nbAreaLine] (PPCnb) |- (PPControls.north west);
+	\draw[nbAreaLine] (PPCnb) |- (PPControls.south west);
+	% Mesh segmentation inputs
+	\node[nBalloon] at (-2.5,2.37) {5}; % Smoothing sigma
+	\node[nBalloon] at (-2.5,1.87) {6}; % Merge threshold
+	% YieldPoint window
+	\node[shape=rectangle,minimum height=34mm,minimum width=43mm,
+		fill=gray!20,opacity=0.0] (YPwindow) at (-5,-0.06) {};
+	\node[nBalloon,left=2mm of YPwindow] (YPnb) {7};
+	\draw[nbAreaLine] (YPnb) |- (YPwindow.north west);
+	\draw[nbAreaLine] (YPnb) |- (YPwindow.south west);
+	% Execute path
+	\node[nBalloon] at (-2.5,-2.40) {8};
+	% Mesh Display Settings
+	\node[shape=rectangle,minimum height=16mm,minimum width=43mm,
+		fill=gray!20,opacity=0.0] (MeshDispSettings) at (-5,-3.5) {};
+	\node[nBalloon,left=2mm of MeshDispSettings] (MDSnb) {9};
+	\draw[nbAreaLine] (MDSnb) |- (MeshDispSettings.north west);
+	\draw[nbAreaLine] (MDSnb) |- (MeshDispSettings.south west);
+	% scene and model label
+	\node[nBalloon] at (6,2.5) {10};
+	\draw[draw,-{Latex[round]}] (-1,-3.9) node[nBalloon, in front of path] {11} -- +(270:4.5mm);
+\end{tikzpicture}
+	\caption{Application GUI with callouts}
+	\label{fig:gui_overview}
+\end{figure}
+
+\begin{enumerate}
+	\item \textbf{Load Model}: Opens a dialog box to load a 3D mesh.
+		At the time of writing, only OBJ files were accepted for openeing and processing.
+	\item \textbf{Reload Models}: Reloads the scene elements as well as the 3D mesh, if any.
+		Throughout development various scene elements were created, mostly to represent the rotary table and robotic arm.
+		The plan was to view a simulation of the robot and rotary table executing the planned path.
+		% I could expand on why this was not pursued, but the short answer is the same almost all others: lack of time
+	\item \textbf{Check Mesh Quality}: The initial 3D meshes used for testing were not always complete, and this led to errors in the program.
+		Although the algorithm and code were later improved to be more robust when dealing with an incomplete mesh, the quick solution was to create a function to check the mesh for holes and other imperfections, and an accompanying button to trigger the mesh check.
+		Mesh issues detected are printed to the terminal window that accompanies the program.
+	\item \textbf{Path Planning Controls}: This panel controls the mesh segmentation settings and execution of the path planning algorithm.
+		The first two buttons marked \textbf{Start} and \textbf{Stop}, start and stop execution of the path planner, respectively.
+		While the path planner is inactive, the \textbf{Stop} button is disabled, indicated by being grayed out.
+		Once the path planner has been started the text of the \textbf{Start} button changes to ``Continue'', and the \textbf{Stop} button is enabled.
+	\item \textbf{Smoothing Sigma}: This field is used to smooth the curvature derivative values post computation.
+		The smoothing value corresponds to the sigma of a Gaussian smoothing function.
+		A value of 0 disables curvature smoothing.
+	\item \textbf{Merge Threshold}: This field sets the initial merge threshold exponent used during Watershed segmentation in the \textit{3D Segmentation} high-level step.
+		It was originally used to examined the effect of different merge thresholds during Watershed segmentation.
+		Because the merge threshold is iteratively reduced during the \textit{3D Segmentation} step, this field is largely unused now.
+	\item \textbf{Yield Point Window}: To facilitate debugging and displaying intermediate results ``Yield Points'' were developed.
+		Yield points are similar to breakpoints used to aid in debugging a program, but do not completely interrupt execution, only the path planning procedure.
+		Yield points may be activated / deactivated in by de/selecting them in the \textbf{Yield Point Window}.
+		Updated mesh colors, typically to display the results of a segmentation step, are passed to yield points to update the mesh's appearance.
+		This allows the user to view the evolution of the mesh's segmentation in real time, especially if the \textit{3D Segmentation} yield points are inactive.
+		Below the \textbf{Yield Point Window} is a field to display the current yield point.
+		When execution reaches a yield point, the path planner pauses, until \textbf{Continue} (the Start button) is clicked.
+	\item \textbf{Execute Path}: Button to send commands to the robot arm.
+		This button would be used to send the planned path to the robot arm and rotary table, but only basic funcitonality was tested.
+		% Again, could elaborate on what it is actually / currently used for, but that will likely come in the discussion.
+	\item \textbf{Mesh Display Settings}: This panel contains settings relevant to how the mesh is displayed.
+		The rotary table angle controls are a remnant from when the rotary table was expected to have only 8 positions.
+		Similarly, the vertex color input was created to examine different types of curvature, to determine which was best suited as the basis for Watershed segmentation.
+		The \textbf{Highlight region} field is used to highlight a region specified by its index.
+		The program's output log displays plenty of information detailing the results of each path planning step, but due to its textual nature mesh regions and simple surfaces are reduced to a number.
+		Thus, it is necessary to have a function that ``puts a name to a face'', or a number to a mesh region, in this case.
+	\item \textbf{Display Window}: This is the scene where the loaded 3D mesh is displayed.
+		The ability to rotate and zoom the scene was included in the base form of the GUI application.
+	\item \textbf{Model Label}: This field displays the filepath to the loaded 3D mesh.
+		This is particularly useful when comparing multiple versions of the same model but with different meshes, to ensure there is no confusion as to which mesh is currently loaded.
+\end{enumerate}
+
+Altough not relevant to the research goals of this project, the application critical to development and testing.
+Development of the application and its GUI took a not insignificant portion of the alloted project time, hence the need to mention it.
 
