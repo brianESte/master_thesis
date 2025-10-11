@@ -766,9 +766,599 @@ Once the creation of simple surfaces is complete, they are passed on to the next
 (Is there anything else i should say about simple surfaces?)
 
 \section{2D Segmentation}
-This is Interior Edge Extension
-The idea was that downstream components requried convex shapes to facilitate local path planning.
-In hindsight, surfaces need not be completely convex, but merely \textit{mostly} convex.
+
+\begin{figure}[ht]
+	\centering
+\begin{tikzpicture}%[inner sep=0]
+	\newdimen\dx
+	\dx=6mm
+	% nodes
+	\node[align=center,text width=16mm,inner sep=0] (Outlines) {Simple Surface 2D Shape};
+	\node[shape=diamond,aspect=2.0,draw,right=of Outlines] (Convex) {Convex?};
+	\node[FC-Node, text width=15mm] (VG) [below=of Convex] {Create Vertex Graph};
+	\node[FC-Node, text width=15mm] (ExtIntEdges) [right=\dx of VG] {Extend Interior Edges};
+	\node[FC-Node, text width=17mm] (PG) [right=\dx of ExtIntEdges] {Create Polygon Graph};
+	\node[FC-Node,text width=30mm] (CMOs) [below=10mm of VG, xshift=7mm] {Generate Convex Merge Options};
+	\node[FC-Node,text width=26mm] (OptimalSet) [right=\dx of CMOs] {Determine Optimal Set};
+	\node[vertex,right=of PG] (Join) {};
+	\node[text width=20mm,right=of Join] (CvPolys) {Convex Polygons};
+	% connections
+	\draw [FC-Arrow] (Outlines) -- (Convex);
+	\draw [FC-Arrow] (Convex) -| (Join) node[pos=0.06,anchor=south] {Yes};
+	\draw [FC-Arrow] (Convex) -- (VG) node[pos=0.4,anchor=west] {No};
+	\draw [FC-Arrow] (VG) -- (ExtIntEdges);
+	\draw [FC-Arrow] (ExtIntEdges) -- (PG);
+	\draw [FC-Arrow, rounded corners=5pt] (PG) |-| (CMOs);
+	\draw [FC-Arrow] (CMOs) -- (OptimalSet);
+	\draw [FC-Arrow] (OptimalSet) -| (Join);
+	\draw [FC-Arrow] (Join) -- (CvPolys);
+	% Seg2D container node
+	\node[thick,dashed,draw,rounded corners=8pt,inner sep=7pt,fit=(Convex)(Join)(CMOs),label={90:2D Segmentation}]{};
+\end{tikzpicture}
+\caption{Graphic depiction of the 2D segmentation procedure. Non-convex outlines undergo the \textit{interior edge extension} procedure to produce ``optimal'' convex polygons. Convex polygons need not be processed.}
+	\label{fig:Seg2D}
+\end{figure}
+
+The purpose of \textit{2D Segmentation} is to decompose non-convex polygons into convex polygons whose geometry is more conducive to local path planning.
+The \textit{2D Segmentation} step is applied to each simple surface's 2D shape.
+During the research phase of the project it was decided that the algorithm to achieve this would be the ``Interior Extension of Edges'' presented by Nielsen et al.\cite{IntEdgeExt}.
+Figure \ref{fig:Seg2D} gives a graphical representation of the \textit{2D Segmentation} procedure.
+
+The process can be summarized as the following:
+\begin{enumerate}
+	\item A vertex graph is created from the input polygon, where each vertex is a node and the polygon's edges are also the graph's edges.
+	\item Interior corners are identified, and the interior edges at those vertices are extended, creating new nodes and edges.
+	\item The completed vertex graph is then traverse to form a polygon graph, where each node is an atomic convex polygon.
+		The 2D edges shared between two polygon nodes double as the graph edges between them.
+	\item The set of ``convex merge options'' are generated from the polygon graph.
+	\item The subset of convex merge options that minimizes the sum of convex merge option widths is found.
+\end{enumerate}
+These steps are explained in greater detail in the following subsections.
+To illustrate this process, the following test polygons will be used.
+
+\begin{figure}[htb]
+	\centering
+	\begin{subfigure}{0.48\textwidth}
+		\centering
+\begin{tikzpicture}
+	\draw[step=10mm,gray!50,very thin] (-0.2,-0.2) grid (6.2,3.2);
+	\draw (-0.3,0) -- (6.3,0);
+	\draw (0,-0.3) -- (0,3.3);
+	\draw[very thick] (0,0) node [anchor=north east] {0} --
+		(1,0) node [anchor=north west] {1} --
+		(2,1) node [anchor=north west] {2} --
+		(4,1) node [anchor=north east] {3} --
+		(5,0) node [anchor=north east] {4} --
+		(6,0) node [anchor=north west] {5} --
+		(6,3) node [anchor=south west] {6} --
+		(0,3) node [anchor=south east] {7} -- cycle;
+\end{tikzpicture}
+		\caption{Example polygon 1: ``blocky bridge''}
+		\label{sfig:iee_blocky_bridge}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.46\textwidth}
+		\centering
+\begin{tikzpicture}
+% \datavisualization [
+% 	school book axes,
+% 	all axes=grid,
+% 	visualize as line]
+% 	data[format=table,read from file=../resources/seg_2d/ex_polygon_1.csv];
+% data [format=named] {
+% x=0, y=0
+% x=1, y=1
+% x=2, y=1
+% x=3, y=0
+% };
+\end{tikzpicture}
+	\caption{Should another example polygon be necessary, it will be displayed here.}
+		% \label{sfig:gs_shared_edges_clamped}
+	\end{subfigure}
+\caption{Example polygons to help illustrate \textit{interior edge extension}}
+	% \label{fig:extend_shared_edges}
+\end{figure}
+
+\subsection{Vertex Graph}
+Creating a vertex graph from a polygon is relatively straightforward.
+A vertex node is created for each vertex in the polygon, as well as a vertex edge for the edge between subsequent polygon vertices.
+Figure \ref{fig:vertex_graph_init} shows the initial vertex graph created from the example object ``blocky bridge''.
+The solid black dots are the graph's nodes.
+
+\begin{figure}[htb]
+	\centering
+\begin{tikzpicture}
+	\draw[step=10mm,gray!50,very thin] (-0.2,-0.2) grid (6.2,3.2);
+	\draw (-0.3,0) -- (6.3,0);
+	\draw (0,-0.3) -- (0,3.3);
+	\draw[very thick] (0,0) node [vertex,label=225:0] {} --
+		(1,0) node [vertex,label=315:1] {} --
+		(2,1) node [vertex,label=315:2] {} --
+		(4,1) node [vertex,label=225:3] {} --
+		(5,0) node [vertex,label=225:4] {} --
+		(6,0) node [vertex,label=315:5] {} --
+		(6,3) node [vertex,label=45:6] {} --
+		(0,3) node [vertex,label=135:7] {} -- cycle;
+\end{tikzpicture}
+\caption{Initial vertex graph created from the polygon ``blocky bridge''}
+	\label{fig:vertex_graph_init}
+\end{figure}
+
+\subsection{Extend Interior Edges}
+The algorithm's namesake step involves extending the polygon's interior edges to create convex sub-polygons.
+Figures \ref{sfig:vg_extend_node_2_edges} and \ref{sfig:vg_extend_node_2_3_edges} show the result of extending the interior edges at nodes 2, and 2 and 3, respectively.
+Note that new nodes are created at all edge intersections, not only at intersections between extended edges and original edges.
+
+\begin{figure}[htb]
+	\centering
+	\begin{subfigure}{0.48\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=0.94]
+			\draw[step=10mm,gray!50,very thin] (-0.2,-0.2) grid (6.2,3.2);
+			\draw (-0.3,0) -- (6.3,0);
+			\draw (0,-0.3) -- (0,3.3);
+			\draw[very thick] (0,0) node (0) [vertex,label=225:0] {} --
+				(1,0) node (1) [vertex,label=315:1] {} --
+				(2,1) node (2) [vertex,label=315:2] {} --
+				(4,1) node (3) [vertex,label=225:3] {} --
+				(5,0) node (4) [vertex,label=225:4] {} --
+				(6,0) node (5) [vertex,label=315:5] {} --
+				(6,3) node (6) [vertex,label= 45:6] {} --
+				(4,3) node (8) [vertex,label= 90:8] {} --
+				(0,3) node (7) [vertex,label=135:7] {} --
+				(0,1) node (9) [vertex,label=180:9] {} -- cycle;
+			\draw[dashed,very thick] (2) -- (8);
+			\draw[dashed,very thick] (2) -- (9);
+		\end{tikzpicture}
+		\caption{Example polygon post extension of node 2's interior edges}
+		\label{sfig:vg_extend_node_2_edges}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.48\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=0.94]
+			\draw[step=10mm,gray!50,very thin] (-0.2,-0.2) grid (6.2,3.2);
+			\draw (-0.3,0) -- (6.3,0);
+			\draw (0,-0.3) -- (0,3.3);
+			\draw[very thick] (0,0) node (0) [vertex,label=225:0] {} --
+				(1,0) node (1) [vertex,label=315:1] {} --
+				(2,1) node (2) [vertex,label=315:2] {} --
+				(4,1) node (3) [vertex,label=225:3] {} --
+				(5,0) node (4) [vertex,label=225:4] {} --
+				(6,0) node (5) [vertex,label=315:5] {} --
+				(6,1) node (10)[vertex,label= 0:10] {} --
+				(6,3) node (6) [vertex,label= 45:6] {} --
+				(4,3) node (8) [vertex,label= 90:8] {} --
+				(2,3) node (12)[vertex,label=90:12] {} --
+				(0,3) node (7) [vertex,label=135:7] {} --
+				(0,1) node (9) [vertex,label=180:9] {} -- cycle;
+			\draw[dashed,very thick] (2) --
+				(3,2) node (11)[vertex,label= 0:11] {} -- (8);
+			\draw[dashed,very thick] (2) -- (9);
+			\draw[dashed,very thick] (3) -- (10);
+			\draw[dashed,very thick] (3) -- (11) -- (12);
+		\end{tikzpicture}
+		\caption{Example polygon post extension of nodes 2 and 3's interior edges}
+		\label{sfig:vg_extend_node_2_3_edges}
+	\end{subfigure}
+\caption{Nodes 2 and 3's interior edges are extended}
+	% \label{fig:extend_shared_edges}
+\end{figure}
+
+The general steps to perform interior edge extension are outlined below in algorithm \ref{alg:VG:extend_interior_edges}.
+
+\begin{algorithm}[htb]
+\caption{Extend interior edges}\label{alg:VG:extend_interior_edges}
+\begin{algorithmic}[1]
+\Function{extendInteriorEdges}{}
+	\For{edge loop $l$ in edge loops $L$}
+		\For{$n$ in $l$.nodes}
+			\If{$n$ is an exterior corner}
+				\State \textbf{continue}
+			\EndIf
+			\For{$d$ in extension directions}
+				\State Extend edge to create new nodes and edges
+				\State Add new nodes and edges to Vertex Graph
+			\EndFor
+		\EndFor
+	\EndFor
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+Conceptually, \verb|extendInteriorEdges| is fairly simple.
+The function iterates through each edge loop in the general polygon.
+In the example here, ``blocky bridge'' has only one edge loop, the outer boundary.
+Next the vertex nodes of the edge loop are iterated, with exterior corners skipped.
+% NOTE: not a fan of that sentence
+When an interior corner is encountered, an edge is extended from each edge adjacent to the vertex node.
+In figure \ref{sfig:vg_extend_node_2_edges} node 2 is the interior corner encountered.
+An edge is extended along the 1$\rightarrow$2 direction to create node 8, and also along the 3$\rightarrow$2 direction to create node 9.
+Figure \ref{sfig:vg_extend_node_2_3_edges} shows this procedure repeated for node 3, creating nodes 10, 11, and 12.
+
+\subsection{Polygon Graph}
+To create a polygon graph ``branches'' traverse the completed vertex graph starting at node~0.
+This process is described in detail in algorithmm \ref{alg:PG:create} and visually in figure \ref{fig:PG:create}.
+
+\begin{algorithm}[!htb]
+\caption{Create Polygon Graph}\label{alg:PG:create}
+\begin{algorithmic}[1]
+\Function{PolygonGraph::create}{}
+	\State new PolygonGraph $G_P$
+	\State new queue $B_{active}$ \Comment{For active branches}
+	\State new list $B_{mature}$ \Comment{For mature branches}
+	\State new set $B_{complete}$ \Comment{For completed branches}
+	\State initialize $B_{active}$ with branches starting at node 0
+	\While{$B_{active}$ not empty}
+		\State new branch $b_{active} \leftarrow B_{active}$.dequeue()
+		\If{$b_{active}$.tip has 2 edges}
+			\State $b_{active}$.growUntilSplit()
+		\EndIf
+		\If{$b_{active}$ in $B_{mature}$ or $B_{complete}$}
+			\State \textbf{continue}
+		\EndIf
+		\State check for intersection between $b_{active}$ and a branch in $B_{mature}$
+		\State $B_{mature}$.append($b_{active}$)
+		\If{branch intersection found}
+			% Trace branches from intersection to common base
+			\State Trace branches from intersection to common base
+			\State new PolygonNode $n$ from traced branches
+			\State $G_P$.addNode($n$)
+			\State updateCompletedBranches($B_{complete}$, $B_{mature}$, $n$)
+		\ElsIf{$b_{active}$.tip has 3 or more edges}
+			% This indicates the branch splits
+			\For{$e$ in $b_{active}$.tip.edges}
+				\State $B_{active}$.enqueue(Branch($e$))
+			\EndFor
+		\EndIf
+	\EndWhile
+	\State \textbf{return} $G_P$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+% Lines 3-5 set up  To manage the branches as they traverse the vertex graph
+Branches may be considered active, mature, or complete.
+Active branches are newly created and reside in $B_{active}$ until dequeued and processed.
+Mature branches are active branches that have grown to a splitting node, but have not been fully utilized in the creation of polygon nodes.
+% NOTE: ^hm
+The queue $B_{active}$ is initialized with branches from node 0 on line 6.
+This can also be seen in figure \ref{sfig:pg_n0_branches}.
+If the branch's tip does not split, lines 9-11 ensure it grows until it does so.
+The branch from node 0 to 1 in figure \ref{sfig:pg_n0_branches} is one such immature branch, and in figure \ref{sfig:pg_n2_branches} it has grown to node 2 and split to produce new active branches.
+Because a given edge on the vertex graph may be processed from each direction, lines 12-14 check if the a branch equivalent to $b_{active}$ already exists in either the set of mature or completed branches, so that an already processed branch is not re-processed.
+An example of this is vertex graph edge 2-9.
+An active branch from node 2 to node 9 is created when branch 0$\rightarrow$1 grows to node 2 and splits, and an equivalent branch from node 9 to node 2 is created when the split at node 9 is handled.
+Once $b_{active}$ is confirmed novel, a mature branch whose tip occupies the same node as $b_{active}$ is sought from $B_{mature}$.
+$b_{active}$ is added to the list of mature branches \textit{after} searching for an intersection with a mature branch to preclude $b_{active}$ being identified as converging with itself.
+If a convergin branch is found both branches are traced backwards until a common base node is found.
+In figure \ref{sfig:pg_branch_convergence} branch 2$\rightarrow$9 is fully grown and has converged with the mature branch 0$\rightarrow$9.
+Figure \ref{sfig:pg_0_1_2_9_polygon} shows the completed polygon node after both branches were traced back to node 0.
+On line 20 in the pseudocode the newly created polygon node is added to the polygon graph.
+Afterwards the branch containers $B_{complete}$ and $B_{mature}$ are updated.
+Given a newly matured branch did not converge with any existing mature branches, then said newly matured branch is the first to reach that node on the vertex graph.
+Hence the node reached by the newly matured branch must be inspected for a branch split.
+If a branch split is encountered, new active branches are created from the newly discovered vertex graph edges and enqueued to $B_{active}$.
+This procedure repeats until all active branches have been exhausted, and all possible polygon nodes created and added to the polygon graph.
+
+\begin{figure}[htb]
+	\centering
+	\begin{subfigure}{0.48\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=0.94]
+			\draw[step=10mm,gray!50,very thin] (-0.2,-0.2) grid (6.2,3.2);
+			\draw (-0.3,0) -- (6.3,0);
+			\draw (0,-0.3) -- (0,3.3);
+			% Draw complete vertex graph
+			\draw[very thick] (0,0) node (N0) [vertex,label=225:0] {} --
+				(1,0) node (N1) [vertex,label=315:1] {} --
+				(2,1) node (N2) [vertex,label=315:2] {} --
+				(4,1) node (N3) [vertex,label=225:3] {} --
+				(5,0) node (N4) [vertex,label=225:4] {} --
+				(6,0) node (N5) [vertex,label=315:5] {} --
+				(6,1) node (N10)[vertex,label= 0:10] {} --
+				(6,3) node (N6) [vertex,label= 45:6] {} --
+				(4,3) node (N8) [vertex,label= 90:8] {} --
+				(2,3) node (N12)[vertex,label=90:12] {} --
+				(0,3) node (N7) [vertex,label=135:7] {} --
+				(0,1) node (N9) [vertex,label=180:9] {} -- cycle;
+			\draw[very thick] (N2) --
+				(3,2) node (N11)[vertex,label= 0:11] {} -- (N8);
+			\draw[very thick] (N2) -- (N9);
+			\draw[very thick] (N3) -- (N10);
+			\draw[very thick] (N3) -- (N11) -- (N12);
+			% Draw vines / branches
+			\coordinate (N0o) at ($(N0)+(45:0.15)$);
+			\coordinate (N1o) at ($(N1)+(112.5:0.15)$);
+			\coordinate (N2o) at ($(N2)+(202.5:1)$);
+			\path[name path=N1o](N1) -- (N1o);
+			\path[name path=N0h](N0o) -- (N0o -| N1);
+			\path[name path=N2o](N2) -- (N2o);
+			\draw[Vine,name intersections={of=N1o and N0h}] (N0o) -- (intersection-1);
+			% Vertical vine from 0 to 9
+			\draw[Vine] ($(N0)+(45:0.15)$) -- ($(N9)+(315:0.15)$);
+		\end{tikzpicture}
+		\caption{Initial branches from node 0}
+		\label{sfig:pg_n0_branches}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.48\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=0.94]
+			\draw[step=10mm,gray!50,very thin] (-0.2,-0.2) grid (6.2,3.2);
+			\draw (-0.3,0) -- (6.3,0);
+			\draw (0,-0.3) -- (0,3.3);
+			% Draw complete vertex graph
+			\draw[very thick] (0,0) node (N0) [vertex,label=225:0] {} --
+				(1,0) node (N1) [vertex,label=315:1] {} --
+				(2,1) node (N2) [vertex,label=315:2] {} --
+				(4,1) node (N3) [vertex,label=225:3] {} --
+				(5,0) node (N4) [vertex,label=225:4] {} --
+				(6,0) node (N5) [vertex,label=315:5] {} --
+				(6,1) node (N10)[vertex,label= 0:10] {} --
+				(6,3) node (N6) [vertex,label= 45:6] {} --
+				(4,3) node (N8) [vertex,label= 90:8] {} --
+				(2,3) node (N12)[vertex,label=90:12] {} --
+				(0,3) node (N7) [vertex,label=135:7] {} --
+				(0,1) node (N9) [vertex,label=180:9] {} -- cycle;
+			\draw[very thick] (N2) --
+				(3,2) node (N11)[vertex,label= 0:11] {} -- (N8);
+			\draw[very thick] (N2) -- (N9);
+			\draw[very thick] (N3) -- (N10);
+			\draw[very thick] (N3) -- (N11) -- (N12);
+			% Draw vines / branches
+			\coordinate (N0o) at ($(N0)+(45:0.15)$);
+			\coordinate (N1o) at ($(N1)+(112.5:0.15)$);
+			\coordinate (N2o) at ($(N2)+(202.5:1)$);
+			\path[name path=N1o](N1) -- (N1o);
+			\path[name path=N0h](N0o) -- (N0o -| N1);
+			\path[name path=N2o](N2) -- (N2o);
+			\draw[name intersections={of=N1o and N0h}] (N0o) --
+				(intersection-1) node (N1oi) {};
+			\coordinate (N1oi) at (N1oi);
+			\path[name path=N1f](N1oi) -- +(45:2);
+			\draw[Vine,name intersections={of=N1f and N2o}] (N1oi) --
+				(intersection-1) node[inner sep=0,outer sep=0] (N2oi1) {};
+			% vertical vine from N0 to N9
+			\draw[Vine] ($(N0)+(45:0.15)$) -- ($(N9)+(315:0.15)$);
+			% Vine from N2 towards N3
+			\draw[Vine] ($(N2)+(22.5:0.2)$) -- +(0:0.8);
+			% Vine from N2 towards N9
+			\draw[very thick,-Stealth] (N2) -- ($(N2)!0.5!(N9)$);
+			% \draw[Vine] (N2oi1) -- +(180:0.8);
+			% Vine from N2 towards N11
+			\draw[very thick,-Stealth] (N2) -- ($(N2)!0.5!(N11)$);
+		\end{tikzpicture}
+		\caption{Branches grown from node 2}
+		\label{sfig:pg_n2_branches}
+	\end{subfigure}
+	% Next subfigure row
+	\begin{subfigure}{0.48\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=0.94]
+			% NOTE: Some people say using "\def" is not good... until i know better, i shall use it.
+			\def\VineOffset{1.5mm}
+			\draw[step=10mm,gray!50,very thin] (-0.2,-0.2) grid (6.2,3.2);
+			% \draw (-0.3,0) -- (6.3,0);
+			% \draw (0,-0.3) -- (0,3.3);
+			% Draw complete vertex graph
+			\draw[very thick] (0,0) node (N0) [vertex,label=225:0] {} --
+				(1,0) node (N1) [vertex,label=315:1] {} --
+				(2,1) node (N2) [vertex,label=315:2] {} --
+				(4,1) node (N3) [vertex,label=225:3] {} --
+				(5,0) node (N4) [vertex,label=225:4] {} --
+				(6,0) node (N5) [vertex,label=315:5] {} --
+				(6,1) node (N10)[vertex,label= 0:10] {} --
+				(6,3) node (N6) [vertex,label= 45:6] {} --
+				(4,3) node (N8) [vertex,label= 90:8] {} --
+				(2,3) node (N12)[vertex,label=90:12] {} --
+				(0,3) node (N7) [vertex,label=135:7] {} --
+				(0,1) node (N9) [vertex,label=180:9] {} -- cycle;
+			\draw[very thick] (N2) --
+				(3,2) node (N11)[vertex,label= 0:11] {} -- (N8);
+			\draw[very thick] (N2) -- (N9);
+			\draw[very thick] (N3) -- (N10);
+			\draw[very thick] (N3) -- (N11) -- (N12);
+			% Draw vines / branches
+			% Prepare for vine from N0 to N2
+			\coordinate (N0o) at ($(N0)+(45:\VineOffset)$);
+			\coordinate (N1o) at ($(N1)+(112.5:\VineOffset)$);
+			\coordinate (N2o) at ($(N2)+(202.5:1)$);
+			\path[name path=N1o](N1) -- (N1o);
+			\path[name path=N0h](N0o) -- (N0o -| N1);
+			\path[name path=N2o](N2) -- (N2o);
+			% Vine section from N0 to N1
+			\draw[name intersections={of=N1o and N0h}] (N0o) --
+				(intersection-1) node (N1oi) {};
+			\coordinate (N1oi) at (N1oi);
+			\path[name path=N1f](N1oi) -- +(45:2);
+			% Vine from N1 to N2
+			\draw[Vine,name intersections={of=N1f and N2o}] (N1oi) --
+				(intersection-1) node[inner sep=0,outer sep=0] (N2oi1) {};
+			% Vine from N0 to N9
+			\draw[Vine] ($(N0)+(45:\VineOffset)$) -- ($(N9)+(315:\VineOffset)$);
+			% Vine from N9 to N2
+			\draw[very thick,-Stealth] (N9) -- ($(N9)!0.5!(N2)$);
+			% \coordinate (N9o4) at ($(N9)+(315:\VineOffset)$);
+			% \path[name path=N9h](N9o4) -- (N9o4 -| N2);
+			% \draw[Vine,name intersections={of=N9h and N2o}] (N9o4) -- (intersection-1);
+			% Vine from N2 towards N3
+			\draw[Vine] ($(N2)+(22.5:0.2)$) -- +(0:0.5);
+			% Vine from N2 towards N9
+			\draw[very thick,-Stealth] (N2.west) -- (N9.east);
+			% \draw[Vine] (N2oi1) -- +(180:0.5);
+			% Vine from N2 towards N11
+			\draw[very thick,-Stealth] (N2) -- +(45:0.7);
+			% Vine from N9 to N7
+			\coordinate (N7o4) at ($(N7)+(315:0.15)$);
+			\coordinate (N9o1) at ($(N9)+(45:0.15)$);
+			\draw[Vine] (N9o1) -- ($(N9o1)!0.5!(N7o4)$);
+		\end{tikzpicture}
+		\caption{Branch 2$\rightarrow$9 converges with branch 0$\rightarrow$9}
+		\label{sfig:pg_branch_convergence}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.48\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=0.94]
+			\draw[step=10mm,gray!50,very thin] (-0.2,-0.2) grid (6.2,3.2);
+			\draw (-0.3,0) -- (6.3,0);
+			\draw (0,-0.3) -- (0,3.3);
+			% Draw complete vertex graph
+			\draw[very thick] (0,0) node (N0) [vertex,label=225:0] {} --
+				(1,0) node (N1) [vertex,label=315:1] {} --
+				(2,1) node (N2) [vertex,label=315:2] {} --
+				(4,1) node (N3) [vertex,label=225:3] {} --
+				(5,0) node (N4) [vertex,label=225:4] {} --
+				(6,0) node (N5) [vertex,label=315:5] {} --
+				(6,1) node (N10)[vertex,label= 0:10] {} --
+				(6,3) node (N6) [vertex,label= 45:6] {} --
+				(4,3) node (N8) [vertex,label= 90:8] {} --
+				(2,3) node (N12)[vertex,label=90:12] {} --
+				(0,3) node (N7) [vertex,label=135:7] {} --
+				(0,1) node (N9) [vertex,label=180:9] {} -- cycle;
+			\draw[very thick] (N2) --
+				(3,2) node (N11)[vertex,label= 0:11] {} -- (N8);
+			\draw[very thick] (N2) -- (N9);
+			\draw[very thick] (N3) -- (N10);
+			\draw[very thick] (N3) -- (N11) -- (N12);
+			% Draw vines / branches
+			% line section from 0 to 1
+			\coordinate (N0o) at ($(N0)+(45:0.15)$);
+			\coordinate (N1o) at ($(N1)+(112.5:0.15)$);
+			\path[name path=N1o](N1) -- (N1o);
+			\path[name path=N0h](N0o) -- (N0o -| N1);
+			\draw[name intersections={of=N1o and N0h,by={N1op}}] (N0o) -- (N1op);
+			% line section from 1 to 2
+			\path[name path=N1to2](N1op) -- +(45:2);
+			\coordinate (N2o) at ($(N2)+(202.5:1)$);
+			\path[name path=N2o](N2) -- (N2o);
+			\draw[name intersections={of=N1to2 and N2o,by={N2op}}] (N1op) -- (N2op);
+			% line section from 2 to 9
+			\path[name path=N2to9](N2op) -- +(180:2);
+			\coordinate (N9e) at ($(N9)+(315:0.15)$);
+			\path[name path=N9ol](N9) -- (N9e);
+			\draw[name intersections={of=N9ol and N2to9,by={N9op}}] (N2op) -- (N9op);
+			% line section from 9 to 0
+			\draw[] (N9op) -- (N0o);
+			% Vine from N2 towards N3
+			\draw[Vine] ($(N2)+(22.5:0.2)$) -- +(0:0.8);
+			% Vine from N2 towards N11
+			\draw[very thick,-Stealth] (N2) -- +(45:0.8);
+			% Vine from N9 towards N2
+			\draw[very thick,-Stealth] (N9) -- ($(N9)!0.5!(N2)$);
+			% Vine from N9 to N7
+			\coordinate (N7o4) at ($(N7)+(315:0.15)$);
+			\coordinate (N9o1) at ($(N9)+(45:0.15)$);
+			\draw[Vine] (N9o1) -- ($(N9o1)!0.5!(N7o4)$);
+		\end{tikzpicture}
+		\caption{Polygon node 0-1-2-9 complete}
+		\label{sfig:pg_0_1_2_9_polygon}
+	\end{subfigure}
+	\caption{Visual depiction of the procedure to create a polygon graph.}
+	\label{fig:PG:create}
+\end{figure}
+
+\subsection{Generate Merge Options}
+The completed polygon graph of the ongoing example can be seen in figure \ref{fig:pg_complete}.
+Once the polygon graph has been created the complete set of convex merge options (CMOs) may be generated.
+The objective is to obtain the complete set of possible CMOs, so that the optimal subset may be picked from it.
+The method followed in this work is described below in algorithm \ref{alg:generate_CMOs}.
+
+\begin{figure}[htb]
+	\centering
+	% TODO: recreate this image with tikz
+	\includegraphics[width=0.5\linewidth]{../resources/seg_2d/iee_ex1_atomic_polygons.png}
+\caption{Complete polygon graph of the example polygon}
+	\label{fig:pg_complete}
+\end{figure}
+
+A naive approach would be to attempt to create a convex polygon from each combination of polygons.
+At first glance the approach taken here does the same, albeit more intelligently.
+Each iteration of the \verb|while| loop attempts to create new CMOs from the existing set of CMOs.
+$O_{merge}$ is assumed complete if in a given iteration of the \verb|while| loop no new CMOs are added.
+The outer \verb|for| loop iterates through all CMOs, while the inner \verb|for| loop iterates through the CMOs starting with the CMO after $o_i$.
+The bulk of the inner \verb|for| loop is guard clauses, ensuring that the potential CMO created from CMOs $o_i$ and $o_j$ is novel and valid.
+Each iteration of the \verb|while| loop seeks to create CMOs containing a given number of sub-polygons, in short, CMOs of a certain degree.
+The first guard clause enforces this by summing the sub-polygons from the would-be input CMOs and comparing this to $d$.
+The second guard clause checks if $o_i$ and $o_j$ contain any overlapping sub-polygons, and rejects the combination if so.
+The guard clause on lines 16-18 checks if the potential new CMO already exists, and skips to the next combination if so.
+Line 19 computes the set of open edges shared between $o_i$ and $o_j$ as a set difference.
+In an effort to simplify checking the convexity of CMOs, each has a set of ``open edges''.
+An open edge is a complete edge that completely borders other polygon nodes.
+As an example, a CMO comprised solely of node 2 in figure \ref{fig:pg_complete} has 3 open edges: bordering node 1 (vertices 2-9), bordering node 3 (vertices 2-11), and bordering node 4 (vertices 11-12).
+However, a \{1,2\} CMO has only 1 open edge: bordering node 4.
+The edge between nodes 1 and 2 allowed them to merge, and node 2's edge bordering node 3 (vertices 2-11) is no longer considered open and valid because there is no collinear open edge on node 1.
+That the edge between the \{1,2\} CMO and \{3\} CMO is closed, prevents them from merging and creating a non-convex merge option.
+As another example, when the \{2\} CMO and \{4\} CMO merge, \{2\}'s edge with node 3 and \{4\}'s edge with node 5 also merge to form a single open edge from vertex 2 to 8.
+The combined \{2,4\} CMO can no longer merge with \{3\} or \{5\} because neither has an open edge from vertex 2 to 8.
+If the aforementioned set difference $E_{shared}$ is empty, then $o_i$ and $o_j$ have no common open edge and cannot combine to create a valid CMO.
+Once all guard clauses are passed, a new CMO is created, and added to the set $O_{merge}$.
+
+Nielsen et al. discuss the difficulty of blindly checking the convexity of all possible sub-polygon combinations, especially when the number of sub-polygons is great ($N$ = 300)\cite{IntEdgeExt}.
+To address this, they developed an approximation scheme to restrict the combinations checked.
+The method they propose is similar to the ``CMO degree'' propsed here, in which only combinations of $\lfloor i/2 \rfloor$ and $\lceil i/2 \rceil$ are considered, where $i$ is the numner of sub-polygons in the target CMOs.
+The example they give is that for a CMO comprised of 6 sub-polygons only input CMOs of 3 sub-polygons are considered.
+It is unknown how the implementation here compares to theirs, because the set partitioning problem discussed in section \ref{OptimalCMOs} became a limiting factor before the $N=300$ they encountered.
+
+% TODO: figure out how to make this algorithm float appear where i want it to..
+\begin{algorithm}[!hb]
+\caption{Generate Convex Merge Options}\label{alg:generate_CMOs}
+\begin{algorithmic}[1]
+\Function{generateMergeOptions}{Polygon graph $G_P$}
+	\State new set $O_{merge}$ \Comment{To store the convex merge options}
+	\State new uint $s_{set} \leftarrow 0$ \Comment{To check if the size of the set changed}
+	\State initialize $O_{merge} \leftarrow$ CMOs derived from each original polygon
+	\State new uint $d \leftarrow 2$ \Comment{Stores current CMO degree}
+	\While{$O_{merge}$.size() != $s_{set}$}
+		\State $s_{set} \leftarrow O_{merge}$.size()
+		\For{CMO $o_i$ in $O_{merge}$}
+			\For{CMO $o_j$ in $O_{merge}$ starting at $o_i$.next}
+				\If{$o_i$.subpolygons.size() + $o_j$.subpolygons.size() != $d$}
+					\State \textbf{continue}
+				\EndIf
+				\If{containsOverlappingSubpolygons($o_i$, $o_j$)}
+					\State \textbf{continue}
+				\EndIf
+				\If{containsOption($O_{merge}$, $o_i$, $o_j$)}
+					\State \textbf{continue}
+				\EndIf
+				\State new set $E_{shared} \leftarrow o_i$.$E_{open} - o_j$.$E_{open}$
+				\If{$E_{shared}$ is empty}
+					\State \textbf{continue}
+				\EndIf
+				\State new CMO $o$ derived from $o_i$, $o_j$, $E_{shared}$, and $G_P$
+				\State $O_{merge}$.insert($o$)
+			\EndFor
+		\EndFor
+		\State $d \leftarrow d + 1$
+	\EndWhile
+	\State \textbf{return} $O_{merge}$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+The complete set of CMOs for the example polygon is:
+\[
+\begin{split}
+	1:& \{0\},\{1\},\{2\},\{3\},\{4\},\{5\}\\
+	2:& \{0,3\},\{2,3\},\{3,4\},\{1,5\},\{2,5\},\{4,5\}\\
+	3:& \{1,4,5\},\{0,3,4\}\\
+	4:& \{2,3,4,5\}
+\end{split}
+\]
+(?) Is it worth displaying this?
+
+\subsection{Optimal Polygon Option Set}\label{OptimalCMOs}
+The final step of \textit{interior edge extension} is to determine what subset of CMOs minimizes the sum of CMO widths.
+The solution proposed here amounts to the ``brute-force'' method of solving the set partitioning problem.
+This works fine for relatively small numbers of CMOs, but quickly becomes a computational bottleneck.
+The completion of a minimal working ``pipeline'' was prioritized over computational efficiency, hence this solution was left in place.
+% NOTE: Come back and write more after improving the algorithm..
+
+\subsection{Modifications}
+Due to the computational inefficiency of the aforementioned set partitioning problem approach, the algorithm was modified to finish as soon as a feasible solution was computed.
+Due to the way that function is written, this typically results in the simplest, but least efficient solution set of all individual sub-polygons.
 
 \section{Surface Path Planning}
 This is effectively Boustrophedon
