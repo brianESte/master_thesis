@@ -833,9 +833,10 @@ To illustrate this process, the following test polygons will be used.
 		(6,3) node [anchor=south west] {6} --
 		(0,3) node [anchor=south east] {7} -- cycle;
 \end{tikzpicture}
-		\caption{Example polygon 1: ``blocky bridge''}
-		\label{sfig:iee_blocky_bridge}
+		% \caption{Example polygon 1: ``blocky bridge''}
+		% \label{sfig:iee_blocky_bridge}
 	\end{subfigure}
+\iffalse
 	\hfill
 	\begin{subfigure}{0.46\textwidth}
 		\centering
@@ -855,7 +856,9 @@ To illustrate this process, the following test polygons will be used.
 	\caption{Should another example polygon be necessary, it will be displayed here.}
 		% \label{sfig:gs_shared_edges_clamped}
 	\end{subfigure}
-\caption{Example polygons to help illustrate \textit{interior edge extension}}
+\fi
+%NOTE: ensure "polygons" plurality is correct
+\caption{Example polygon to help illustrate \textit{interior edge extension}}
 	% \label{fig:extend_shared_edges}
 \end{figure}
 
@@ -1265,7 +1268,7 @@ Once the polygon graph has been created the complete set of convex merge options
 The objective is to obtain the complete set of possible CMOs, so that the optimal subset may be picked from it.
 The method followed in this work is described below in algorithm \ref{alg:generate_CMOs}.
 
-\begin{figure}[htb]
+\begin{figure}[htbp]
 	\centering
 	% TODO: recreate this image with tikz
 	\includegraphics[width=0.5\linewidth]{../resources/seg_2d/iee_ex1_atomic_polygons.png}
@@ -1273,36 +1276,7 @@ The method followed in this work is described below in algorithm \ref{alg:genera
 	\label{fig:pg_complete}
 \end{figure}
 
-A naive approach would be to attempt to create a convex polygon from each combination of polygons.
-At first glance the approach taken here does the same, albeit more intelligently.
-Each iteration of the \verb|while| loop attempts to create new CMOs from the existing set of CMOs.
-$O_{merge}$ is assumed complete if in a given iteration of the \verb|while| loop no new CMOs are added.
-The outer \verb|for| loop iterates through all CMOs, while the inner \verb|for| loop iterates through the CMOs starting with the CMO after $o_i$.
-The bulk of the inner \verb|for| loop is guard clauses, ensuring that the potential CMO created from CMOs $o_i$ and $o_j$ is novel and valid.
-Each iteration of the \verb|while| loop seeks to create CMOs containing a given number of sub-polygons, in short, CMOs of a certain degree.
-The first guard clause enforces this by summing the sub-polygons from the would-be input CMOs and comparing this to $d$.
-The second guard clause checks if $o_i$ and $o_j$ contain any overlapping sub-polygons, and rejects the combination if so.
-The guard clause on lines 16-18 checks if the potential new CMO already exists, and skips to the next combination if so.
-Line 19 computes the set of open edges shared between $o_i$ and $o_j$ as a set difference.
-In an effort to simplify checking the convexity of CMOs, each has a set of ``open edges''.
-An open edge is a complete edge that completely borders other polygon nodes.
-As an example, a CMO comprised solely of node 2 in figure \ref{fig:pg_complete} has 3 open edges: bordering node 1 (vertices 2-9), bordering node 3 (vertices 2-11), and bordering node 4 (vertices 11-12).
-However, a \{1,2\} CMO has only 1 open edge: bordering node 4.
-The edge between nodes 1 and 2 allowed them to merge, and node 2's edge bordering node 3 (vertices 2-11) is no longer considered open and valid because there is no collinear open edge on node 1.
-That the edge between the \{1,2\} CMO and \{3\} CMO is closed, prevents them from merging and creating a non-convex merge option.
-As another example, when the \{2\} CMO and \{4\} CMO merge, \{2\}'s edge with node 3 and \{4\}'s edge with node 5 also merge to form a single open edge from vertex 2 to 8.
-The combined \{2,4\} CMO can no longer merge with \{3\} or \{5\} because neither has an open edge from vertex 2 to 8.
-If the aforementioned set difference $E_{shared}$ is empty, then $o_i$ and $o_j$ have no common open edge and cannot combine to create a valid CMO.
-Once all guard clauses are passed, a new CMO is created, and added to the set $O_{merge}$.
-
-Nielsen et al. discuss the difficulty of blindly checking the convexity of all possible sub-polygon combinations, especially when the number of sub-polygons is great ($N$ = 300)\cite{IntEdgeExt}.
-To address this, they developed an approximation scheme to restrict the combinations checked.
-The method they propose is similar to the ``CMO degree'' propsed here, in which only combinations of $\lfloor i/2 \rfloor$ and $\lceil i/2 \rceil$ are considered, where $i$ is the numner of sub-polygons in the target CMOs.
-The example they give is that for a CMO comprised of 6 sub-polygons only input CMOs of 3 sub-polygons are considered.
-It is unknown how the implementation here compares to theirs, because the set partitioning problem discussed in section \ref{OptimalCMOs} became a limiting factor before the $N=300$ they encountered.
-
-% TODO: figure out how to make this algorithm float appear where i want it to..
-\begin{algorithm}[!hb]
+\begin{algorithm}[htbp]
 \caption{Generate Convex Merge Options}\label{alg:generate_CMOs}
 \begin{algorithmic}[1]
 \Function{generateMergeOptions}{Polygon graph $G_P$}
@@ -1337,6 +1311,35 @@ It is unknown how the implementation here compares to theirs, because the set pa
 \EndFunction
 \end{algorithmic}
 \end{algorithm}
+
+A naive approach would be to attempt to create a convex polygon from each combination of polygons.
+At first glance the approach taken here does the same, albeit more intelligently.
+Each iteration of the \verb|while| loop attempts to create new CMOs from the existing set of CMOs.
+$O_{merge}$ is assumed complete if in a given iteration of the \verb|while| loop no new CMOs are added.
+The outer \verb|for| loop iterates through all CMOs, while the inner \verb|for| loop iterates through the CMOs starting with the CMO after $o_i$.
+The bulk of the inner \verb|for| loop is guard clauses, ensuring that the potential CMO created from CMOs $o_i$ and $o_j$ is novel and valid.
+Each iteration of the \verb|while| loop seeks to create CMOs containing a given number of sub-polygons, in short, CMOs of a certain degree.
+The first guard clause enforces this by summing the sub-polygons from the would-be input CMOs and comparing this to $d$.
+The second guard clause checks if $o_i$ and $o_j$ contain any overlapping sub-polygons, and rejects the combination if so.
+The guard clause on lines 16-18 checks if the potential new CMO already exists, and skips to the next combination if so.
+Line 19 computes the set of open edges shared between $o_i$ and $o_j$ as a set difference.
+In an effort to simplify checking the convexity of CMOs, each has a set of ``open edges''.
+An open edge is a complete edge that completely borders other polygon nodes.
+As an example, a CMO comprised solely of node 2 in figure \ref{fig:pg_complete} has 3 open edges: bordering node 1 (vertices 2-9), bordering node 3 (vertices 2-11), and bordering node 4 (vertices 11-12).
+However, a \{1,2\} CMO has only 1 open edge: bordering node 4.
+The edge between nodes 1 and 2 allowed them to merge, and node 2's edge bordering node 3 (vertices 2-11) is no longer considered open and valid because there is no collinear open edge on node 1.
+That the edge between the \{1,2\} CMO and \{3\} CMO is closed, prevents them from merging and creating a non-convex merge option.
+As another example, when the \{2\} CMO and \{4\} CMO merge, \{2\}'s edge with node 3 and \{4\}'s edge with node 5 also merge to form a single open edge from vertex 2 to 8.
+The combined \{2,4\} CMO can no longer merge with \{3\} or \{5\} because neither has an open edge from vertex 2 to 8.
+If the aforementioned set difference $E_{shared}$ is empty, then $o_i$ and $o_j$ have no common open edge and cannot combine to create a valid CMO.
+Once all guard clauses are passed, a new CMO is created, and added to the set $O_{merge}$.
+
+Nielsen et al. discuss the difficulty of blindly checking the convexity of all possible sub-polygon combinations, especially when the number of sub-polygons is great ($N$ = 300)\cite{IntEdgeExt}.
+To address this, they developed an approximation scheme to restrict the combinations checked.
+The method they propose is similar to the ``CMO degree'' propsed here, in which only combinations of $\lfloor i/2 \rfloor$ and $\lceil i/2 \rceil$ are considered, where $i$ is the numner of sub-polygons in the target CMOs.
+The example they give is that for a CMO comprised of 6 sub-polygons only input CMOs of 3 sub-polygons are considered.
+% TODO: revise this once find_optimal() is fixed...
+It is unknown how the implementation here compares to theirs, because the set partitioning problem discussed in section \ref{OptimalCMOs} became a limiting factor before the $N=300$ they encountered.
 
 The complete set of CMOs for the example polygon is:
 \[
@@ -1426,10 +1429,10 @@ The boustrophedon path planning procedure developed in this work is described in
 		new Cartesian axis=x axis,
 		new Cartesian axis=y axis,
 		x axis={attribute=x},
-		y axis={attribute=y}
 		% xy Cartesian,
 		% outline={style={mark=*,mark size=1.4pt}},
 		% path={style={red,arrow data={0.25}{stealth}}}
+		y axis={attribute=y}
 	}
 }
 %TODO: figure out how to define a style sheet or visualizer to hopefully reduce repeated code...
@@ -1615,10 +1618,11 @@ Once the final waypoint is plotted (calculated?) the waypoints are transformed b
 % From the intersection point, the second condition ($w_{temp}$.y > $c_{curr}$.y) will trigger, resulting in a waypoint at the corner and another above the corner set from the updated $e_{curr}$.
 % Figure \ref{sfig:bpath_sweep3} shows the updated positions of $e_{curr}$ and $c_{curr}$, as well as the intersection, corner and full-shift waypoints (red dots).
 
-\iffalse
+\iftrue
 \section{Modified Traveling Salesman Problem}
-Normal TSP should have already been described in \ref{background}, so no need to rehash that.
-Only need to talk about the modifications and how it would have been applied...
+As mentioned in the Background, determining the order with which the individual surface paths will be tied together into a complete path is a TSP.
+Due to time constraints this aspect of the project was cut, and is left as a suggested extension to the project.
+It is worth noting that the better \textit{interior edge extension} works, the fewer surface paths will need to be traversed by the TSP, leading to a faster solution.
 \fi
 
 \section{Inverse Kinematics}
