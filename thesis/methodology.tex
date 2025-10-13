@@ -1020,7 +1020,7 @@ This process is described in detail in algorithmm \ref{alg:PG:create} and visual
 % Lines 3-5 set up  To manage the branches as they traverse the vertex graph
 Branches may be considered active, mature, or complete.
 Active branches are newly created and reside in $B_{active}$ until dequeued and processed.
-Mature branches are active branches that have grown to a splitting node, but have not been fully utilized in the creation of polygon nodes.
+Mature branches are active branches that have grown to reach a splitting node, but have not been fully utilized in the creation of polygon nodes.
 % NOTE: ^hm
 The queue $B_{active}$ is initialized with branches from node 0 on line 6.
 This can also be seen in figure \ref{sfig:pg_n0_branches}.
@@ -1351,7 +1351,8 @@ The complete set of CMOs for the example polygon is:
 
 \subsection{Optimal Polygon Option Set}\label{OptimalCMOs}
 The final step of \textit{interior edge extension} is to determine what subset of CMOs minimizes the sum of CMO widths.
-The solution proposed here amounts to the ``brute-force'' method of solving the set partitioning problem.
+Nielsen et al. describe this as a set partitioning problem\cite{IntEdgeExt}, but it is actually a weighted set cover problem.
+The solution proposed here amounts to the ``brute-force'' method of solving the set cover problem.
 This works fine for relatively small numbers of CMOs, but quickly becomes a computational bottleneck.
 The completion of a minimal working ``pipeline'' was prioritized over computational efficiency, hence this solution was left in place.
 % NOTE: Come back and write more after improving the algorithm..
@@ -1361,7 +1362,258 @@ Due to the computational inefficiency of the aforementioned set partitioning pro
 Due to the way that function is written, this typically results in the simplest, but least efficient solution set of all individual sub-polygons.
 
 \section{Surface Path Planning}
-This is effectively Boustrophedon
+Surface path planning consists of generating the back-and-forth path outline for the given convex polygon.
+The ``back-and-forth'' style of path planning has been termed ``boustrophedon path''.
+The word boustrophedon comes from ancient greek, and roughly means ``the way the ox turns'', describing the path an ox would take while ploughing a field.
+The boustrophedon path planning procedure developed in this work is described in detail in algorithm \ref{alg:boustrophedon}, and visually in figure \ref{fig:bpath_steps}.
+
+\begin{algorithm}[htb]
+\caption{Boustrophedon Path Planning}\label{alg:boustrophedon}
+\begin{algorithmic}[1]
+\Function{boustrophedon}{SimplePolygon $P$, sweep direction $s$, shift distance $d_{shift}$}
+	\If{$s = \varnothing$}
+		\State $s \leftarrow$ direction of longest edge in $P$
+	\EndIf
+	\State new CSYS $T_{bous\rightarrow poly}$ derived from $s$
+	\State new polygon $P_{bous} \leftarrow$ transform $P$ to local CSYS using $T_{bous\rightarrow poly}$
+	% \State rotate $P_{bous}$ points so that point (0,0) is first
+	\State new list $W_{bous}$ \Comment{To store the waypoints in boustrophedon CSYS}
+	\State new waypoint $w$
+	\State $W_{bous} \leftarrow$ Perform perimeter pass on $P_{bous}$
+	\State new real $h_{pass} \leftarrow$ point from $W_{bous}$ with highest y value
+	% \For{edge $e$ in $P_{bous}$}
+	% 	\State $w \leftarrow e$.startPt
+	% 	\State $h_{pass} \leftarrow$ ($w$.y > $h_{pass}$) ? $w$.y : $h_{pass}$
+	% 	\State $W_{bous}$.append($w$)
+	% \EndFor
+	% \State $W_{bous}$.append($W_{bous}$.first) \Comment{To return to start position}
+	\State new edge $e_{curr} \leftarrow$ edge prior to point 0
+	\State new corner $c_{curr} \leftarrow$ corner prior to point 0
+	\While{$w$.y < $h_{pass}$}
+		\State new real $d_{edge} \leftarrow d_{shift}$ / $e_{curr}$.dir.y
+		\State new waypoint $w_{temp} \leftarrow w$ moved up $d_{edge}$ along $e_{curr}$
+		\If{$w_{temp}$.y > $h_{pass}$}
+			\State $d_{edge} \leftarrow $($h_{pass} - w$.y) / $e_{curr}$.dir.y
+		\ElsIf{$w_{temp}$.y > $c_{curr}$.y}
+			\State $w \leftarrow c_{curr}$
+			\State $W_{bous}$.append($w$)
+			\State $e_{curr}$.next(); $c_{curr}$.next()
+			\State $d_{edge} \leftarrow (w_{temp}$.y - $w$.y) / $e_{curr}$.dir.y
+		\EndIf
+		\State $w \leftarrow w + d_{edge} * e_{curr}$.dir
+		\State $W_{bous}$.append($w$)
+		\State $e_{curr}$.switch(); $c_{curr}$.switch()
+		\If{$w$.y > $c_{curr}$.y}
+			\State $e_{curr}$.next(); $c_{curr}$.next()
+		\EndIf
+		\State $w \leftarrow$ intersection of sweep dir and $e_{curr}$
+		\State $W_{bous}$.append($w$)
+	\EndWhile
+	\State new list $W_{poly} \leftarrow$ transform $W_{bous}$ to polygon CSYS using $T_{bous\rightarrow poly}$
+	\State \textbf{return} $W_{poly}$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\pgfkeys{
+	/pgf/data visualization/style sheets/boustrophedon/.cd,
+	1/.style={mark=*,mark size=1.4pt},
+	2/.style={red},
+	default style/.style={gray!50}
+}
+\tikzset{
+	data visualization/b-system/.style={
+		new Cartesian axis=x axis,
+		new Cartesian axis=y axis,
+		x axis={attribute=x},
+		y axis={attribute=y}
+		% xy Cartesian,
+		% outline={style={mark=*,mark size=1.4pt}},
+		% path={style={red,arrow data={0.25}{stealth}}}
+	}
+}
+%TODO: figure out how to define a style sheet or visualizer to hopefully reduce repeated code...
+\begin{figure}[htb]
+	\centering
+	\begin{subfigure}{0.48\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.0]
+			\datavisualization[
+				% new Cartesian axis=x axis, x axis={attribute=x},
+				% new Cartesian axis=y axis, y axis={attribute=y},
+				scientific axes,%=clean,
+				all axes={ticks={major={at={}},minor={at={}}}},
+				data/format=table,
+				% yticklabel={\empty},
+				% school book axes,
+				visualize as line/.list={outline,path},
+				% /data point/set/outline/.initial=1
+				% outline={style={}},
+				path={style={red}}
+				]
+				data[
+					headline={x,y},
+					read from file="../resources/boustrophedon/ex_1_polygon.csv",
+					set=outline]
+				data[
+					headline={x,y},
+					read from file="../resources/boustrophedon/ex_1_perim.csv",
+					set=path];
+		\end{tikzpicture}
+		\caption{Perimeter pass in progress}
+		\label{sfig:bpath_step1}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.48\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.0]
+			\datavisualization[
+				scientific axes,
+				all axes={ticks={major={at={}},minor={at={}}}},
+				data/format=table,
+				visualize as line/.list={outline,path},
+				path={style={red}}]
+				data[
+					headline={x,y},
+					read from file="../resources/boustrophedon/ex_1_polygon.csv",
+					set=outline]
+				data[
+					headline={x,y},
+					read from file="../resources/boustrophedon/ex_1_sweep_1.csv",
+					set=path]
+				info {
+					\draw (visualization cs:x=-0.61,y=3.89) circle [radius=2pt]
+						node[right]{$c_{curr}$};
+				}
+				info {
+					\draw[red,fill=red] (visualization cs:x=-0.28,y=2.72) circle [radius=1.2pt];
+				}
+				info {
+					\draw[-{Stealth}](visualization cs:x=-0.11,y=2.1) --
+						% (visualization cs:x=-0.56,y=3.71) node[below right]{$e_{curr}$};
+						(visualization cs:x=-0.28,y=2.72) node[right]{$e_{curr}$};
+				};
+		\end{tikzpicture}
+		\caption{New waypoint from moving up along $e_{curr}$}
+		\label{sfig:bpath_sweep1}
+	\end{subfigure}
+	% Next row of subfigures
+	\begin{subfigure}{0.48\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.0]
+			\datavisualization[
+				scientific axes,
+				all axes={ticks={major={at={}},minor={at={}}}},
+				data/format=table,
+				visualize as line/.list={outline,path},
+				% outline={style={mark=*,mark size=1.4pt}},
+				path={style=red}]
+				data[
+					headline={x,y},
+					read from file="../resources/boustrophedon/ex_1_polygon.csv",
+					set=outline]
+				data[
+					headline={x,y},
+					read from file="../resources/boustrophedon/ex_1_sweep_2.csv",
+					set=path]
+				info {
+					\draw (visualization cs:x=10.62,y=2.88) circle [radius=2pt]
+						node[above left]{$c_{curr}$};
+				}
+				info {
+					\draw[-Stealth](visualization cs:x=10.6,y=1.5) --
+						(visualization cs:x=10.62,y=2.75) node[below left]{$e_{curr}$};
+				};
+		\end{tikzpicture}
+		\caption{$e_{curr}$ and $c_{curr}$ pre-update}
+		\label{sfig:bpath_sweep2}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.48\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.0]
+			\datavisualization[
+				scientific axes,
+				all axes={ticks={major={at={}},minor={at={}}}},
+				data/format=table,
+				visualize as line/.list={outline,path},
+				% outline={style={mark=*,mark size=1.4pt}},
+				path={style=red}]
+				data[
+					headline={x,y},
+					read from file="../resources/boustrophedon/ex_1_polygon.csv",
+					set=outline]
+				data[
+					headline={x,y},
+					read from file="../resources/boustrophedon/ex_1_sweep_3.csv",
+					set=path]
+				info {
+					\draw (visualization cs:x=8.77,y=5.67) circle [radius=2pt]
+						node[left]{$c_{curr}$};
+				}
+				info {
+					\draw[red,fill=red] (visualization cs:x=10.62,y=2.72) circle [radius=1.1pt];
+				}
+				info {
+					\draw[red,fill=red] (visualization cs:x=10.62,y=2.88) circle [radius=1.1pt];
+				}
+				info {
+					\draw[red,fill=red] (visualization cs:x=10.19,y=3.52) circle [radius=1.3pt];
+				}
+				info {
+					\draw[-{Stealth[round]}](visualization cs:x=10.62,y=2.88) --
+						(visualization cs:x=10.19,y=3.52) node[below left]{$e_{curr}$};
+				};
+		\end{tikzpicture}
+		\caption{New waypoints post $e_{curr}$ and $c_{curr}$ update}
+		\label{sfig:bpath_sweep3}
+	\end{subfigure}
+	\caption{Visual depiction of boustrophedon path planning steps}
+	\label{fig:bpath_steps}
+\end{figure}
+
+The algorithm inputs beyond the polygon are the ``sweep direction'' and ``shift distance''.
+The sweep direction is the long pass direction, and the shift distance is the perpendicular distance between long passes.
+At this point the end-effector tool and its characteristics become relevant.
+The envisioned tool is a high-powered laser with a set beam width to ablate the coating on the target object.
+The laser beam's width sets the maximum shift distance.
+To maintain even ablation throughout the path, the sweep direction should ideally follow the surface's maximum curvature.
+For a planar surface all directions are equally valid sweep directions.
+However for a cylindric surface moving up and down the cylinder (an axially oriented sweep direction) would result in uneven laser application, whereas moving \textit{around} the cylinder (a circumferential sweep direction) would ensure the surface that the laser contacts is, relative to the laser beam, flat.
+
+The algorithm begins by checking if a sweep direction was provided, and if not, creating one from the polygon's longest edge.
+To simplify calculating the positions of waypoints, a local ``boustrophedon'' coordinate system is created.
+This coordinate system is defined such that the sweep direction $s$ aligns with the x axis, and its origin coincides with the corner point in $P$ preceding the edge that best aligns with $s$.
+The input polygon $P$ is then transformed to the local coordinate system, creating $P_{bous}$.
+In order to ensure complete coverage of the polygon, a perimeter pass is performed first, which creates a path inset from the polygon.
+Figure \ref{sfig:bpath_step1} shows a perimeter pass in progress.
+From this perimeter pass the upper bound in the y direction of the remaining waypoints ($h_{pass}$) can be calculated from the highest waypoint in $W_{bous}$.
+On line 12 the edge $e_{curr}$ is created to manage the edge currently being followed for shifts, and on the subsequent line the corner $c_{curr}$ is created to manage switching between sides of the polygon.
+More specifically, $e_{curr}$ contains the edge from the perimeter pass that is used to guide each ``shift'', that is, the movement up to where the next sweep pass begins.
+The \verb|while| loop carries out a shift upwards along the current edge and then a long pass across the polygon meeting the opposite edge.
+Note that the edges referenced at this point are not those of the polygon itself, but of those created by the perimeter pass.
+This is made clear by observing the sweep pass lines in figure \ref{sfig:bpath_sweep1}.
+The \verb|while| loop's procedure begins by calculating the distance to be traveled along the current edge's direction.
+A temporary waypoint $w_{temp}$ is created at this proposed position to check a couple conditions.
+% NOTE: should probably rename h_pass...
+First, if $w_{temp}$'s y coordinate is greater than $h_{pass}$, $d_{edge}$ is updated so that the next waypoint $w$ is no higher than $h_{pass}$, as this will be the final shift and sweep pass.
+Second, if $w_{temp}$ is above the current corner, then a waypoint is added at the corner and both the current edge and corner are moved up to their next positions.
+The edge distance is then recalculated based on the remaining distance from the proposed waypoint to the waypoint set by the corner.
+This is illustrated in figures \ref{sfig:bpath_sweep2} and \ref{sfig:bpath_sweep3}.
+In figure \ref{sfig:bpath_sweep2} the sweep path will intersect a little below the current corner, and the proposed next waypoint will be above this corner.
+Figure \ref{sfig:bpath_sweep3} shows the intersection waypoint, corner waypoint and the final waypoint of this shift upwards after $e_{curr}$ and $c_{curr}$ have been updated.
+% NOTE: thinking of renaming w_temp to w_prop for proposed...
+Once $d_{edge}$ has been adjusted according to either aforementioned condition, a new waypoint is set from the current waypoint moved up $d_{edge}$ along the current edge's direction.
+Figure \ref{sfig:bpath_sweep1} marks this new waypoint with a red dot.
+Before performing the actual sweep pass, $e_{curr}$ and $c_{curr}$ are switched to the opposite side of the perimeter pass.
+This can be observed by comparing figures \ref{sfig:bpath_sweep1} and \ref{sfig:bpath_sweep2}.
+On lines 27-29 the y coordinate of the last waypoint, and subsequent intersection post sweep, is checked against the newly switched current corner.
+If the last waypoint is above the corner, the current edge and corner are updated to their next positions so that the intersection between the last waypoint along the sweep direction and the current corner along the current edge is correct.
+At the end of the \verb|while| loop the intersection is calculated, $w$ is updated and added to $W_{bous}$, and the process repeats.
+Once the final waypoint is plotted (calculated?) the waypoints are transformed back to the polygon coordinate system and returned.
+% Figure \ref{sfig:bpath_sweep2} shows the current edge and corner after switching to the opposite side to intercept the sweep pass.
+% From the intersection point, the second condition ($w_{temp}$.y > $c_{curr}$.y) will trigger, resulting in a waypoint at the corner and another above the corner set from the updated $e_{curr}$.
+% Figure \ref{sfig:bpath_sweep3} shows the updated positions of $e_{curr}$ and $c_{curr}$, as well as the intersection, corner and full-shift waypoints (red dots).
 
 \iffalse
 \section{Modified Traveling Salesman Problem}

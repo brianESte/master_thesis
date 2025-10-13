@@ -41,6 +41,7 @@
 \usetikzlibrary{
 	arrows.meta,
 	calc,
+	datavisualization,
 	fit,
 	intersections,
 	matrix,
@@ -55,9 +56,6 @@
 	vertex/.style={circle, radius=2pt,fill, inner sep=2pt,outer sep=0pt},
 	Vine/.style={-Stealth}
 }
-\def \globalscale {1.000000}
-% TODO: integrate the color into tikz
-\definecolor{c179c7d}{RGB}{23,156,125}
 % for multifigure environments
 \usepackage{subcaption}
 % \usepackage{svg}
@@ -103,7 +101,7 @@
 %Paketvorschläge Mathematik
 %%%%%%%%%%%%%%%%%%%
 \usepackage{mathtools} % erweiterte Fassung von amsmath
-%\usepackage{amssymb}   % erweiterter Zeichensatz
+\usepackage{amssymb}   % erweiterter Zeichensatz
 %\usepackage{siunitx}   % Einheiten
 
 %Formatierungen für Beispiele in diesem Dokument. Im Allgemeinen nicht notwendig!

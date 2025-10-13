@@ -19,6 +19,8 @@ Reminders:
 - Conforming to this template, there is no point in referencing a subsubsection by `\label{}` / `\ref{}` because the number shown will be at most that of the containing subsection. Thus it is (probably) better to reference subsubsections by name instead.
 
 ## Notes
+Regarding LaTeX floats: floats seem to place themselves where i want them with when they are placed at the top / beginning of a section/chapter and the text that describe them thereafter.
+The text then "floats" up to fill empty space caused by the actual floats being forced down, typically because they are too large for whatever space was initially alloted them.
 
 ### TUDa Template Installation
 
