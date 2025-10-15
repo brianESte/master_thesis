@@ -1,14 +1,6 @@
 %! TeX root = thesis.tex
 \chapter{Background}\label{background}
-Here i will discuss background knowledge of Coverage Path Planning and surface curvature...
-
-Things / topics i will cover:
-\begin{enumerate}
-	\item Interior Edge Extension (and my modifications, if any) -> methodology
-	\item boustrophedon -> methodology
-	\item Modified TSP -> methodology
-\end{enumerate}
-
+(? Does there need to be any text to introduce the background chapter?, ie, a paragraph here)
 
 \section{Geometric Curvature}
 For segmenting a 3D mesh via Watershed Segmentation each vertex requires a singular / combined measure of curvature.
@@ -192,6 +184,81 @@ Through testing it was determined that supplying the derivative of curvature ins
 Rusinkiewicz proposes a method of taking the derivative of the curvature tensor\cite{SRTensor}.
 Because watershed segmentation expects a single value rather than a tensor, the magnitude of the derivative of the curvature tensor was approximated as the sum of squares of said tensor.
 
+\section{Surface Regression}
+Part of the \textit{Surface Classification} step is to confirm the surface type estimation by performing the corresponding surface regression on the target surface and comparing the error value to a pre-defined threshold.
+
+\subsection{Planar Regression}\label{sec:planar_regression}
+A plane may be defined by a normal vector and a point on the plane.
+% To perform planar regression on a set of 3D points principal component analysis is used to
+Given a set of 3D points, principal component analysis (PCA) can be used to calculate the plane's normal vector as the PCA's least principal component.
+% Given a set of 3D points, the least principal component from a PCA of the points is the regression plane's normal vector.
+% That it, the direction that explains the least variance of the 3D points ... is the most significant for the normal vec?
+The mean of the points is sufficient to produce the intersection point on the plane.
+Calculating the error of such a regression is done by computing the distance from each point to the plane and calculating the root mean square of said distances like so:
+\begin{equation}
+	e_{RMSE} = \left(\frac{1}{N}\sum_{i}^{N}d_i^2 \right)^{\frac{1}{2}}.
+\end{equation}
+% The distance from a point $p_i$ to a plane described by point $p_P$ and normalized normal vector $\vec{n}$ may be calculated by transforming the point $p_i$ to the plane's coordinate system, with the origin at $p_P$ and which $\vec{n} = \vec{e_z}$.
+The distance from a point $p_i$ to a plane described by point $p_P$ and normalized normal vector $\vec{n}$ may be calculated by transforming the target point to the plane's coordinate system, and taking the transformed point's $z$ coordinate as the distance.
+% The distance from a point $p_i$ to a plane may be calculated by transforming the target point to the plane's coordinate system, with the origin at $p_P$ and which $\vec{n} = \vec{e_z}$:
+\begin{equation}
+	\prescript{P}{}p_i = \prescript{P}{}T_0 \prescript{0}{}p_i
+\end{equation}
+\begin{equation}
+	d_i = \vec{e_z} \cdot \prescript{P}{}p_i
+\end{equation}
+where $\prescript{P}{}T_0$ is the homogeneous transformation matrix from global to planar coordinate systems.
+Alternatively, if there is no other reason to compute the transformation matrix for the plane's local coordinate system, it is simpler to calculate the point-plane distance as the dot product of the plane normal with the vector $p_i - p_P$ as shown:
+\begin{equation}
+	d_i = \langle p_i - p_P, \vec{n}\rangle,
+\end{equation}
+
+\subsection{Cylindric Regression}
+Cylinders in this context can be understood as an extruded conic section.
+The general equation of a conic is:
+\begin{equation}\label{eq:gen_conic}
+	Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0.
+\end{equation}
+% Treating this as the error function to be minimized via least squares
+Fitting a given set of 3D points to this equation can be achieved via total least squares.
+Rosin shows that it is useful to set $F = 1$\cite{Ellipse_least_squares}, both to normalize the equation, and to avoid the trivial solution
+\begin{equation}
+	A = B = C = D = E = F = 0.
+\end{equation}
+Once the coefficients have been obtained, the specific type of conic represented by the points may be discerned by the determinant
+\begin{equation*}
+	B^2 - 4AC.
+\end{equation*}
+The specific method and equations to check the validity of the conic regression depend on the type of conic.
+
+\subsubsection{Elliptic Regression}\label{sec:elliptic_reg}
+For $B^2 - 4AC < 0$ the set of points represent an ellipse.
+
+Computing the distance from a given point to an ellipse or other conic shape is non-trivial and, at the time of writing, no exact algebraic solution was found.
+In place of an exact distance function, the sum of squared residuals was used throughout most of the project's timeline.
+For example, a point on a conic section should satisfy equation \ref{eq:gen_conic}, but for a point \textit{almost} on a conic section, the result will be non-zero:
+\begin{equation}
+	R(x,y) = Ax^2 + Bxy + Cy^2 + Dx + Ey + F \neq 0,
+\end{equation}
+where $R(x,y)$ is known as the residual. The error function then becomes:
+\begin{equation}
+	e = \sum_i \left(Ax_i^2 + Bx_i y_i + Cy_i^2 + Dx_i + Ey_i + F\right)^2.
+\end{equation}
+While easy to calculate, this value is unreliable as an indicator of whether or not the given surface is actually a conic surface.
+During testing cases were encountered in which obviously non-cylindric surfaces yielded extremely low error values, resulting in false positives.
+This realization fueled the need for a proper point-to-ellipse distance function.
+
+Eberly\cite{GeoTools_pt_to_ellipse} shows that for an origin-centered axis-aligned ellipse described by major and minor diameters $a$ and $b$, and a target point $(x_p, y_p)$, the distance $t$ from the target point to the ellipse must satisfy the equation
+\begin{equation}\label{eq:ellipse_dist}
+	F(t) = \left(\frac{a x_p}{t + a^2}\right)^2 + \left(\frac{b y_p}{t + b^2}\right)^2 - 1 = 0.
+\end{equation}
+Eberly also compares 3 methods of solving equation \ref{eq:ellipse_dist} for $t$, concluding that the bisection method is the most robust.
+
+\subsubsection{Parabolic and Hyperbolic Regression}
+% TODO: return to this, improve it.?
+The functionality to perform parabolic or hyperbolic regression was omitted from this work due to time constraints.
+(? I could layout how to compute the distance and thus error for at least a parabola, but is it worth it if it is not implemented? it is safe to assume the vast majority of curves encountered will be circular, and if not circular then elliptic...)
+
 \section{UV Mapping}
 UV Mapping is the process of projecting a surface from 3D to 2D, effectively ``unwrapping'' the 3D surface.
 (insert sentence about common usage in 3D modeling / graphics and textures)
@@ -315,7 +382,7 @@ Setting 3.7 into 3.8:
 \end{equation}
 
 \section{Ramer-Douglas-Peucker Algorithm}
-The Ramer-Douglas-Peucker (RDP) algorithm is a method to interatively simplify a line defined by a set of points.
+The Ramer-Douglas-Peucker (RDP) algorithm is a method to interatively simplify a line defined by a set of points\cite{RDP_line_reduction_DP, RDP_line_reduction_R}.
 The only arguments to RDP are a list of points and a tolerance width, within which points will be considered unnecessary and discarded.
 % The algorithm looks at a list of points, draws an imaginary line from the first to the last, finds the point with the farthest normal distance to the comparison line, and if the point's distance to the comparison line is greater than a pre-defined tolerance width, splits the lin
 The algorithm iteratively finds the point farthest from the straight line from point 0 to n-1, and if said distance is greater than the tolerance width, the line is split at the farthest point and the line sections before and after the split are reconsidered individually.

@@ -10,7 +10,7 @@ fc004,brutal object,GC: PF,TRUE,0.5,1,,,Failure ,due to IEE loop in R9
 fc021,flat chair-like,GC: PF,TRUE,1,1,,,Success,
 90223,irregular D14,10k,FALSE,0.7,1,,,Fail,at GS:1156
 90224,irregular D12,10k,FALSE,1,1,,,Fail,faux corner between R9-10
-fc028_e,blocky chair,GC: PF,TRUE,1,1,,,Success,
+fc028,blocky chair,GC: PF,TRUE,1,1,,,Success,
 91904,N64 crown,10k,TRUE,1,1,,,Fail,
 1344057,hexagonal rod,10k,TRUE,0.5,1,,,Success,after mesh size reduction
 1344051,low poly rock with flat bottom,10k,FALSE,1,1,,,redownload and remesh,
@@ -23,7 +23,6 @@ fc028_e,blocky chair,GC: PF,TRUE,1,1,,,Success,
 93072,pokey tree,10k,TRUE,1,2,,,untested,
 fc057,braced flange,GC: PF,TRUE,1,2,,,untested,
 7120369,filament test,Thing,TRUE,1,2,,,untested,
-solido_v1,brutalist chess pawn,GC,TRUE,1,2,,,untested,
 fc042,corner jig,GC: PF,TRUE,1,2,,,untested,
 82058,short cyl with cyl cut,10k,TRUE,1,2,,,untested,
 94158,short bridge shape,10k,TRUE,1,2,,,untested,

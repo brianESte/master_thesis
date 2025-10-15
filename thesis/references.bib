@@ -1319,11 +1319,12 @@
 }
 
 @inproceedings{SRTensor,
-	author = {Rusinkiewicz, S.},
-	booktitle = {Proceedings. 2nd International Symposium on 3D Data Processing,
-	             Visualization and Transmission, 2004. 3DPVT 2004.},
-	title = {Estimating curvatures and their derivatives on triangle meshes},
+	author = {Rusinkiewicz, Szymon},
+	booktitle = {2nd International Symposium on 3D Data Processing,
+	             Visualization and Transmission},
+	title = {Estimating Curvatures and Their Derivatives on Triangle Meshes},
 	year = {2004},
+	month = {09},
 	volume = {},
 	number = {},
 	pages = {486-493},
@@ -1333,7 +1334,7 @@
 	doi = {10.1109/TDPVT.2004.1335277},
 	url = {https://gfx.cs.princeton.edu/pubs/Rusinkiewicz_2004_ECA/curvpaper.pdf
 	       },
-	note = {TODO},
+	OPTnote = {TODO},
 }
 
 @online{PrincipalCurvature,
@@ -1456,7 +1457,7 @@
 	OPTshorthand = {CMU05},
 }
 
-%% Math algorithms
+%% Math algorithms / procedures
 @article{RDP_line_reduction_DP,
 	author = {Douglas, David H and Peucker, Thomas K},
 	title = {Algorithms for the Reduction of the Number of Points Required to
@@ -1502,6 +1503,59 @@
 	            criterion. The results obtained justify the abandonment of the
 	            minimum-vertices criterion which is computationally much more
 	            expensive.},
+}
+
+@article{Ellipse_least_squares,
+	title = {A note on the least squares fitting of ellipses},
+	journal = {Pattern Recognition Letters},
+	volume = {14},
+	number = {10},
+	pages = {799-808},
+	year = {1993},
+	issn = {0167-8655},
+	doi = {https://doi.org/10.1016/0167-8655(93)90062-I},
+	url = {https://www.sciencedirect.com/science/article/pii/016786559390062I},
+	author = {Paul L. Rosin},
+	keywords = {Ellipse, least squares fitting, normalisation, curvature bias,
+	            singularity, transformational invariance},
+	abstract = {The characteristics of two normalisations for the general conic
+	            equation are investigated for use in least squares fitting:
+	            either setting F = 1 or A + C = 1. The normalisations vary in
+	            three main areas: curvature bias, singularities, transformational
+	            invariance. It is shown that setting F = 1 is the more
+	            appropriate for ellipse fitting since it is less heavily
+	            curvature biased. Setting A + C = 1 produces more eccentric
+	            conics, resulting either in over-elongated ellipses or
+	            hyperbolae. Although the F = 1 normalisation is less well suited
+	            than the A + C = 1 normalisation with respect to singularities
+	            and transformational invariance both these problems are solved by
+	            normalising the data, shifting it so that it is centred on the
+	            origin before shifting fitting, and then re-expressing the fit in
+	            the original frame of reference.},
+}
+
+@online{GeoTools_pt_to_ellipse,
+	author = {David, Eberly},
+	title = {Distance from a Point to an Ellipse, an Ellipsoid, or a
+	         Hyperellipsoid},
+	OPTsubtitle = {Smooth Curvature},
+	date = {2020-09-11},
+	howpublished = {online},
+	organization = {Geometric Tools},
+	location = {Redmond WA, USA},
+	url = {
+	       https://www.geometrictools.com/Documentation/DistancePointEllipseEllipsoid.pdf
+	       },
+}
+
+@online{PNPoly,
+	author = {Franklin, W. Randolph},
+	ALTeditor = {editor},
+	title = {PNPOLY - Point Inclusion in Polygon Test},
+	date = {2023-03-06},
+	url = {https://wrfranklin.org/Research/Short_Notes/pnpoly.html},
+	OPTnote = {Used in code, but that functionality is not described in the
+	           thesis, hence this reference is unused..},
 }
 
 %% Traveling Salesman Problem

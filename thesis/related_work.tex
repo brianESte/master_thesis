@@ -6,7 +6,7 @@ The goal of pathfinding is to determine the shortest path between two points whi
 Pathfinding has applications ranging from navigation to network routing.
 The primary pathfinding algorithms are: Dijkstra's algorithm\cite{Dijkstra, Improved_Dijkstra} which determines the shortest path between two nodes in a weighted graph, and A* (A-Star)\cite{A_Star_lit_review, A_Star_beginners, A_Star_in_computer_games} which is effectively Dijkstra's algorithm with a heuristic function applied.
 Dijkstra's algorithm is well suited for navigating between cities\cite{Dijkstra_for_railroads}, as a network of connected cities is effectively a graph with edges weighted by distance.
-(maybe talk about A* a little more?)
+(? maybe talk about A* a little more?)
 
 In contrast to this, the goal of coverage path planning (CPP) is to traverse as much of the given working area as possible.
 The objective of applied CPP is typically for an agent to perform some function over the entire working area.
@@ -14,7 +14,7 @@ Examples of this include spray painting car parts\cite{Automatic_spray_painting_
 
 In the past few years drones have become increasing popular, including as CPP agents\cite{CPP_UAV_survey, CPP_2D_convex_regions_uav, CPP_multi_UAV, CPP_spraying_drones}.
 Luna et al. presented a multi-UAV approach to scan a set of disjointed land areas\cite{CPP_multi_UAV}.
-(Maybe talk about UAV CPP more?)
+(? Maybe talk about UAV CPP more?)
 
 CPP algorithms can be off-line, in which the environment is known at the start and is assumed constant, or on-line, in which the path planning agent must deal with an unknown or changing environment\cite{CPP_survey_for_robotics}.
 On-line applications include the aforementioned car part spray painting, panel spray forming\cite{Robotic_grc_spraying}, and metal polishing.
@@ -35,7 +35,8 @@ Hameed et al. calculate the height value for their waypoints via bilinear interp
 Gao et al. use a 2.5D grid discretization as the basis for their algorithm\cite{CPP_2.5D_grid_map}.
 Coverage path planning performed by UAVs in a 2D space covering an otherwise 3D ROI is seemingly common\cite{CPP_2.5D_SAA_grid_based_UAV_3D_recons, CPP_2.5D_UAV_3D_terrain_recons, CPP_multi_UAV, CPP_2D_convex_regions_uav}.
 % This style of CPP feels more 2D than 2.5D, despite the results typically being 3D
-Galceran and Carreras demonstrate the complexity of a ROI with varying distance to the agent\cite{CPP_2.5D_seabed_2012}, as holding the depth of their AUV constant results in a varying FOV observed.
+Galceran and Carreras demonstrate the complexity of a ROI with varying distance to the agent\cite{CPP_2.5D_seabed_2012}, as holding the depth of their autonomous underwater vehicle constant results in a varying FOV observed.
+% NOTE: If i talked more about AUVs, it would be worth creating and using the initialism..initialism...
 They solve this by segmenting the given seabed map into regions of depth constant enough to be approximated as 2D.
 In a subsequent paper Galceran and Carreras tackle a similar problem by segmenting the given bathymetric map into ``high-slope'' regions and relatively planar regions\cite{CPP_2.5D_seabed_2013}.
 
@@ -54,7 +55,8 @@ The path is formed by the repeated intersection of a slicing plane with the offs
 
 % \section{3D Segmentation}
 Decomposing a fully 3D space into more manageable subspaces typically done either by in a hierarchical manner\cite{HiCPP_cplx_3D_env}, or via segmentation of the target's mesh representation\cite{Mesh_segm_technik_survey}.
-Within 3D mesh segmentation...
+(? I had considered writing more about the different types of 3D mesh decomposition, but that would have been another page, at least, and the chapter is already ~3.5 pages...)
+% Within 3D mesh segmentation...
 % TODO: expand on the types of mesh segmentation discussed in MSTS
 
 Pichler et al. present a procedure that compares laser-range data against a collection of complex geometric definitions\cite{Automatic_spray_painting_unknown_parts}.
@@ -92,7 +94,7 @@ They term a convex polygon composed from one or more adjacent sub-polygon cells 
 The set of convex merge options is created from the initial sub-polygons cells.
 To determine which subset of convex merge options constitutes the \textit{optimal} sub-polygons is a set partitioning problem with the optimal sub-polygons selected via an integer programming model.
 
-(I could not find a source documenting the following, as such it is just my thoughts, and should probably be moved to methodology...)
+(? I could not find a source documenting the following, as such it is just my thoughts, and should probably be moved to methodology...)
 
 To plan a path within a convex or semi-convex (as is the case via BCD) polygon two motion planning options are immediately apparent: a spiral patter and a back-and-forth pattern also known as a boustrophedon path.
 Between these, the boustrophedon path is generally favored over the spiral pattern because it is simpler and because the spiral pattern requires a direction change at each corner, whereas an omnidirectional agent, such as a UAV or robotic arm, following a boustrophedon path need not change orientation between sweep lines, only position.
