@@ -327,7 +327,9 @@
 	booktitle = {Proceedings 2001 ICRA. IEEE International Conference on
 	             Robotics and Automation (Cat. No.01CH37164)},
 	title = {Exact cellular decomposition of closed orientable surfaces embedded
-	         in /spl Rfr//sup 3/},
+	         in R3},
+	OPTtitle = {Exact cellular decomposition of closed orientable surfaces
+	            embedded in /spl Rfr//sup 3/},
 	year = {2001},
 	volume = {1},
 	number = {},
@@ -349,7 +351,7 @@
 	year = {2005},
 	doi = {10.1177/0278364905059058},
 	URL = { https://doi.org/10.1177/0278364905059058 },
-	eprint = { https://doi.org/10.1177/0278364905059058 },
+	OPTeprint = { https://doi.org/10.1177/0278364905059058 },
 	abstract = { In spray painting applications, it is essential to generate a
 	            spray gun trajectory such that the entire surface is completely
 	            covered and receives an acceptably uniform layer of paint
@@ -377,6 +379,7 @@
 	            simple surfaces in simulation, and finally evaluate the
 	            effectiveness of our algorithms experimentally on real automotive
 	            surfaces. },
+	note = {Note about hbox},
 }
 
 @article{Terrain_covering_AUV,
@@ -1538,7 +1541,6 @@
 	author = {David, Eberly},
 	title = {Distance from a Point to an Ellipse, an Ellipsoid, or a
 	         Hyperellipsoid},
-	OPTsubtitle = {Smooth Curvature},
 	date = {2020-09-11},
 	howpublished = {online},
 	organization = {Geometric Tools},
@@ -1546,6 +1548,26 @@
 	url = {
 	       https://www.geometrictools.com/Documentation/DistancePointEllipseEllipsoid.pdf
 	       },
+}
+
+@online{GeoTools_least_squares_fitting,
+	author = {David, Eberly},
+	title = {Least Squares Fitting of Data by Linear or Quadratic Structures},
+	date = {2024-02-25},
+	howpublished = {online},
+	organization = {Geometric Tools},
+	location = {Redmond WA, USA},
+	url = {https://www.geometrictools.com/Documentation/LeastSquaresFitting.pdf},
+}
+
+@misc{PCL_cyl_regression,
+	title = {On cylindrical regression in three-dimensional Euclidean space},
+	author = {O. V. Ageev and R. A. Sharipov},
+	year = {2019},
+	eprint = {1908.02215},
+	archivePrefix = {arXiv},
+	primaryClass = {cs.CG},
+	url = {https://arxiv.org/abs/1908.02215},
 }
 
 @online{PNPoly,
@@ -1704,6 +1726,21 @@
 	url = {https://doi.org/10.5281/zenodo.4438751},
 }
 
+%% Improvements
+@article{Isovists,
+	author = {Benedikt, Michael},
+	year = {1979},
+	month = {01},
+	pages = {47-65},
+	title = {To Take Hold of Space: Isovists and Isovist Fields},
+	volume = {6},
+	journal = {Environment and Planning B: Planning and Design},
+	doi = {10.1068/b060047},
+	url = {
+	       https://www.researchgate.net/publication/23541752_To_Take_Hold_of_Space_Isovists_and_Isovist_Fields
+	       },
+}
+
 %% Robot
 @online{UR_XML-RPC,
 	title = {XML-RPC communication},
@@ -1853,19 +1890,5 @@
 	numpages = {7},
 	keywords = {robust estimation, mesh smoothing, mesh processing, mesh fairing
 	            , bilateral filtering, anisotropic diffusion},
-}
-
-@article{Isovists,
-	author = {Benedikt, Michael},
-	year = {1979},
-	month = {01},
-	pages = {47-65},
-	title = {To Take Hold of Space: Isovists and Isovist Fields},
-	volume = {6},
-	journal = {Environment and Planning B: Planning and Design},
-	doi = {10.1068/b060047},
-	url = {
-	       https://www.researchgate.net/publication/23541752_To_Take_Hold_of_Space_Isovists_and_Isovist_Fields
-	       },
 }
 

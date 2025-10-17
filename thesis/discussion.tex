@@ -1,5 +1,95 @@
 %! TeX root = thesis.tex
 \chapter{Discussion}
 \IMRADlabel{discussion}
-Discussion! did it work? I hope so.
+Discussion! did it work?
+
+\section{Watershed Segmentation}
+Watershed segmentation as implemented here, functioned as intended.
+Based on the results observed, the cause of any segmentation issues is believed to lie with the height function chosen.
+Though not thoroughly tested, the Watershed modifications made in this work are expected to have been non-detrimental.
+(? probably better without the previous sentence...)
+% There is no reason to believe the additions / modifications / implementation here is responsible for the issues encountered.
+
+\section{Surface Classification}
+Of the implemented primitives, plane and elliptic cylinder, surface classification works as intended.
+Expanding this project to handle the third proposed primitive, ellipsoids, would be relatively straightforward, given that Eberly's work on ellipses extends to ellipsoids \cite{GeoTools_pt_to_ellipse}.
+Should the approach of primitive segmentation and classification be pursued further, the functionality to handle more primitives will be necessary.
+Beyond ellipsoids, the main remaining geometric primitives are the cone and torus.
+For both of these Eberly once again offers solutions \cite{GeoTools_least_squares_fitting}, though fitting a cone to 3D points can likely be simplified by exploiting the input mesh's normals.
+% The surface classification methods presented here, although they represent earnest attempts, are generally unreliable. -> less so since classifiers were replaced with pure regression.
+
+\section{2D Segmentation}
+The stated goals of the \textit{interior edge extension}\cite{IntEdgeExt} are:
+\begin{enumerate}
+	\item to minimize the number of changes in direction of the planned paths.
+		This goal leads to the optimization requirement of minimizing the sum of cell widths when solving the weighted set coverage problem.
+	\item to produce convex cells.
+\end{enumerate}
+
+Minimizing the number of direction changes is of value if the cost in time or energy of a direction change is non-negligible, as is the case for mobile robots such as automated agriculture machines, AUVs, and to a lesser degree UAVs.
+However the cost of direction change for a robot arm is minimal.
+Furthermore, the envisioned end-effector tool is equally effective in its surface treatment moving in the positive or negative direction normal to the laser plane.
+(? rethink previous sentence...?)
+That is, while a Roomba would be less effective if it were to traverse its environment backwards, the laser module suffers no such loss of efficacy.
+% a ``planar laser'' (? revisit with better wording)
+% need not rotate at each switchback because it is
+Hence, the goal of minimzing the number of switchbacks was unnecessary for this work.
+
+Nielsen et al. do not explain why the final polygons should be convex, treating it as a given.
+Boustrophedon path planning requires cells to be \textit{semi}-convex, not necessarily truly convex.
+This is illustrated in figure \ref{fig:bpath_semi_convex} below.
+
+\begin{figure}[htb]
+	\centering
+	\begin{tikzpicture}[scale=1.0]
+		\datavisualization[
+			% new Cartesian axis=x axis, x axis={attribute=x},
+			% new Cartesian axis=y axis, y axis={attribute=y},
+			scientific axes,%=clean,
+			all axes={ticks={major={at={}},minor={at={}}}},
+			data/format=table,
+			% yticklabel={\empty},
+			% school book axes,
+			visualize as line/.list={outline,path},
+			% /data point/set/outline/.initial=1
+			% outline={style={}},
+			path={style={red}}
+			]
+			data[
+				headline={x,y},
+				read from file="../resources/boustrophedon/ex_2_polygon.csv",
+				set=outline]
+			data[
+				headline={x,y},
+				read from file="../resources/boustrophedon/ex_2_path.csv",
+				set=path];
+	\end{tikzpicture}
+	\caption{Boustrophedon path planning performed on a semi-convex shape}
+	\label{fig:bpath_semi_convex}
+\end{figure}
+
+For semi-convex polygons the sweep direction may no longer be chosen based on the longest edge.
+The sweep direction must be chosen such that a line parallel to the sweep direction reaches the entire polygon when swept along the shift direction.
+% A formal definition of ``semi-convex'' is beyond the scope of this work, and left for future work, but ..?
+Although a formal definition of ``semi-convex'' is beyong the scope of this work, an informal one may be attempted (? approached).
+% This is best described with an image, see below.
+
+\subsection{Isovist Line}
+% TODO: new name... "bivist line" ?
+To define a useful measure of "semi-convexity" the notion of the isovist is helpful.
+Benedikt gives the definition of an isovist as "the set of all points visible from a given vantage point in space and with respect to an environment"\cite{Isovists}.
+While the isovist concept is primarily used in architecture and urban spaces, it can also be applied to computational geometry.
+In the \textit{art gallery problem} each guard represents an isovist, and the solution to a given art gallery problem is the minimum number of isovists to completely cover the given environment.
+A similar problem in computational geometry is the \textit{watchman route problem}, in which the a single mobile watchman is tasked with guarding an environment with obstacles.
+The challenge lies in determining the shortest path the watchman should take to observe the entire environment.
+Determining a polygon's ``semi-convexity'' draws on both of these problems by reducing the number of guards is to one, whose scope of observation is further reduced to a single line in both directions, but who \textit{is} allowed to move perpendicular to the viewing direction.
+% Extending the art gallery problem to create a semi-convexity-test for a polygon, the number of guards is reduced to one, whose scope of observation is further reduced to a single line in both directions, but who \texti{is} allowed to move perpendicular to the viewing direction.
+If ``guarding'' the polygon this way is feasible, then the polygon is at least semi-convex, and boustrophedon path planning may be applied, with the shift direction set to the guard's direction of movement, and the sweep direction perpendicular thereto.
+Naturally, convex polygons pass this test as well.
+% Each guard is reduced to looking along a single line in both directions, but is allowed to move along a line perpendicular to the viewing direction.
+
+\section{Cellular Path Planning}
+Cellular path planning using boustrophedon path planning worked as expected.
+There was potential for expansion, such as allowing the TSP to potentially determine the path start point on the polygon.
+This is left for a future expansion of the project, in which the TSP is fully implemented.
 

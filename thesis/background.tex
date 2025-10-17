@@ -215,6 +215,12 @@ Alternatively, if there is no other reason to compute the transformation matrix 
 
 \subsection{Cylindric Regression}
 Cylinders in this context can be understood as an extruded conic section.
+While there are methods of ascertaining (? better word?) a cylinder from a mere collection of 3D points\cite{PCL_cyl_regression}, the process employed here was simplified by exploiting the mesh's normals.
+For a cylindric mesh of constant radius with vertex normals, the normals will all be perpendicular to the main axis.
+Thus, the least principal component from a PCA performed on the mesh's normals will yield a vector along the main axis.
+From here a coordinate system may be created such that the z axis is the cylinder's main axis.
+The origin of the cylindric coordinate system is for cylindric, and thus conic regression, inconsequential, but is typically set initially to the mean point position of the mesh.
+Next, the mesh vertices are projected onto the XY plane of the cylinder's coordinate system, so that the specific type of conic may be deduced.
 The general equation of a conic is:
 \begin{equation}\label{eq:gen_conic}
 	Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0.
