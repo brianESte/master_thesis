@@ -58,11 +58,11 @@ In such a semi-autonomous system, human contact to the contaminated object is li
 The envisioned application thereof is the processing of waste and debris from the dismantling of nuclear power plants, but other applications are possible.
 The primary cooling system in a nuclear power plant is irradiated throughout its lifespan.
 Thus, during decommissioning, components thereof are treated as hazardous waste.
-Coatings are used at nuclear power plants to protect metals from corrosion, reduce general wear, and facilitate decontamination of containment walls and surfaces \cite{NRC_coatings}.
-Because the coating exists to block radioactive nuclides from penetrating the metal underneath, once removed, the metal can be unconditionally released for recycling \cite{NRC_coatings}.
+Coatings are used at nuclear power plants to protect metals from corrosion, reduce general wear, and facilitate decontamination of containment walls and surfaces~\cite{NRC_coatings}.
+Because the coating exists to block radioactive nuclides from penetrating the metal underneath, once removed, the metal can be unconditionally released for recycling~\cite{NRC_coatings}.
 This greatly reduces the volume of material that requires special treatment and storage.
 
-Such a system is currently in operation in Biblis, Germany \cite{ROBBE}.
+Such a system is currently in operation in Biblis, Germany~\cite{ROBBE}.
 The purpose of this thesis is to improve upon that system with a more efficient path planning algorithm and by replacing the high pressure water jet currently used with a high-powered laser to remove the coatings via ablation.
 This change will facilitate clean-up, as laser ablation produces only gases and vapor that van be removed via vacuum, whereas the water from the pressure washer produced a greater mess and volume of material to be stored.
 The disadvantages of laser ablation over a pressure washer, are that the laser has a significantly smaller cleaning contact area, necessitating a longer coverage path, and requiring the laser be positioned closer to the object's surface, increasing the positional path precision required.
@@ -70,14 +70,14 @@ The disadvantages of laser ablation over a pressure washer, are that the laser h
 \section*{Description}
 The difficulty in an autonomous waste processing system lies in handling arbitrary shapes, efficient computing of the geometry and paths, as well as ensuring the entire surface is processed.
 The primary goal of the proposed algorithm is to produce simple, convex, unwrappable surfaces upon which a back-and-forth path will be planned.
-The specific steps are outlined below and in Fig~\ref{fig:procedure_overview}.
+The specific steps are outlined below and in Figure~\ref{fig:procedure_overview}.
 \begin{enumerate}
 	\item Apply Watershed Segmentation to the mesh, yielding surfaces that are unwrappable to 2D.
 		Watershed Segmentation applies a ``height'' function to each vertex in the mesh.
-		Regions are formed from ``low'' areas separated by ``high'' areas \cite{Watershed, Hier_seg_autobody_painting}.
+		Regions are formed from ``low'' areas separated by ``high'' areas~\cite{Watershed, Hier_seg_autobody_painting}.
 	\item The resulting surfaces are classified as planar, cylindric, convex, or multi-planar.
 		Multi-planar indicates that a region could not be classified as one of the three primitive surfaces, and needs to undergo Watershed segmentation again.
-	\item Surfaces with a concave outline are subject to Interior Edge Extension, a 2D segmentation process that produces compact convex shapes from a concave one \cite{IntEdgeExt}.
+	\item Surfaces with a concave outline are subject to Interior Edge Extension, a 2D segmentation process that produces compact convex shapes from a concave one~\cite{IntEdgeExt}.
 	\item Apply a modified Traveling Salesman Problem to the convex surface-sections to connect them in a travel-efficient manner.
 		The TSP is modified such that the start and end nodes need not be the same.
 	\item Plot a back-and-forth path on each surface-section, taking into account the preceding and subsequent surface-sections.
@@ -110,7 +110,7 @@ The specific steps are outlined below and in Fig~\ref{fig:procedure_overview}.
 Testing is currently conducted using a UR10 from Universal Robots.
 During prior testing, commands were sent to the robot without guarantee that the previous command had been fully executed.
 Newly received commands would interrupt the current command, leading to jerky, and sometimes erroneous movement.
-In order to prevent such issues, XML-RPC was chosen as the communication method between controller and robot for this project \cite{UR_XML-RPC}.
+In order to prevent such issues, XML-RPC was chosen as the communication method between controller and robot for this project~\cite{UR_XML-RPC}.
 XML-RPC (Remote Procedure Call) is a communication protocol that allows programs to communicate via HTTP independent of OS and architecture.
 A cursory examination of the UR programming facilities revealed nothing akin to a queue with which to hold received commands.
 As such, queuing of commands will take place server-side (controller) and the robot will be programmed to process commands individually, requesting the next as the current is completed.

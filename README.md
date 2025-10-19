@@ -16,6 +16,7 @@ could be run without sudo privileges.
 
 Reminders:
 - et al. is written with a .
+- Figure, Chapter, Section, Table, Equation, etc are all capitalized when referencing a particular thereof.
 - Conforming to this template, there is no point in referencing a subsubsection by `\label{}` / `\ref{}` because the number shown will be at most that of the containing subsection. Thus it is (probably) better to reference subsubsections by name instead.
 
 ## Notes

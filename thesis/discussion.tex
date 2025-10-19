@@ -12,10 +12,10 @@ Though not thoroughly tested, the Watershed modifications made in this work are 
 
 \section{Surface Classification}
 Of the implemented primitives, plane and elliptic cylinder, surface classification works as intended.
-Expanding this project to handle the third proposed primitive, ellipsoids, would be relatively straightforward, given that Eberly's work on ellipses extends to ellipsoids \cite{GeoTools_pt_to_ellipse}.
+Expanding this project to handle the third proposed primitive, ellipsoids, would be relatively straightforward, given that Eberly's work on ellipses extends to ellipsoids~\cite{GeoTools_pt_to_ellipse}.
 Should the approach of primitive segmentation and classification be pursued further, the functionality to handle more primitives will be necessary.
 Beyond ellipsoids, the main remaining geometric primitives are the cone and torus.
-For both of these Eberly once again offers solutions \cite{GeoTools_least_squares_fitting}, though fitting a cone to 3D points can likely be simplified by exploiting the input mesh's normals.
+For both of these Eberly once again offers solutions~\cite{GeoTools_least_squares_fitting}, though fitting a cone to 3D points can likely be simplified by exploiting the input mesh's normals.
 % The surface classification methods presented here, although they represent earnest attempts, are generally unreliable. -> less so since classifiers were replaced with pure regression.
 
 \section{2D Segmentation}
@@ -37,7 +37,7 @@ Hence, the goal of minimzing the number of switchbacks was unnecessary for this 
 
 Nielsen et al. do not explain why the final polygons should be convex, treating it as a given.
 Boustrophedon path planning requires cells to be \textit{semi}-convex, not necessarily truly convex.
-This is illustrated in figure \ref{fig:bpath_semi_convex} below.
+This is illustrated in Figure \ref{fig:bpath_semi_convex} below.
 
 \begin{figure}[htb]
 	\centering

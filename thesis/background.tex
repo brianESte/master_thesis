@@ -1,88 +1,190 @@
 %! TeX root = thesis.tex
-\chapter{Background}\label{background}
-(? Does there need to be any text to introduce the background chapter?, ie, a paragraph here)
+\chapter{Background}
+\tikzset{HighLevelProcedure/.pic={
+	\newdimen\dx
+	\dx=6mm
+	% nodes
+	\node[] (Mesh) {Mesh};
+	\node[FC-Node] (3DSeg) [right=\dx of Mesh] {3D Segmentation};
+	\node[FC-Node] (GeoSimp) [right=\dx of 3DSeg] {Geometry Simplification};
+	\node[FC-Node] (2DSeg) [right=\dx of GeoSimp] {2D Segmentation};
+	\node[FC-Node,text width=27mm] (Bpath) [below=10mm of Mesh, xshift=10mm] {Cellular path planning};
+	\node[FC-Node,text width=30mm] (TSP) [right=\dx of Bpath] {Modified TSP};
+	\node[FC-Node,text width=20mm] (InvKin) [right=\dx of TSP] {Inverse Kinematics};
+	\node[text width=20mm] (Poses) [right=\dx of InvKin] {Actuator Poses};
+	% connections
+	\draw [FC-Arrow] (Mesh) -- (3DSeg);
+	\draw [FC-Arrow] (3DSeg) -- (GeoSimp);
+	\draw [FC-Arrow] (GeoSimp) -- (2DSeg);
+	\draw [FC-Arrow, rounded corners=5pt] (2DSeg.south) |-| (Bpath.north);
+	\draw [FC-Arrow] (Bpath) -- (TSP);
+	\draw [FC-Arrow] (TSP) -- (InvKin);
+	\draw [FC-Arrow] (InvKin) -- (Poses);
+}}
+
+\begin{figure}[hb]
+	\centering
+\begin{tikzpicture}
+	\pic at (0,0) {HighLevelProcedure};
+\end{tikzpicture}
+	\caption{Graphical overview of the path planning and execution procedure}
+	\label{fig:bkgd_overview}
+\end{figure}
+The objective is to plan a path covering the surface of an unknown object.
+The intended application of this is to be able to clean a surface via ablation using a planar laser.
+The general flow (? procedure?) presented in this work is as follows.
+The high level procedure is shown in Figure \ref{fig:bkgd_overview}
+The 3D triangular mesh of an object is provided as input.
+This mesh is segmented using Watershed segmentation into regions of low curvature separated by regions of high curvature.
+These regions are classified into different categories of geometric primitives, or if no classification is possible, subjected to Watershed segmentation again.
+Once all regions have been classified, idealized geometric representations, termed ``simple surfaces'', are created from each based on their primitive classification.
+Non-convex simple surfaces are subject to 2D segmentation, from which convex sub-regions are produced.
+A local coverage path is then planned on each convex region.
+The task of combining the individual paths into a single path is a form of Traveling Salesman Problem (TSP).
+Once the path is complete, the waypoints thereof may be sent to the robot arm tasked with carrying out the cleaning operation.
 
 \section{Geometric Curvature}
-For segmenting a 3D mesh via Watershed Segmentation each vertex requires a singular / combined measure of curvature.
+The first step of \textit{3D Segmentation} is to segment the object's mesh using Watershed segmentation.
+Watershed segmentation requires a ``height'' function be applied to each vertex of the given mesh.
+See Section \ref{sec:ws_seg} for greater detail on Watershed segmentation.
+In order to segment the mesh along regions of high curvature, the vertice's height must be a function of its curvature.
 The various forms and types of curvature examined throughout this project are presented in the following sections.
+
+Curvature descibes the rate of change of a curve or surface's tangent.
+Figure \ref{sfig:tangent_on_curve} shows the curvature $\kappa$ as the change of the tangent at the marked point as it moves along the curve.
+Alternatively, the curvature of a point on a surface can be defined via the osculating circle at that point, which is the circle that best approximates the surface at that point.
+Following that definition, the curvature is the inverse radius of the osculating circle.
+
+\begin{figure}[ht]
+	\centering
+	\begin{subfigure}{0.47\textwidth}
+		\centering
+\begin{tikzpicture}[scale=1.5]
+	% based on image in slide 22/23 in DDG-Curves.pdf
+	% \draw[step=10mm,gray!50,very thin] (-0.2,-0.2) grid (5.2,3.2);
+	\draw[] (-0.1,-0.1) .. controls (2.0,2.0) and (2.5,0) .. (1.5,0)
+		% node [sloped,pos=0.1,minimum size=10mm,anchor=south west] (pt1) {}
+		% node [sloped,pos=0.15,minimum size=9mm,anchor=south west] (pt1d) {}
+		node [sloped,pos=0.38,minimum size=15mm,anchor=south west] (pt2) {}
+		node [sloped,pos=0.43,minimum size=12mm,anchor=south west] (pt2d) {};
+	% Point 1
+	% \fill (pt1.south west) circle[radius=2pt,blue];
+	% \path (pt1.south west) edge[-Stealth] node[above] {$\vec{t}$} (pt1.south east);
+	% Point 1 delta and curvature
+	% \path (pt1d.south west) edge[-Stealth] node[] {} (pt1d.south east);
+	% \draw[dashed] (pt1.south east) -- (pt1d.south east) node[pos=0.5] {$\kappa$};
+	% Point 2
+	\fill (pt2.south west) circle[radius=1.5pt,blue];
+	\path (pt2.south west) edge[-Stealth] node[above] {$\vec{t}$} (pt2.south east);
+	% Point 2 delta and curvature
+	\path (pt2d.south west) edge[-Stealth] node[] {} (pt2d.south east);
+	\draw[red] (pt2.south east) -- (pt2d.south east) node[pos=0.5,anchor=west] {$\kappa$};
+\end{tikzpicture}
+		\caption{%
+Normal vector of a point on a curve.
+Inspired by~\cite{DDGAppIntro_12_smooth_curves}.}
+		\label{sfig:tangent_on_curve}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.45\textwidth}
+		\centering
+	\includegraphics[width=0.7\textwidth]{../resources/curvature/osculating_circle.png}
+% \begin{tikzpicture}[scale=1.0]\end{tikzpicture}
+		\caption{%
+A curve with osculating circle at point $p$.
+Image from~\cite{DDGAppIntro_12_smooth_curves}, unless replaced by TikZ.
+(? TODO: recreate important parts in TikZ)
+}
+		% \label{sfig:mesh_neighborhood}
+	\end{subfigure}
+	% \caption{}
+\end{figure}
 
 \subsection{Principal Curvatures}
 All combined measures of curvature are based, either in theory or in actuality, on the principal curvatures.
-The principal curvatures at a given point on a surface are simply the maximum and minimum curvature\cite{DDGAppIntro_17_smooth_k}.
-The principal curvatures at the top of a hill-like surface are illustrated in figure \ref{fig:principal_k}.
-Determining principal curvatures for a continuous surface is unambiguous.
-The principal curvatures of a surface $S$ at point $p$ are defined by the 2nd fundamental form\cite{DiffGeo_curves_surfaces, Basic_diff_geo_of_surfaces, DDGAppIntro_17_smooth_k}:
-\begin{equation}
-	II(X,Y) := \langle dN(X), df(Y)\rangle,
-\end{equation}
-and can be found as the eigenvalues of
-\begin{equation}\label{2nd_fundamental_tensor}
-	\begin{bmatrix}
-		II(X_1, X_2) & II(X_1, X_2) \\
-		II(X_2, X_1) & II(X_2, X_2)
-	\end{bmatrix}.
-\end{equation}
-Similarly, the principal directions are the eigenvectors of \ref{2nd_fundamental_tensor}.
+The principal curvatures at a given point on a surface are simply the maximum $\kappa_1$ and minimum $\kappa_2$ curvature~\cite{DDGAppIntro_17_smooth_k}.
+Note that in this work the first principal curvature is the maximum and the second the minimum, whereas other sources may use the reverse schema.
+The principal curvatures at the top of a hill-like surface are illustrated in Figure \ref{fig:principal_k}.
 
-\begin{figure}
+\begin{figure}[htb]
 	\centering
 	% \includegraphics[width=0.7\textwidth]{../resources/minimal_surface_curvature_planes-en.svg.png}
-	\includegraphics[width=0.7\textwidth]{../resources/principal_curvatures.png}
+	\includegraphics[width=0.7\textwidth]{../resources/curvature/principal_curvatures.png}
 	% \includesvg[width=0.9\textwidth]{../resources/Minimal_surface_curvature_planes-en.svg}
 	\caption{
-Principal curvatures shown on an ellipsoidally round surface\cite{Digital_geom_proc_w_disc_ext_calc}.
+Principal curvatures are shown on an ellipsoidally round surface~\cite{Digital_geom_proc_w_disc_ext_calc}.
 $X_1$ and $X_2$ show the principal directions.
-The curvature of a curve at a given point is the inverse of the radius of said curve.
-The cutaway views show this as an osculated circle in each projection of the surface.
-	}
+The cutaway views show this as an osculating circle in each projection of the surface.
+}
 	\label{fig:principal_k}
 \end{figure}
 
-There are however various ways of approximating the principal curvatures on a discrete mesh\cite{EstCurvOnTriMesh, DiscDiffGeoOpsTriMani}.
-A basic approach is to calculate the mean and Gaussian curvatures, and derive the principal curvatures from them\cite{DDGAppIntro_19_discrete_k_2, Gauss_mean_k_notes}.
-Given the mean curvature $H$ and Gaussian curvature $K$ (see \ref{sec:mean_k} and \ref{sec:gauss_k}), the principal curvatures can be calculated from \ref{eq:mean_k} and \ref{eq:gauss_k}.
-\begin{align}
+Determining principal curvatures for a continuous surface is unambiguous.
+The principal curvatures of a surface $S$ at point $p$ are defined by the 2nd fundamental form~\cite{DiffGeo_curves_surfaces, Basic_diff_geo_of_surfaces, DDGAppIntro_17_smooth_k} $\textbf{II}(X,Y)$, where $X$ and $Y$ are orthonormal vectors at $p$.
+\iffalse
+\begin{equation}
+	\textbf{II}(U,V) = Ldu^2 + 2 M du dv + N dv^2,%\langle dN(X), df(Y)\rangle,
+\end{equation}
+where $U$ and $V$ are orthonormal vectors tangent to the point $(u,v)$ on some surface, $du$ and $dv$ are the changes in the $U$ and $V$ directions, repsectively.
+Additionally, $L$ is ...
+and can be found as the eigenvalues of
+\fi
+The principal curvatures are the eigenvalues of
+\begin{equation}\label{eq:2nd_fundamental_tensor}
+	\begin{bmatrix}
+		\textbf{II}(X_1, X_2) & \textbf{II}(X_1, X_2) \\
+		\textbf{II}(X_2, X_1) & \textbf{II}(X_2, X_2)
+	\end{bmatrix},
+\end{equation}
+where $X_1$ and $X_2$ are the aforementioned orthonormal vectors tangent to the surface at point $p$.
+Similarly, the principal directions are the eigenvectors of Equation \ref{eq:2nd_fundamental_tensor}.
+
+There are however various ways of approximating the principal curvatures on a discrete mesh~\cite{EstCurvOnTriMesh, DiscDiffGeoOpsTriMani}.
+A basic approach is to calculate the mean and Gaussian curvatures, and derive the principal curvatures from them~\cite{DDGAppIntro_19_discrete_k_2, Gauss_mean_k_notes}.
+Given the mean curvature $H$ and Gaussian curvature $K$ (see Sections \ref{sec:mean_k} and \ref{sec:gauss_k}), the principal curvatures can be calculated from Equations \ref{eq:mean_k} and \ref{eq:gauss_k}, or the discrete approximations from Equations \ref{eq:dihedral_angle} and \ref{eq:disc_gauss_k}.
+\begin{align*}
 	\kappa_1 &= H - \sqrt{H^2 - K} \\
 	\kappa_2 &= H + \sqrt{H^2 - K}
-\end{align}
+\end{align*}
 Although theoretically impossible, discretization errors can cause $H^2$ to be less than $K$, resulting in ``imaginary'' curvature.
 This tends to occur on planar mesh regions, thus a minimum of 0 can be set for $H^2 - K$, because the root term would have been near 0 regardless, but it does highlight a flaw in this measure of curvature.
 
-Taubin calculated the principal curvatures directly by estimating the tensor of curvature\cite{TaubinTensor}.
-This has the benefit of direct calculation, but has been shown to be succeptible to noise in the mesh\cite{Comp_k_notes}.
-Thiesel et al. calculate the curvature tensor per triangular face in the mesh, based on the face's corner normals\cite{Norm_based_k_tensor_est}.
-Rusinkiewicz took a slightly different approach, calculating the curvature tensor for each mesh face via the differences between corner normals\cite{SRTensor}.
-From there he computes the per vertex curvature tensor as a weighted sum over the curvature tensors of the vertex's adjoining triangles via coordinate system transformations.
-Gatzke and Grimm examine a variety of other curvature estimation methods\cite{EstCurvOnTriMesh}, most of which were not considered for this work.
+Initially, RMS curvature calculated from discrete Gaussian and mean curvature was used as the mesh height.
+But this was eventually replaced with Taubin's method of calculating the principal curvatures directly via curvature tensor estimation~\cite{TaubinTensor}.
+This has the benefit of direct calculation, but has been shown to be succeptible to noise in the mesh~\cite{Comp_k_notes}.
+% Thiesel et al. calculate the curvature tensor per triangular face in the mesh, based on the face's corner normals~\cite{Norm_based_k_tensor_est}.
+This too was later retired, and replaced with Rusinkiewicz's approach of calculating the curvature tensor for each mesh face via the differences between corner normals~\cite{SRTensor}, then computing the per vertex curvature tensor as a weighted sum over the curvature tensors of the vertex's adjoining triangles via coordinate system transformations.
+% Gatzke and Grimm examine a variety of other curvature estimation methods~\cite{EstCurvOnTriMesh}, most of which were not considered for this work.
 
 \subsection{Mean Curvature}\label{sec:mean_k}
-Mean curvature is, as the name implies, the mean of the principal curvatures\cite{DDGAppIntro_19_discrete_k_2}:
+The discrete mean curvature was used early in development as part of the RMS curvature calculation.
+Mean curvature is, as the name implies, the mean of the principal curvatures~\cite{DDGAppIntro_19_discrete_k_2}
 \begin{equation}\label{eq:mean_k}
 	H = \frac{\kappa_1 + \kappa_2}{2}
 \end{equation}
+where $H$ is the mean curvature.
 Mean curvature can be approximated on a discrete mesh via sum of dihedral edge angle length products:
 \begin{equation}\label{eq:dihedral_angle}
 	H_i := \frac{1}{2}\sum_{j \in E}l_{ij} \phi_{ij}
 \end{equation}
 where $H_i$ is the mean curvature at vertex $i$, $j$ is a vertex in the ring of $i$, $l_{ij}$ is the length of the edge from $i$ to $j$, and $\phi_{ij}$ is the dihedral angle between the faces adjacent to edge $ij$.
-See \ref{sfig:dihedral_angle} for a graphical depiction.
+See Figure \ref{sfig:dihedral_angle} for a graphic depiction.
 
-Alternatively, the mean curvature normal $\Delta f$ can be calculated via the discrete Laplace-Beltrami operator\cite{DDGAppIntro_18_discrete_k_1}:
+Alternatively, the mean curvature normal $\Delta f$ can be calculated via the discrete Laplace-Beltrami operator~\cite{DDGAppIntro_18_discrete_k_1}
 \begin{equation}\label{eq:lap_beltrami_op}
 	(\Delta f)_i := \frac{1}{2}\sum_{j \in E}(\cot \alpha_{ij} + \cot \beta_{ij})(p_j - p_i),
 \end{equation}
-and the absolute mean curvature can be calculated as half of the magnitude thereof:
+and the absolute mean curvature can be calculated as half of the magnitude thereof
 \begin{equation}
 	|H_i| = \frac{\|(\Delta f)_i \|}{2}.
 \end{equation}
-In equation \ref{eq:lap_beltrami_op} above $p_j$ is a vertex in the ring of vertex $p_i$ which indicates the current edge, $\alpha_{ij}$ and $\beta_{ij}$ are the angles opposite the current edge (see \ref{sfig:mesh_neighborhood}).
+In Equation \ref{eq:lap_beltrami_op} above $p_j$ is a vertex in the ring of vertex $p_i$ which indicates the current edge, $\alpha_{ij}$ and $\beta_{ij}$ are the angles opposite the current edge (see \ref{sfig:mesh_neighborhood}).
 
-\begin{figure}[t]
+\begin{figure}[htb]
 	\centering
 	\begin{subfigure}{0.45\textwidth}
 		\centering
 \begin{tikzpicture}[
-	vertex/.style={circle, radius=2pt,fill, inner sep=2pt,outer sep=0pt},
 	hidden/.style={inner sep=0, outer sep=0}]
 	\node [vertex,label=180:i] (node_i) at (-0.4,2.2) {};
 	\node [vertex,label=215:j] (node_j) at (0.4,-2.2) {};
@@ -97,15 +199,13 @@ In equation \ref{eq:lap_beltrami_op} above $p_j$ is a vertex in the ring of vert
 	\draw [|-|, thick] ($(node_i.east)+(0.1,0.05)$) -- ($(node_j.east)+(0.1,0.05)$)
 		node [pos=0.65,label={0:$l_{ij}$}] {};
 \end{tikzpicture}
-		\caption{Dihedral angle of adjacent mesh faces. Inspired by \cite{DDGAppIntro_19_discrete_k_2}.}
+		\caption{Dihedral angle of adjacent mesh faces. Inspired by~\cite{DDGAppIntro_19_discrete_k_2}.}
 		\label{sfig:dihedral_angle}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}{0.45\textwidth}
 		\centering
-\begin{tikzpicture}[
-	scale=1.1,
-	vertex/.style={circle, radius=2pt,fill, inner sep=2pt,outer sep=0pt}]
+\begin{tikzpicture}[scale=1.1]
 	% based on image in slide 26/44 in DDG-DiscreteCurvatureI.pdf
 	\newdimen\hexR
 	\hexR=2cm
@@ -140,52 +240,56 @@ The angles opposite edge $ij$ are indicated as $\alpha_{ij}$ and $\beta_{ij}$.
 \end{figure}
 
 \subsection{Gaussian Curvature}\label{sec:gauss_k}
-Gaussian curvature\cite{TheoremaEgregium} is the product of the principal curvatures:
-
+Similar to mean curvature, discrete Gaussian curvature was used as part of the RMS curvature calculation.
+Gaussian curvature is the product of the principal curvatures
 \begin{equation}\label{eq:gauss_k}
 	K = \kappa_1 \cdot \kappa_2
 \end{equation}
-
-The discrete Gaussian curvature at a vertex is typically approximated as the ``angle defect'' divided by the vertex's area:
-\begin{equation}
+where $K$ is the Gaussian curvature~\cite{TheoremaEgregium}.
+The discrete Gaussian curvature at a vertex is typically approximated as the ``angle defect'' divided by the vertex's area
+\begin{equation}\label{eq:disc_gauss_k}
 	K = \frac{2\pi - \sum \Theta_j}{A_i}
 \end{equation}
-where $\Theta_j$ is the angle between adjacent edges from the central vertex ($\Theta_{ijk}$ in \ref{sfig:mesh_neighborhood}), and $A_i$ is the vertex area.
+where $\Theta_j$ is the angle between adjacent edges from the central vertex ($\Theta_{ijk}$ in Figure \ref{sfig:mesh_neighborhood}), and $A_i$ is the vertex area.
 
-Mean and Gaussian curvature are compared visually in figure \ref{fig:mean_gauss_k} from Pulla et al.
+Mean and Gaussian curvature are compared visually in Figure \ref{fig:mean_gauss_k}.
 Note that the Gaussian curvature is approximately 0 over the entire surface, because the surface curves in only 1 direction, thus the 2nd principal curvature is ~0.
 The colors shown in the mean curvature plot are effectively due entirely to the 1st principal curvature values.
 
 \begin{figure}
 	\centering
 	% TODO: create a tikz picture to replace this image
-	\includegraphics[width=0.9\textwidth]{../resources/gaussian_mean_k.png}
-	\caption{Comparison of Gaussian (a) and mean (b) curvature\cite{Imp_k_estimation_for_WS}}
+	\includegraphics[width=0.9\textwidth]{../resources/curvature/gaussian_mean_k.png}
+	\caption{This Comparison of Gaussian (a) and mean (b) curvature demonstrates how a surface that bends in only one direction will have 0 Gaussian curvature, whereas the mean curvature will vary with that direction~\cite{Imp_k_estimation_for_WS}.}
 	\label{fig:mean_gauss_k} % NOTE: Label should be declared after caption
 \end{figure}
 
 \subsection{Root Mean Square Curvature}
-Pulla et al. propsed using the root mean square curvature as the curvature estimate for use during watershed segmentation:
+Pulla et al. compared different types of curvature for the purpose of Watershed segmentation and found that although the absolute curvature produced the best results, the root mean square curvature produced similar results and was less computationally expensive.
+The root mean square curvature is as the name implies, the square root of the average of the principal curvatures squared:
 \begin{equation}
 	\kappa_{rms} = \sqrt{\frac{\kappa_1^2 + \kappa_2^2}{2}}.
 \end{equation}
-They compared different measures of curvature for this purpose and found that it was approximately as good as absolute curvature:
-\begin{equation}
-	\kappa_{abs} = |\kappa_1| + |\kappa_2|,
-\end{equation}
-but cheaper to compute, because they computed $\kappa_{rms}$ from the mean and Gaussian curvatures using:
-\begin{equation}
+% They compared different measures of curvature for this purpose and found that it was approximately as good as absolute curvature:
+% \begin{equation*}
+% 	\kappa_{abs} = |\kappa_1| + |\kappa_2|,
+% \end{equation*}
+They found $\kappa_{rms}$ cheaper to compute than the absolute curvature because they computed it from the mean and Gaussian curvatures:
+\begin{equation*}
 	\kappa_{rms} = \sqrt{4H^2 - 2K}.
-\end{equation}
-RMS curvature was used during developement prior to implementing the derivative of curvature.
+\end{equation*}
+% RMS curvature was used during developement prior to implementing the derivative of curvature.
 
 \subsection{Derivative of Curvature}
-Through testing it was determined that supplying the derivative of curvature instead of the curvature itself to watershed segmentation would better preserve the boundaries between semantic regions.
-Rusinkiewicz proposes a method of taking the derivative of the curvature tensor\cite{SRTensor}.
+Through testing it was proposed that supplying the derivative of curvature instead of the curvature itself to watershed segmentation would better preserve the boundaries between semantic regions.
+Rusinkiewicz proposes a method of taking the derivative of the curvature tensor~\cite{SRTensor}.
 Because watershed segmentation expects a single value rather than a tensor, the magnitude of the derivative of the curvature tensor was approximated as the sum of squares of said tensor.
 
 \section{Surface Regression}
-Part of the \textit{Surface Classification} step is to confirm the surface type estimation by performing the corresponding surface regression on the target surface and comparing the error value to a pre-defined threshold.
+The second high level step within \textit{3D Segmentation} is \textit{Surface Classification}, which attempts to classify the mesh segments yielded by Watershed segmentation as belonging to one of the defined geometric primitives.
+Fitting 3D points to the various primitives was a part of \textit{Surface Classification}, initially as a means of confirming an initial shape primitive estimation, and later as means of direct shape primitive classification.
+In both uses the regression results were confirmed by comparing the error value, obtained from the difference between the fitted primitive and the set of 3D points, to a pre-defined threshold.
+The methods to perform and validate regression on the shape primitives implemented in this work are described in the following sections.
 
 \subsection{Planar Regression}\label{sec:planar_regression}
 A plane may be defined by a normal vector and a point on the plane.
@@ -215,7 +319,7 @@ Alternatively, if there is no other reason to compute the transformation matrix 
 
 \subsection{Cylindric Regression}
 Cylinders in this context can be understood as an extruded conic section.
-While there are methods of ascertaining (? better word?) a cylinder from a mere collection of 3D points\cite{PCL_cyl_regression}, the process employed here was simplified by exploiting the mesh's normals.
+While there are methods of ascertaining (? better word?) a cylinder from a mere collection of 3D points~\cite{PCL_cyl_regression}, the process employed here was simplified by exploiting the mesh's normals.
 For a cylindric mesh of constant radius with vertex normals, the normals will all be perpendicular to the main axis.
 Thus, the least principal component from a PCA performed on the mesh's normals will yield a vector along the main axis.
 From here a coordinate system may be created such that the z axis is the cylinder's main axis.
@@ -227,7 +331,7 @@ The general equation of a conic is:
 \end{equation}
 % Treating this as the error function to be minimized via least squares
 Fitting a given set of 3D points to this equation can be achieved via total least squares.
-Rosin shows that it is useful to set $F = 1$\cite{Ellipse_least_squares}, both to normalize the equation, and to avoid the trivial solution
+Rosin shows that it is useful to set $F=1$~\cite{Ellipse_least_squares}, both to normalize the equation, and to avoid the trivial solution
 \begin{equation}
 	A = B = C = D = E = F = 0.
 \end{equation}
@@ -239,14 +343,13 @@ The specific method and equations to check the validity of the conic regression 
 
 \subsubsection{Elliptic Regression}\label{sec:elliptic_reg}
 For $B^2 - 4AC < 0$ the set of points represent an ellipse.
-
 Computing the distance from a given point to an ellipse or other conic shape is non-trivial and, at the time of writing, no exact algebraic solution was found.
 In place of an exact distance function, the sum of squared residuals was used throughout most of the project's timeline.
-For example, a point on a conic section should satisfy equation \ref{eq:gen_conic}, but for a point \textit{almost} on a conic section, the result will be non-zero:
+For example, a point on a conic section should satisfy Equation \ref{eq:gen_conic}, but for a point \textit{almost} on a conic section, the result will be non-zero:
 \begin{equation}
 	R(x,y) = Ax^2 + Bxy + Cy^2 + Dx + Ey + F \neq 0,
 \end{equation}
-where $R(x,y)$ is known as the residual. The error function then becomes:
+where $R(x,y)$ is known as the residual. The error function then becomes
 \begin{equation}
 	e = \sum_i \left(Ax_i^2 + Bx_i y_i + Cy_i^2 + Dx_i + Ey_i + F\right)^2.
 \end{equation}
@@ -254,11 +357,11 @@ While easy to calculate, this value is unreliable as an indicator of whether or 
 During testing cases were encountered in which obviously non-cylindric surfaces yielded extremely low error values, resulting in false positives.
 This realization fueled the need for a proper point-to-ellipse distance function.
 
-Eberly\cite{GeoTools_pt_to_ellipse} shows that for an origin-centered axis-aligned ellipse described by major and minor diameters $a$ and $b$, and a target point $(x_p, y_p)$, the distance $t$ from the target point to the ellipse must satisfy the equation
+Eberly~\cite{GeoTools_pt_to_ellipse} shows that for an origin-centered axis-aligned ellipse described by major and minor diameters $a$ and $b$, and a target point $(x_p, y_p)$, the distance $t$ from the target point to the ellipse must satisfy the equation
 \begin{equation}\label{eq:ellipse_dist}
 	F(t) = \left(\frac{a x_p}{t + a^2}\right)^2 + \left(\frac{b y_p}{t + b^2}\right)^2 - 1 = 0.
 \end{equation}
-Eberly also compares 3 methods of solving equation \ref{eq:ellipse_dist} for $t$, concluding that the bisection method is the most robust.
+Eberly also compares 3 methods of solving Equation \ref{eq:ellipse_dist} for $t$, concluding that the bisection method is the most robust.
 
 \subsubsection{Parabolic and Hyperbolic Regression}
 % TODO: return to this, improve it.?
@@ -388,11 +491,11 @@ Setting 3.7 into 3.8:
 \end{equation}
 
 \section{Ramer-Douglas-Peucker Algorithm}
-The Ramer-Douglas-Peucker (RDP) algorithm is a method to interatively simplify a line defined by a set of points\cite{RDP_line_reduction_DP, RDP_line_reduction_R}.
+The Ramer-Douglas-Peucker (RDP) algorithm is a method to interatively simplify a line defined by a set of points~\cite{RDP_line_reduction_DP, RDP_line_reduction_R}.
 The only arguments to RDP are a list of points and a tolerance width, within which points will be considered unnecessary and discarded.
 % The algorithm looks at a list of points, draws an imaginary line from the first to the last, finds the point with the farthest normal distance to the comparison line, and if the point's distance to the comparison line is greater than a pre-defined tolerance width, splits the lin
 The algorithm iteratively finds the point farthest from the straight line from point 0 to n-1, and if said distance is greater than the tolerance width, the line is split at the farthest point and the line sections before and after the split are reconsidered individually.
-The procedure is described in greater detail in algorithm \ref{alg:RDP}.
+The procedure is described in greater detail in Algorithm\ref{alg:RDP}.
 
 \begin{algorithm}[H]
 \caption{Ramer-Douglas-Peucker}\label{alg:RDP}
@@ -436,9 +539,9 @@ An alternative implementation that uses recursion may be found on wikipedia.
 The Traveling Salesman Problem (TSP) is a well known problem in combinatorial optimization.
 The original problem was posed as the following:
 A salesman wishes to visit every city in a given region once, to spend the least amount of time traveling between cities, and to end at his home city.
-It was initially formulated in the 1800s by mathematicians William Rowan Hamilton and Thomas Kirkman\cite{Graph_theory}.
+It was initially formulated in the 1800s by mathematicians William Rowan Hamilton and Thomas Kirkman~\cite{Graph_theory}.
 The problem can be stripped down to simply the optimal round-trip traversal of a set of nodes in a graph, where the traversal represents the salesman's movement, and each node represents a city.
-It can be shown\cite{TSP_in_pursuit_of} that for $n$ nodes the number of possible route permutations is
+It can be shown~\cite{TSP_in_pursuit_of} that for $n$ nodes the number of possible route permutations is
 \begin{equation*}
 	n_{\text{routes}} = (n-1)!.
 \end{equation*}
@@ -446,13 +549,13 @@ For the vast majority of applications symmetric node-to-node costs can be assume
 \begin{equation*}
 	n_{\text{routes}} = \frac{(n-1)!}{2}.
 \end{equation*}
-The number of real world TSP applications is similarly large\cite{TSP_theory_applications}, ranging from determining the drill order of holes in printed circuit board manufacturing\cite{TSP_PCB_manufacturing}, to mail delivery and vehicle routing in general\cite{TSP_mail_delivery}, to X-ray crystallography\cite{TSP_xray_crystallography}.
+The number of real world TSP applications is similarly large~\cite{TSP_theory_applications}, ranging from determining the drill order of holes in printed circuit board manufacturing~\cite{TSP_PCB_manufacturing}, to mail delivery and vehicle routing in general~\cite{TSP_mail_delivery}, to X-ray crystallography~\cite{TSP_xray_crystallography}.
 The algorithm described in this work produces a set of convex surfaces from the target object.
 Within each convex surface region a simple path is planned.
 % NOTE the verb tense/case! "would" because it is not implemented
 It is the traversal of these surface regions that would be formulated as a TSP with the distance between each region and the change in end-effector orientation serving as the travel costs.
 Considering only the traversal of the surface regions, the start and end nodes need not be the same, and the situation can be modeled as a modified TSP.
-The common way to modify a TSP to achieve different start and end nodes is to introduce a dummy node with 0-cost edges to the other nodes\cite{TSP_dummy_node_mod}.
+The common way to modify a TSP to achieve different start and end nodes is to introduce a dummy node with 0-cost edges to the other nodes~\cite{TSP_dummy_node_mod}.
 After insertion of the dummy node, the TSP can be solved like normal.
 Once the TSP has been solved the nodes adjacent to the dummy node are the start and end nodes.
 If the robot's starting or home position is included as a node, the application can be handled as a classic TSP.

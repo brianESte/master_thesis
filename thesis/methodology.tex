@@ -1,56 +1,30 @@
 %! TeX root = thesis.tex
-\chapter{Methodology}\label{methodology}
+\chapter{Methodology}
 \IMRADlabel{methods}
 
 \section{Overview}
-Would this be better as a numbered list?
 The basic premise is to segment the given model into primitive surfaces, such as plane, cylinder, cone, etc.
 Each surface is unwrapped and simplified to its 2D representation, which undergoes a 2D segmentation to produce convex regions.
 Upon each convex region a local path is planned.
 The order in which each region is traversed by the robot is determined via a modified Traveling Salesman Problem (TSP).
 The classic TSP creates a closed loop of nodes, but in this application the start and end points of the salesman's path need not be the same.
 Finally, the waypoints of the complete path are converted to actuator positions and sent via XMLRPC to the connected robotic arm and rotary table to be executed.
-Figure \ref{fig:overview} gives a graphical overview of the procedure's main steps.
+Figure \ref{fig:mtdy_overview} gives a graphical overview of the procedure's main steps.
 
 \begin{figure}[ht]
 	\centering
 \begin{tikzpicture}
-	\newdimen\dx
-	\dx=6mm
-	% nodes
-	\node[] (Mesh) {Mesh};
-	\node[FC-Node] (3DSeg) [right=\dx of Mesh] {3D Segmentation};
-	\node[FC-Node] (GeoSimp) [right=\dx of 3DSeg] {Geometry Simplification};
-	\node[FC-Node] (2DSeg) [right=\dx of GeoSimp] {2D Segmentation};
-	\node[FC-Node,text width=27mm] (Bpath) [below=10mm of Mesh, xshift=10mm] {Cellular path planning};
-	\node[FC-Node,text width=30mm] (TSP) [right=\dx of Bpath] {Modified TSP};
-	\node[FC-Node,text width=20mm] (InvKin) [right=\dx of TSP] {Inverse Kinematics};
-	\node[text width=20mm] (Poses) [right=\dx of InvKin] {Actuator Poses};
-	% connections
-	\draw [FC-Arrow] (Mesh) -- (3DSeg);
-	\draw [FC-Arrow] (3DSeg) -- (GeoSimp);
-	\draw [FC-Arrow] (GeoSimp) -- (2DSeg);
-	\draw [FC-Arrow, rounded corners=5pt] (2DSeg.south) |-| (Bpath.north);
-	\draw [FC-Arrow] (Bpath) -- (TSP);
-	\draw [FC-Arrow] (TSP) -- (InvKin);
-	\draw [FC-Arrow] (InvKin) -- (Poses);
+	\pic at (0,0) {HighLevelProcedure};
 \end{tikzpicture}
 	\caption{Graphical overview of the path planning and execution procedure}
-	\label{fig:overview}
+	\label{fig:mtdy_overview}
 \end{figure}
 
 \section{3D Segmentation}
-Segmentation in 3D consists of breaking the model into primitive surfaces, that have readily solvable mappings from 3D to 2D.
-This is done by applying Watershed segmentation to the mesh as a whole and attempting to classify the resultant mesh sections as a certain primitive.
-Watershed segmentation is imperfect, and sometimes yields mesh sections comprised of multiple primitive types.
-In such cases the composite mesh section undergoes Watershed segmentation again, but with a lower merge threshold (see \ref{ws_seg}), so that it might be split into multiple mesh sections.
-This procedure is displayed visually in figure \ref{fig:Seg3D}.
-
-\begin{figure}
+\begin{figure}[ht]
 	\centering
 \begin{tikzpicture}[]
-	\newdimen\dx
-	\dx=6mm
+	\def\dx{6mm}
 	% nodes
 	\node (Mesh) {Complete Mesh};
 	\node[FC-Node, text width=30mm] (WS) [right=\dx of Mesh] {Watershed Segmentation};
@@ -72,14 +46,19 @@ This procedure is displayed visually in figure \ref{fig:Seg3D}.
 	\caption{Graphic depiction of the 3D segmentation procedure}
 	\label{fig:Seg3D}
 \end{figure}
+Segmentation in 3D consists of breaking the model into primitive surfaces, that have readily solvable mappings from 3D to 2D.
+This is done by applying Watershed segmentation to the mesh as a whole and attempting to classify the resultant mesh sections as a certain primitive.
+Watershed segmentation is imperfect, and sometimes yields mesh sections comprised of multiple primitive types.
+In such cases the composite mesh section undergoes Watershed segmentation again, but with a lower merge threshold (see Section on \textit{Shallow-merge} within Section~\ref{sec:ws_seg}), so that it might be split into multiple mesh sections.
+This procedure is displayed visually in Figure~\ref{fig:Seg3D}.
 
-\subsection{Watershed Segmentation}\label{ws_seg}
-A watershed, according to the North American usage, is an area of land, in which all streams and rainfall drain to a common body of water\cite{USGS_Watersheds}, also commonly called catchment basins.
+\subsection{Watershed Segmentation}\label{sec:ws_seg}
+A watershed, according to the North American usage, is an area of land, in which all streams and rainfall drain to a common body of water~\cite{USGS_Watersheds}, also commonly called catchment basins.
 Somewhat confusingly, the rest of the English speaking world uses ``Watershed'' to refer to the high elevation regions that separate said catchment basins.
-Watershed segmentation originally comes from image processing, where it is used for image segmentation\cite{ImageSegWS, DigitalImageProc}.
+Watershed segmentation originally comes from image processing, where it is used for image segmentation~\cite{ImageSegWS, DigitalImageProc}.
 It works by applying a ``height function'' to the input image and forming image regions divided by ``high'' areas.
-A common ``height function'' in image processing is the gradient of the image\cite{ImageSegWS}.
-Mangan and Whitaker first applied this concept to 3D meshes, replacing pixels for the mesh's vertices and the image gradient for the mesh curvature\cite{Watershed}.
+A common height function in image processing is the gradient of the image~\cite{ImageSegWS}.
+Mangan and Whitaker first applied this concept to 3D meshes, replacing pixels for the mesh's vertices and the image gradient for the mesh curvature~\cite{Watershed}.
 
 \subsubsection{Basic Procedure}
 Mangan and Whitaker's algorithm consists of 6 steps:
@@ -93,8 +72,8 @@ Mangan and Whitaker's algorithm consists of 6 steps:
 \end{enumerate}
 
 Their algorithm was modified throughout this project, as described in the following sections.
-Atkar et al's Watershed segmentation implementation also helped inspire the implementation in this work\cite{HierSurfSeg_for_autobody_painting}.
-Their graphical depiction of Watershed segmentation is shown below in figure \ref{fig:ws_1570179_steps}.
+Atkar et al's Watershed segmentation implementation also helped inspire the implementation in this work~\cite{HierSurfSeg_for_autobody_painting}.
+A graphical depiction of their Watershed segmentation implementation is shown below in Figure \ref{fig:ws_1570179_steps}.
 % In addition to the mesh to be segmented, a merge threshold value is provided to Watershed.
 % This threshold value is described in greater detail in \ref{sec:shallow_merge}.
 \begin{figure}[htb]
@@ -102,19 +81,23 @@ Their graphical depiction of Watershed segmentation is shown below in figure \re
 	% TODO: recreate this image with tikz
 	\includegraphics[width=0.5\linewidth]{../resources/watershed/1570179_WS_steps.png}
 \caption{
-Graphical depiction of Atkar et al.'s Watershed segmentation implementation.\cite{HierSurfSeg_for_autobody_painting}
+Graphical depiction of Atkar et al.'s Watershed segmentation implementation~\cite{HierSurfSeg_for_autobody_painting}.
+Subfigure (a) shows Mangan and Whitaker's step 2: locating and labeling each local minima.
+The step shown in Subfigure (b) is of Atkar et al.'s own design, and due to its adaptation in this work, is described in the section on \textit{Minima Expansion}.
+Region 1 in Subfigure (c) depicts the original step 5: descent to a minimum, and regions 2 and 3 in the same subfigure show step 6: the merging of shallow regions into deep ones.
+The end result of Watershed is shown in Subfigure (d).
 }
 	\label{fig:ws_1570179_steps}
 \end{figure}
 
-In figure \ref{fig:ws_1570179_steps} subfigure (a) shows Mangan and Whitaker's step 2: locating and labeling each local minima.
+In Figure \ref{fig:ws_1570179_steps} subfigure (a) shows Mangan and Whitaker's step 2: locating and labeling each local minima.
 Region 1 in subfigure (c) depicts the original step 5: descent to a minimum, and regions 2 and 3 in the same subfigure show step 6: the merging of shallow regions into deep ones.
 The step shown in subfigure (b) is of Atkar et al.'s own design, and due to its adaptation in this work, is described in the section on \textit{minima expansion}.
 Figure \ref{fig:ws_1570179_steps} concludes with the end result of Watershed in subfigure (d).
 
 \subsubsection{Region Initialization}
 In this work's implementation the curvature values and derivative thereof are calculated once for the whole mesh prior to the first Watershed pass.
-Watershed step 0, applying the height function to the mesh, is shown in figure \ref{sfig:ws_dk}.
+Watershed step 0, applying the height function to the mesh, is shown in Figure \ref{sfig:ws_dk}.
 This work's version of Watershed begins by creating mesh regions from each local minima.
 Here, local minima includes local plateaus.
 Thus, if a region of the mesh is found whose vertices' curvature are all roughly equal and less than that of their neighbors, it is a minima plateau.
@@ -136,6 +119,7 @@ Thus, if a region of the mesh is found whose vertices' curvature are all roughly
 	\end{subfigure}
 \caption{
 Watershed segmentation steps 0 and 1 shown applied to test object ``fc028''.
+All test objects and their sources can be found in Appendix \ref{app:model_table}
 }
 \end{figure}
 
@@ -144,10 +128,11 @@ Because the surfaces of the test object are perfectly flat, the horizontal and v
 The lack of plateaus on the inclined surface is most likely due to floating point errors in the vertex positions on the inclined surface.
 
 \subsubsection{Minima Expansion}
-This step was adopted from Atkar et al.'s implementation of Watershed segmentation\cite{HierSurfSeg_for_autobody_painting}.
+This step was adopted from Atkar et al.'s implementation of Watershed segmentation~\cite{HierSurfSeg_for_autobody_painting}.
 Each mesh region expands up to a pre-set depth, absorbing any regions encountered.
 Although not essential to the segmentation results, it facilitates subsequent steps by effectively filtering high frequency noise and features from the mesh.
-It is worth noting that Watershed segmentation overall would work without \textit{minima expansion}, but would be slightly slower because the region merging in steps 4.1 and 4.2 are a little more computationally expensive than region merges during \textit{minima expansion}.
+It is worth noting that Watershed segmentation overall would work without \textit{minima expansion}, but would be slightly slower because the region merging in Watershed steps 4 and 5 are a little more computationally expensive than region merges during \textit{minima expansion}.
+% NOTE: in the code mini-merge is numbered 4.1, and shallow-merge 4.2, but for simplicity they are 4 and 5 here.
 
 \begin{figure}[htb]
 	\centering
@@ -181,14 +166,15 @@ Test object ``fc028'' post Watershed segmentation step 3: Descent to minima
 \end{figure}
 
 \subsubsection{Mini-Merge}
-As noted by Mangan and Whitaker, Descent to Minima will segment the given mesh, but in all likelihood it will be overly segmented.
-Their solution was to merge shallow regions into adjacent deeper regions (see subsequent section on \textit{shallow merge}).
+As noted by Mangan and Whitaker, \textit{Descent to Minima} will segment the given mesh, but in all likelihood it will be overly segmented.
+Their solution was to merge shallow regions into adjacent deeper regions (see subsequent section on \textit{Shallow Merge}).
 Through testing small high curvature regions were observed, that due to their high curvature did were not merged into any of the larger more useful regions.
 To combat this, the ``Mini-Merge'' step was developed to merge regions deemed too small to be worth keeping.
 The merge condition changed throughout development, from a fixed number of vertices threshold, to a threshold relative to the total number of vertices in the mesh undergoing Watershed segmentation, to the condition that the number of perimeter vertices in the region be fewer than 50\% of the region's vertices.
 (? reword previous sentence?)
-The \textit{mini-merge} procedure is shown in algorithm \ref{alg:WS:mini_merge}.
+The \textit{mini-merge} procedure is shown in Algorithm~\ref{alg:WS:mini_merge}.
 
+% TODO: HK wants me to move the algorithm higher?
 \begin{algorithm}[htb]
 \caption{Mini-Merge}\label{alg:WS:mini_merge}
 \begin{algorithmic}[1]
@@ -209,7 +195,7 @@ The \textit{mini-merge} procedure is shown in algorithm \ref{alg:WS:mini_merge}.
 \textit{Mini-merge} iterates through each mesh section, checking each if it meets the aforementioned merge condition.
 When a small region is found, the region adjacent its low side is sought, which then absorbs the small region.
 % Mesh regions that trigger the merge condition are merged into the mesh region adjacent their shallow side.
-The method to find the low-side adjacent neighboring mesh region is shown below in algorithm \ref{alg:MR:low_side_neighbor}.
+The method to find the low-side adjacent neighboring mesh region is shown below in Algorithm~\ref{alg:MR:low_side_neighbor}.
 
 \begin{algorithm}[htb]
 \caption{Find low side neighbor}\label{alg:MR:low_side_neighbor}
@@ -238,19 +224,20 @@ Watershed segmentation step 4.1 shown applied to test object ``fc028''.
 	\label{fig:ws_4.1}
 \end{figure}
 
-As can be seen in figure \ref{fig:ws_4.1} the segmentation results post \textit{mini-merge} are noticeably cleaner than after the previous step.
+As can be seen in Figure \ref{fig:ws_4.1} the segmentation results post \textit{mini-merge} are noticeably cleaner than after the previous step.
 Had the test object been more complex, the need for further merging would have been apparent.
 
 \subsubsection{Shallow Merge}
 This step was adopted without modification from Mangan and Whitaker.
-The implementation of \textit{shallow merge} used in this work is detailed in algorithm \ref{alg:WS:shallow_merge}.
+The implementation of \textit{shallow merge} used in this work is detailed in Algorithm~\ref{alg:WS:shallow_merge}.
+The \textit{mini-merge} and \textit{shallow-merge} procedures are quite similar, with the main difference being that the absorbing mesh section in \textit{shallow-merge} must update its depth in order to maintain the depth ordering.
 
 \begin{algorithm}[!b]
 \caption{Shallow-Merge}\label{alg:WS:shallow_merge}
 \begin{algorithmic}[1]
 	\Function{shallowMerge}{Mesh sections $S$, real $t_e$}
 		\State Sort $S$ by mesh section depth in ascending order
-		% \State $d_{th} \leftarrow d_{deepest}^{t_e}$\Comment{See equation \ref{eq:merge_threshold} for explanation}
+		% \State $d_{th} \leftarrow d_{deepest}^{t_e}$\Comment{See Equation \ref{eq:merge_threshold} for explanation}
 		\State calculate merge threshold $d_{th}$
 		\While{$S$.first.depth < $d_{th}$}
 			% \State \Comment{While the depth of the shallowest mesh is below the merge threshold}
@@ -265,14 +252,13 @@ The implementation of \textit{shallow merge} used in this work is detailed in al
 \end{algorithm}
 
 First the mesh sections are sorted by depth in ascending order, so that as soon as the first mesh section is above the merge threshold, the others are guaranteed to be above it as well.
-On line 3 \verb|ShallowMerge|'s second argument $e$ is used in equation \ref{eq:merge_threshold} to calculate the merge threshold $d_{th}$.
+On line 3 the function \verb|shallowMerge|'s second argument $e$ is used in Equation \ref{eq:merge_threshold} to calculate the merge threshold $d_{th}$:
 \begin{equation}\label{eq:merge_threshold}
-	d_{th} = d_{max}^{e}
+	d_{th} = d_{max}^{e}.
 \end{equation}
 where $d_{max}$ is the depth of the deepest region and $e$ is the threshold value provided to \textit{shallow-merge}.
 Due to the threshold value being applied as an exponent, values greater than 1 are pointless.
-Regions with a depth below the merge threshold are merged into the mesh region adjacent their shallow side, using the algorithm \ref{alg:MR:low_side_neighbor}.
-The \textit{mini-merge} and \textit{shallow-merge} procedures are quite similar, with the main difference being that the absorbing mesh section in \textit{shallow-merge} must update its depth in order to maintain the depth ordering.
+Regions with a depth below the merge threshold are merged into the mesh region adjacent their shallow side, using the function shown in Algorithm~\ref{alg:MR:low_side_neighbor}.
 
 \begin{figure}[htb]
 	\centering
@@ -295,8 +281,8 @@ Results from Watershed segmentation step 4.2 with a high merge threshold (a) and
 \end{figure}
 
 Figures \ref{sfig:ws_4.2.0} and \ref{sfig:ws_4.2.1} show the results post \textit{shallow-merge}.
-If the merge threshold is too high, useful regions will be merged together into a large composite mesh section, as can be seen in figure \ref{sfig:ws_4.2.0}.
-figure \ref{sfig:ws_4.2.1} shows the result of a merge threshold more appropriate for the mesh shown.
+If the merge threshold is too high, useful regions will be merged together into a large composite mesh section, as can be seen in Figure \ref{sfig:ws_4.2.0}.
+Figure \ref{sfig:ws_4.2.1} shows the result of a merge threshold more appropriate for the mesh shown.
 Because each model has different geometry and meshing, a certain merge threshold may work well for one model, yet work poorly for another.
 A certain merge threshold may not even work well for the entirety of a single model.
 This is why the \textit{3D Segmentation} process is iterative.
@@ -343,7 +329,7 @@ It \textit{is} possible to set useful curvature thresholds for noisy meshes, but
 The second planar test was used for some time until abandoning it in favor of performing regression as a means of classification.
 Planar regression was performed using PCA on the surface's point positions, with the least principal component denoting the plane's normal vector.
 To determine if the surface is indeed planar, the root mean squared error is calculated and compared to a set threshold.
-How to calculate the rmse for a set of points and a plane is described in greater detail in section \ref{sec:planar_regression}.
+How to calculate the rmse for a set of points and a plane is described in greater detail in Section \ref{sec:planar_regression}.
 If the RMSE is above the threshold, the surface is deemed non-planar and undergoes further tests to check if it is cylindric.
 % As a check on the test, planar regression via Singular Value Decomposition is performed on the mesh region's vertices, and the root mean squared error is reported.
 % If the RMSE is within a set threshold, the region passes the second check and is classified as planar.
@@ -371,11 +357,13 @@ This approach has a glaring flaw: planes pass this test.
 % , and cones do not pass.
 % Various tests that take into account the vertices' normals were conceived, but all were either abandoned due to inefficacy, or simply unimplemented due to time constraints.
 
-(? talk about other flaws? This was definitely a weak point in my work)
+% TODO:
+% (? talk about other flaws? This was definitely a weak point in my work)
+% "This will be discussed in results and conclusion, here you are just explaining what you did"
 
 Because there exists no direct algebraic solution for the distance from a point to an ellipse, the sum of squared residuals was initially used as the error value when confirming the surface as cylindric.
 This was eventually replaced with an iterative method of calculating the point-surface distance, and then conic regression could be used \textit{as} cylinder classification.
-The method of computing the distance from a point to an ellipse is described further in section \ref{sec:elliptic_reg}.
+The method of computing the distance from a point to an ellipse is described further in Section \ref{sec:elliptic_reg}.
 % After implementing a conic error function based on point-surface distance, conic regression could be used \textit{as} cylinder classification.
 A surface that failed planar classification would be suject to cylindric regression, and the resultant RMSE compared to a threshold to determine cylindric categorization.
 
@@ -394,8 +382,7 @@ The best method for ellipsoidal classification conceived during this project is 
 
 \begin{figure}[htb]
 	\centering
-\begin{tikzpicture}[inner sep=0,
-	vertex/.style={circle, radius=2pt,fill, inner sep=2pt,outer sep=0pt}]
+\begin{tikzpicture}[inner sep=0]
 	% Nodes
 	\matrix (table) [
 		matrix of nodes,
@@ -426,14 +413,18 @@ The best method for ellipsoidal classification conceived during this project is 
 	% GeoSimp container node
 	\node[thick, dashed,draw, rounded corners=8pt,inner sep=7pt, fit=(split)(top)(cCorners)(cSurfaces),label={90:Geometry Simplification}]{};
 \end{tikzpicture}
-	\caption{Graphic depiction of the 3D segmentation procedure. Simple surfaces require both shared edges and shared corners, hence the connection from each.}
+	\caption{%
+Graphic depiction of the 3D segmentation procedure.
+Simple surfaces require both the original mesh sections and shared edges, hence the connection from each.
+Shared edges are first created from the collection of mesh sections, then extended to completion using shared corners.
+}
 	\label{fig:GeoSimp}
 \end{figure}
 
 The purpose of the geometry simplification step is to create a simplified form for each mesh region provided by Segmentation 3D.
 Geometry Simplification's output is a set of ``simple surfaces'' created from the provided mesh regions.
 A simple surface contains, among other things, a reference to the mesh region from which it was created, a UV-map, and the unwrapped 2D region outline.
-Geometry Simplification follows the block diagram shown in figure \ref{fig:GeoSimp}.
+Geometry Simplification follows the block diagram shown in Figure \ref{fig:GeoSimp}.
 First the \verb|SharedEdges|, edges between mesh regions, are ascertained.
 These are used to determine the region corners (``shared corners''), which are then used to finish preparing the shared edges (Extend shared edges).
 Finally, the completed shared edges plus the mesh regions are used to create the \verb|simple surfaces|, which are passed on to the next high-level step.
@@ -442,7 +433,7 @@ Finally, the completed shared edges plus the mesh regions are used to create the
 The boundary between two mesh regions is termed a ``shared edge'', because its information is shared between the two mesh regions it divides.
 Each shared edge is made up of a list of line segments that approximate the boundary between two mesh regions.
 The algorithm to obtain the shared edges is shown split into algorithms \ref{alg:shared_edges_1} and \ref{alg:shared_edges_2}.
-The function \textbf{CreateSharedEdges()} can be broken into \textbf{edge discovery} and \textbf{edge refinement}.
+The function \textbf{createSharedEdges()} can be broken into \textbf{edge discovery} and \textbf{edge refinement}.
 % Line 2 sets up list $E_{points}$, in which each entry $i$ is the list of all points for the $i-th$ discovered edge.
 % $E_{points}$ is filled throughout \textbf{edge discovery} and in \textbf{edge refinement}
 In \textbf{edge discovery} the list of vertices found along each edge is appended to list $E_{points}$.
@@ -509,8 +500,8 @@ These points are then removed from the overall point set $P_{remaining}$ and app
 	\For{$P_{edge}$ in $E_{points}$}\label{alg:edge_refinement_for}
 		\State Determine the surfaces $s_1$ and $s_2$ adjacent current point line $P_{edge}$
 		\State Obtain UV-maps $m_{UV1}$ and $m_{UV1}$ from $s_1$, $s_2$ and $M$
-		\State ClampPointsToSurfaces($P_{edge}$, $m_{UV1}$, $m_{UV2}$)\label{alg:edge_refinement_clamp_pts}
-		\State SortEdgePoints($P_{edge}$)
+		\State clampPointsToSurfaces($P_{edge}$, $m_{UV1}$, $m_{UV2}$)\label{alg:edge_refinement_clamp_pts}
+		\State sortEdgePoints($P_{edge}$)
 		\State $E$.append(SharedEdge($P_{edge}$))
 	\EndFor
 	\State \textbf{return} $E$
@@ -521,14 +512,14 @@ These points are then removed from the overall point set $P_{remaining}$ and app
 \textbf{Edge refinement} is, relative to \textbf{edge discovery}, fairly simple.
 A new list $E$ is created to store the final shared edges.
 The \verb|for| loop on line \ref{alg:edge_refinement_for} iterates through the lists of edge vertices in $E_{points}$, attempting to create a shared edge from each.
-On line \ref{alg:edge_refinement_clamp_pts} \verb|ClampPointsToSurfaces()| forces the edge points onto an idealized representation of the two bordering mesh sections.
+On line \ref{alg:edge_refinement_clamp_pts} \verb|clampPointsToSurfaces()| forces the edge points onto an idealized representation of the two bordering mesh sections.
 For an edge between two planar surfaces, this would force all points to be colinear.
-Next the clamped points are sorted according to position along the line using \verb|SortEdgePoints()|.
+Next the clamped points are sorted according to position along the line using the function \verb|sortEdgePoints()|.
 Finally a shared edge is created from the edge points, and then appended to $E$.
 Within the creation of a shared edge the RDP algorithm is used to simplify the line down to only the critical points.
-% The complete list of vertices is simplified via the Ramer-Douglas-Peucker (RDP) algorithm\cite{RDP_line_reduction}.
+% The complete list of vertices is simplified via the Ramer-Douglas-Peucker (RDP) algorithm~\cite{RDP_line_reduction}.
 The mesh's mean edge length is used as the tolerance width in the RDP algorithm.
-Once all point lists in $E_{points}$ have been processed, the list $E$ is returned, and \verb|CreateSharedEdges()| is complete.
+Once all point lists in $E_{points}$ have been processed, the list $E$ is returned, and \verb|createSharedEdges()| is complete.
 
 \subsection{Create Shared Corners}
 
@@ -580,7 +571,7 @@ Once all point lists in $E_{points}$ have been processed, the list $E$ is return
 \end{algorithm}
 
 Shared corners are used to simplify the process of extending the shared edges to the regions they abut.
-The process of creating shared corners $C$ is outlined in algorithm \ref{alg:shared_corners}.
+The process of creating shared corners $C$ is outlined in Algorithm~\ref{alg:shared_corners}.
 The \verb|CreateSharedCorners()| argument $E_{R,E}$ is a list, where each entry is the list of edges that border the mesh region indexed by the $E_{R,E}$ index.
 That is, the $i$-th item in $E_{R,E}$ is the list of edges that border mesh region $i$.
 Determining which line tips match is facilitated by each item in $E_{R,E}$ only containing the edges relevant to a given mesh region.
@@ -601,9 +592,9 @@ Finally, the list of shared corners $C$ is returned.
 \subsection{Extend Shared Edges}
 % Another meaningful name for this would be "force line tip coincidence", at least for the fn
 At this point the shared edges align with the regions they divide, but likely do not extend to meet the shared corners or each other.
-\verb|ClampLineTips()|, described in algorithm \ref{alg:clamp_line_tips}, exists to rectify this.
+The function \verb|clampLineTips()|, described in Algorithm~\ref{alg:clamp_line_tips}, exists to rectify this.
 
-\begin{algorithm}[hb]
+\begin{algorithm}[htb]
 \caption{Clamp Line Tips}\label{alg:clamp_line_tips}
 \begin{algorithmic}[1]
 \Function{clampLineTips}{$C$, $S$, $M_{UV}$}
@@ -623,7 +614,7 @@ At this point the shared edges align with the regions they divide, but likely do
 \end{algorithmic}
 \end{algorithm}
 
-The \verb|ClampLineTips| arguments are as follows:
+The \verb|clampLineTips| arguments are as follows:
 % $E$: the shared edges,
 $C$: the shared corners, $S$: the mesh surfaces, and $M_{UV}$: the list of UV-maps.
 % The objective is to find for a given line tip the region, and its corresponding UV-map, that set the line tip's position along the line tip direction.
@@ -635,7 +626,7 @@ The number of elements in the set difference $S_{diff}$ is dependent on the numb
 Although $S_{diff}$ can contain more than one element, it matters not which is chosen as the extension target for the line tip.
 Next the UV-map belonging to the surface in $S_{diff}$ is obtained.
 On line \ref{alg:clamp_tip_point} the line tip $t$ is forced to lie at the intersection of its tangent and the extension target surface.
-Figure \ref{fig:extend_shared_edges} below shows the before and after of applying \verb|ClampLineTips| to a set of shared edges.
+Figure \ref{fig:extend_shared_edges} below shows the before and after of applying \verb|clampLineTips| to a set of shared edges.
 
 \begin{figure}[htb]
 	\centering
@@ -658,14 +649,14 @@ The shared edges from test object ``1505020'' Before and after \textit{extend sh
 	\label{fig:extend_shared_edges}
 \end{figure}
 
-As can be seen in figure \ref{sfig:gs_shared_edges} ``unclamped'' shared edges are decent, but noticeably unconnected.
+As can be seen in Figure \ref{sfig:gs_shared_edges} ``unclamped'' shared edges are decent, but noticeably unconnected.
 Figure \ref{sfig:gs_shared_edges_clamped} shows the same edges post \textit{extend shared edges} and noticeably connected.
 
 \subsection{Create Simple Surfaces}
 A simple surface is created from a mesh region and the shared edges that border said mesh region.
 % How are simple surfaces formed?
 The bulk of the procedure to create a simple surface is the process to form the surface's outlines from the given shared edges.
-This process is described in detail in algorithm \ref{alg:find_outlines}.
+This process is described in detail in Algorithm~\ref{alg:find_outlines}.
 % Given a mesh region and the previously created shared edges as input, the simple surface first collects the edges and corners that border the source mesh region.
 % Next the outlines of the mesh region are generated from the shared edges (see below...)
 
@@ -715,7 +706,7 @@ Line 4 sets up the set of edges associated with line tips $T$.
 Each iteration of the function's \verb|while| loop produces a new outline.
 On line 8 a line tip $t_{target}$ is created as the end line tip of edge $e_0$.
 This serves as the initial line tip ``targeted'', and as the end condition for the \verb|repeat-until| loop.
-The function to find the next sequential line tip, \verb|findNextLineTip|, is shown in algorithm \ref{alg:next_line_tip}.
+The function to find the next sequential line tip, \verb|findNextLineTip|, is shown in Algorithm~\ref{alg:next_line_tip}.
 When a new $t_{target}$ is found it is added to the outline and its edge is erased from $E$ to show that it has been accounted for.
 When $t_{target}$'s edge equates to $e_0$ the loop and outline are complete.
 The remainder of the \verb|while| loop converts the outline as a list of line tips to a list of points.
@@ -768,8 +759,7 @@ Once the creation of simple surfaces is complete, they are passed on to the next
 \begin{figure}[ht]
 	\centering
 \begin{tikzpicture}%[inner sep=0]
-	\newdimen\dx
-	\dx=6mm
+	\def\dx{6mm}
 	% nodes
 	\node[align=center,text width=16mm,inner sep=0] (Outlines) {Simple Surface 2D Shape};
 	\node[shape=diamond,aspect=2.0,draw,right=of Outlines] (Convex) {Convex?};
@@ -947,7 +937,7 @@ Note that new nodes are created at all edge intersections, not only at intersect
 	% \label{fig:extend_shared_edges}
 \end{figure}
 
-The general steps to perform interior edge extension are outlined below in algorithm \ref{alg:VG:extend_interior_edges}.
+The general steps to perform interior edge extension are outlined below in Algorithm~\ref{alg:VG:extend_interior_edges}.
 
 \begin{algorithm}[htb]
 \caption{Extend Interior Edges}\label{alg:VG:extend_interior_edges}
@@ -974,13 +964,13 @@ In the example here, ``blocky bridge'' has only one edge loop, the outer boundar
 Next the vertex nodes of the edge loop are iterated, with exterior corners skipped.
 % NOTE: not a fan of that sentence
 When an interior corner is encountered, an edge is extended from each edge adjacent to the vertex node.
-In figure \ref{sfig:vg_extend_node_2_edges} node 2 is the interior corner encountered.
+In Figure \ref{sfig:vg_extend_node_2_edges} node 2 is the interior corner encountered.
 An edge is extended along the 1$\rightarrow$2 direction to create node 8, and also along the 3$\rightarrow$2 direction to create node 9.
 Figure \ref{sfig:vg_extend_node_2_3_edges} shows this procedure repeated for node 3, creating nodes 10, 11, and 12.
 
 \subsection{Polygon Graph}
 To create a polygon graph ``branches'' traverse the completed vertex graph starting at node~0.
-This process is described in detail in algorithmm \ref{alg:PG:create} and visually in figure \ref{fig:PG:create}.
+This process is described in detail in algorithmm \ref{alg:PG:create} and visually in Figure \ref{fig:PG:create}.
 
 \begin{algorithm}[!htb]
 \caption{Create Polygon Graph}\label{alg:PG:create}
@@ -1025,16 +1015,16 @@ Active branches are newly created and reside in $B_{active}$ until dequeued and 
 Mature branches are active branches that have grown to reach a splitting node, but have not been fully utilized in the creation of polygon nodes.
 % NOTE: ^hm
 The queue $B_{active}$ is initialized with branches from node 0 on line 6.
-This can also be seen in figure \ref{sfig:pg_n0_branches}.
+This can also be seen in Figure \ref{sfig:pg_n0_branches}.
 If the branch's tip does not split, lines 9-11 ensure it grows until it does so.
-The branch from node 0 to 1 in figure \ref{sfig:pg_n0_branches} is one such immature branch, and in figure \ref{sfig:pg_n2_branches} it has grown to node 2 and split to produce new active branches.
+The branch from node 0 to 1 in Figure \ref{sfig:pg_n0_branches} is one such immature branch, and in Figure \ref{sfig:pg_n2_branches} it has grown to node 2 and split to produce new active branches.
 Because a given edge on the vertex graph may be processed from each direction, lines 12-14 check if the a branch equivalent to $b_{active}$ already exists in either the set of mature or completed branches, so that an already processed branch is not re-processed.
 An example of this is vertex graph edge 2-9.
 An active branch from node 2 to node 9 is created when branch 0$\rightarrow$1 grows to node 2 and splits, and an equivalent branch from node 9 to node 2 is created when the split at node 9 is handled.
 Once $b_{active}$ is confirmed novel, a mature branch whose tip occupies the same node as $b_{active}$ is sought from $B_{mature}$.
 $b_{active}$ is added to the list of mature branches \textit{after} searching for an intersection with a mature branch to preclude $b_{active}$ being identified as converging with itself.
 If a convergin branch is found both branches are traced backwards until a common base node is found.
-In figure \ref{sfig:pg_branch_convergence} branch 2$\rightarrow$9 is fully grown and has converged with the mature branch 0$\rightarrow$9.
+In Figure \ref{sfig:pg_branch_convergence} branch 2$\rightarrow$9 is fully grown and has converged with the mature branch 0$\rightarrow$9.
 Figure \ref{sfig:pg_0_1_2_9_polygon} shows the completed polygon node after both branches were traced back to node 0.
 On line 20 in the pseudocode the newly created polygon node is added to the polygon graph.
 Afterwards the branch containers $B_{complete}$ and $B_{mature}$ are updated.
@@ -1262,10 +1252,10 @@ This procedure repeats until all active branches have been exhausted, and all po
 \end{figure}
 
 \subsection{Generate Merge Options}
-The completed polygon graph of the ongoing example can be seen in figure \ref{fig:pg_complete}.
+The completed polygon graph of the ongoing example can be seen in Figure \ref{fig:pg_complete}.
 Once the polygon graph has been created the complete set of convex merge options (CMOs) may be generated.
 The objective is to obtain the complete set of possible CMOs, so that the optimal subset may be picked from it.
-The method followed in this work is described below in algorithm \ref{alg:generate_CMOs}.
+The method followed in this work is described below in Algorithm~\ref{alg:generate_CMOs}.
 
 \begin{figure}[htb]
 	\centering
@@ -1324,7 +1314,7 @@ The guard clause on lines 16-18 checks if the potential new CMO already exists, 
 Line 19 computes the set of open edges shared between $o_i$ and $o_j$ as a set difference.
 In an effort to simplify checking the convexity of CMOs, each has a set of ``open edges''.
 An open edge is a complete edge that completely borders other polygon nodes.
-As an example, a CMO comprised solely of node 2 in figure \ref{fig:pg_complete} has 3 open edges: bordering node 1 (vertices 2-9), bordering node 3 (vertices 2-11), and bordering node 4 (vertices 11-12).
+As an example, a CMO comprised solely of node 2 in Figure \ref{fig:pg_complete} has 3 open edges: bordering node 1 (vertices 2-9), bordering node 3 (vertices 2-11), and bordering node 4 (vertices 11-12).
 However, a \{1,2\} CMO has only 1 open edge: bordering node 4.
 The edge between nodes 1 and 2 allowed them to merge, and node 2's edge bordering node 3 (vertices 2-11) is no longer considered open and valid because there is no collinear open edge on node 1.
 That the edge between the \{1,2\} CMO and \{3\} CMO is closed, prevents them from merging and creating a non-convex merge option.
@@ -1333,12 +1323,12 @@ The combined \{2,4\} CMO can no longer merge with \{3\} or \{5\} because neither
 If the aforementioned set difference $E_{shared}$ is empty, then $o_i$ and $o_j$ have no common open edge and cannot combine to create a valid CMO.
 Once all guard clauses are passed, a new CMO is created, and added to the set $O_{merge}$.
 
-Nielsen et al. discuss the difficulty of blindly checking the convexity of all possible sub-polygon combinations, especially when the number of sub-polygons is great ($N=300$)\cite{IntEdgeExt}.
+Nielsen et al. discuss the difficulty of blindly checking the convexity of all possible sub-polygon combinations, especially when the number of sub-polygons is great ($N=300$)~\cite{IntEdgeExt}.
 To address this, they developed an approximation scheme to restrict the combinations checked.
 The method they propose is similar to the ``CMO degree'' propsed here, in which only combinations of $\lfloor i/2 \rfloor$ and $\lceil i/2 \rceil$ are considered, where $i$ is the numner of sub-polygons in the target CMOs.
 The example they give is that for a CMO comprised of 6 sub-polygons only input CMOs of 3 sub-polygons are considered.
 % TODO: revise this once find_optimal() is fixed...
-It is unknown how the implementation here compares to theirs, because the set partitioning problem discussed in section \ref{OptimalCMOs} became a limiting factor before the $N=300$ they encountered.
+It is unknown how the implementation here compares to theirs, because the set partitioning problem discussed in Section \ref{OptimalCMOs} became a limiting factor before the $N=300$ they encountered.
 
 The complete set of CMOs for the example polygon is:
 \[
@@ -1353,7 +1343,7 @@ The complete set of CMOs for the example polygon is:
 
 \subsection{Optimal Polygon Option Set}\label{OptimalCMOs}
 The final step of \textit{interior edge extension} is to determine what subset of CMOs minimizes the sum of CMO widths.
-Nielsen et al. describe this as a set partitioning problem\cite{IntEdgeExt}, but it is actually a weighted set cover problem.
+Nielsen et al. describe this as a set partitioning problem~\cite{IntEdgeExt}, but it is actually a weighted set cover problem.
 The solution proposed here amounts to the ``brute-force'' method of solving the set cover problem.
 This works fine for relatively small numbers of CMOs, but quickly becomes a computational bottleneck.
 The completion of a minimal working ``pipeline'' was prioritized over computational efficiency, hence this solution was left in place.
@@ -1367,7 +1357,7 @@ Due to the way that function is written, this typically results in the simplest,
 Cellular path planning consists of generating the back-and-forth path outline for the given convex polygon.
 The back-and-forth style of path planning has been termed ``boustrophedon path''.
 The word boustrophedon comes from ancient greek, and roughly means ``the way the ox turns'', describing the path an ox would take while ploughing a field.
-The boustrophedon path planning procedure developed in this work is described in detail in algorithm \ref{alg:boustrophedon}, and visually in figure \ref{fig:bpath_steps}.
+The boustrophedon path planning procedure developed in this work is described in detail in Algorithm~\ref{alg:boustrophedon}, and visually in Figure \ref{fig:bpath_steps}.
 
 % NOTE: the following float seems to only sit where i want it with the !p options...
 \begin{algorithm}[!htbp]
@@ -1595,7 +1585,7 @@ On line 12 the edge $e_{curr}$ is created to manage the edge currently being fol
 More specifically, $e_{curr}$ contains the edge from the perimeter pass that is used to guide each ``shift'', that is, the movement up to where the next sweep pass begins.
 The \verb|while| loop carries out a shift upwards along the current edge and then a long pass across the polygon meeting the opposite edge.
 Note that the edges referenced at this point are not those of the polygon itself, but of those created by the perimeter pass.
-This is made clear by observing the sweep pass lines in figure \ref{sfig:bpath_sweep1}.
+This is made clear by observing the sweep pass lines in Figure \ref{sfig:bpath_sweep1}.
 The \verb|while| loop's procedure begins by calculating the distance to be traveled along the current edge's direction.
 A temporary waypoint $w_{temp}$ is created at this proposed position to check a couple conditions.
 % NOTE: should probably rename h_pass...
@@ -1603,7 +1593,7 @@ First, if $w_{temp}$'s y coordinate is greater than $h_{pass}$, $d_{edge}$ is up
 Second, if $w_{temp}$ is above the current corner, then a waypoint is added at the corner and both the current edge and corner are moved up to their next positions.
 The edge distance is then recalculated based on the remaining distance from the proposed waypoint to the waypoint set by the corner.
 This is illustrated in figures \ref{sfig:bpath_sweep2} and \ref{sfig:bpath_sweep3}.
-In figure \ref{sfig:bpath_sweep2} the sweep path will intersect a little below the current corner, and the proposed next waypoint will be above this corner.
+In Figure \ref{sfig:bpath_sweep2} the sweep path will intersect a little below the current corner, and the proposed next waypoint will be above this corner.
 Figure \ref{sfig:bpath_sweep3} shows the intersection waypoint, corner waypoint and the final waypoint of this shift upwards after $e_{curr}$ and $c_{curr}$ have been updated.
 % NOTE: thinking of renaming w_temp to w_prop for proposed...
 Once $d_{edge}$ has been adjusted according to either aforementioned condition, a new waypoint is set from the current waypoint moved up $d_{edge}$ along the current edge's direction.
@@ -1631,12 +1621,15 @@ The UR3 is capable of receiving end effector positions and handling the inverse 
 Thus, computing the inverse kinematics for a given position would only be necessary to ensure that it is within the robot's workspace and does not collide with the object or rotary table.
 Due to time constraints, an inverse kinematics solver was not included in the final version of the project.
 
+\section{Robot Communication}
+(? Although a minor part of the project, should the work put into communicating with the robot be mentioned at all?)
+
 \section{Graphical User Interface}
-At the beginning of this project, a bare bones graphical user interface (GUI) implemented using wxWidgets\cite{wxWidgets} was provided as the basis for the a program to test the algorithms and procedures developed.
+At the beginning of this project, a bare bones graphical user interface (GUI) implemented using wxWidgets~\cite{wxWidgets} was provided as the basis for the a program to test the algorithms and procedures developed.
 The GUI as initially provided featured two dummy buttons, and the display window.
-The scene rendering in the display window was originally implemented using OpenGL version 1.1\cite{OpenGL_wiki}, but was eventually updated to version 3.3.
+The scene rendering in the display window was originally implemented using OpenGL version 1.1~\cite{OpenGL_wiki}, but was eventually updated to version 3.3.
 Throughout the project the GUI was significantly expanded support development and testing of the core research goals.
-An overview of the GUI and its controls are shown in figure \ref{fig:gui_overview}, and the callouts are described in the list below.
+An overview of the GUI and its controls are shown in Figure \ref{fig:gui_overview}, and the callouts are described in the list below.
 
 When the application is first opened the only GUI controls enabled are the \textbf{Load Model} and \textbf{Reload Models} buttons.
 Without a mesh loaded the remaining controls are meaningless, hence they are enabled only after a mesh has been loaded.
@@ -1742,8 +1735,8 @@ Once Watershed segmentation yielded plausible results from the default cube, mes
 To meet this request models were scoured from Fraunhofer IGD's own collection of scanned and reconstructed cultural artefacts.
 All but one of the reconstructed meshes were too complex to be useful during testing.
 To ensure the algorithm's generalizability additional test models were eventually sought, this time from CAD databases.
-The vast majority of these came originally from Thingiverse, an online platform for users to post their 3D printable models\cite{Thingiverse}.
-The full list of test models and their sources can be found in appendix \ref{App:model_table}.
+The vast majority of these came originally from Thingiverse, an online platform for users to post their 3D printable models~\cite{Thingiverse}.
+The full list of test models and their sources can be found in appendix \ref{app:model_table}.
 
 \subsection{Remeshing}
 Because Watershed segmentation requires input models to have a mesh of vertices upon which the height function may be computed, and CAD models store only what is required to reconstruct their geometry, remeshing was required as a pre-processing step.
@@ -1753,12 +1746,12 @@ The primary input parameter of \textit{isotropic explicit remeshing} is the ``ta
 Unfortunately PyMeshLab's documentation is unclear as to what this value is a percentage of.
 % I tried to find the answer, believe me.
 The vast majority of test models were remeshed with a uniform ``target length'', and the remainder were remeshed using manual selection of regions.
-Models that were remeshed with non-uniform target lengths have a range of values in the \textbf{Mesh} column in appendix \ref{App:model_table}.
+Models that were remeshed with non-uniform target lengths have a range of values in the \textbf{Mesh} column in appendix \ref{app:model_table}.
 
 Prior to testing each test object was examined and assigned a ``difficulty class'' from 1-4.
 The difficulty classification was created during a period when the algorithm's conic regression and cylinder detection functionality were sub-optimal and required improvement.
 Hence the higher difficulty class for objects with cylindric surfaces.
-The example images in the following sections were created using Blender\cite{Blender}.
+The example images in the following sections were created using Blender~\cite{Blender}.
 
 \subsection{Difficulty Class 1}
 These objects are comprised solely of planar surfaces and should pose little to no trouble to the path planner.
@@ -1790,7 +1783,7 @@ Figure \ref{fig:class_1_models} shows 3 such examples.
 \subsection{Difficulty Class 2}
 Features that would cause an object to be pushed into class 2 include small or narrow surfaces, as well as cylindric surfaces.
 There is a decent chance that small and thin surfaces will be absorbed into a neighboring large planar region, decreasing the chance that the combined region will be classified as planar.
-Three examples of class 2 test models can be found in figure \ref{fig:class_2_models}.
+Three examples of class 2 test models can be found in Figure \ref{fig:class_2_models}.
 
 \begin{figure}[htb]
 \centering
@@ -1815,12 +1808,12 @@ Three examples of class 2 test models can be found in figure \ref{fig:class_2_mo
 \label{fig:class_2_models}
 \end{figure}
 
-Of the models shown in figure \ref{fig:class_2_models} model 55583 (figure \ref{sfig:55583}) has the highest potential for failure, due to the narrow surfaces at the top of each gear tooth.
-The smooth transitions from planar to cylindric in figure \ref{sfig:7120369} will also be difficult for the path planner.
+Of the models shown in Figure \ref{fig:class_2_models} model 55583 (Figure \ref{sfig:55583}) has the highest potential for failure, due to the narrow surfaces at the top of each gear tooth.
+The smooth transitions from planar to cylindric in Figure \ref{sfig:7120369} will also be difficult for the path planner.
 
 \subsection{Difficulty Class 3}
 Objects of this class are expected to be difficult despite improvements to cylinder detection and regression, and handling of narrow planar surfaces.
-The examples shown in figure \ref{fig:class_3_models} showcase various difficult features.
+The examples shown in Figure \ref{fig:class_3_models} showcase various difficult features.
 
 \begin{figure}[htb]
 \centering
@@ -1872,9 +1865,9 @@ Figure \ref{fig:class_4_models} shows a few such models.
 \label{fig:class_4_models}
 \end{figure}
 
-Although spherical surfaces, such as those adorning model 50704 (figure \ref{sfig:50704}), were part of the planned set of detectable primitives, that functionality was not completed.
+Although spherical surfaces, such as those adorning model 50704 (Figure \ref{sfig:50704}), were part of the planned set of detectable primitives, that functionality was not completed.
 Thus, even if the path planner were able to perfectly handle the curved surfaces at the base of model 50704, the partial spheres would result in a failure.
-Model 229605 (figure \ref{sfig:229605} appears simple at first glance, but its lower half is that of a cone, and the detection thereof is not implemented.
-Model 99265, shown in figure \ref{sfig:99265}, exhibits swept curves which the path planner is unable to process.
+Model 229605 (Figure \ref{sfig:229605} appears simple at first glance, but its lower half is that of a cone, and the detection thereof is not implemented.
+Model 99265, shown in Figure \ref{sfig:99265}, exhibits swept curves which the path planner is unable to process.
 Its overall form, comprised of occluded regions, is also beyond the scope of the intended application of the path planner developed.
 
