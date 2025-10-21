@@ -90,10 +90,16 @@ The end result of Watershed is shown in Subfigure (d).
 	\label{fig:ws_1570179_steps}
 \end{figure}
 
-In Figure \ref{fig:ws_1570179_steps} subfigure (a) shows Mangan and Whitaker's step 2: locating and labeling each local minima.
-Region 1 in subfigure (c) depicts the original step 5: descent to a minimum, and regions 2 and 3 in the same subfigure show step 6: the merging of shallow regions into deep ones.
-The step shown in subfigure (b) is of Atkar et al.'s own design, and due to its adaptation in this work, is described in the section on \textit{minima expansion}.
-Figure \ref{fig:ws_1570179_steps} concludes with the end result of Watershed in subfigure (d).
+This work's implementation of Watershed builds on both Mangan and Whitker's as well as Atkar et al.'s version.
+Its steps are listed below and described in greater detail in the following sections.
+\begin{enumerate}
+	\item Region initialization: Create and initialize each surface region
+	\item Minima Expansion: Expand outward from each region up to a set point, absorbing encountered regions.
+	\item Descent to Minima: Descend from all remaining indepentent vertices to labeled regions
+	\item Mini-Merge: Merge small regions into a deep adjacent region
+	\item Shallow-Merge: Merge regions whose watershed depth is below a given threshold into a deep adjacent region
+	\item Boundary Smoothing: Smooth region boundaries by transferring singular points to neighboring region.
+\end{enumerate}
 
 \subsubsection{Region Initialization}
 In this work's implementation the curvature values and derivative thereof are calculated once for the whole mesh prior to the first Watershed pass.

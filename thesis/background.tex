@@ -1,8 +1,7 @@
 %! TeX root = thesis.tex
 \chapter{Background}
 \tikzset{HighLevelProcedure/.pic={
-	\newdimen\dx
-	\dx=6mm
+	\def\dx{6mm}
 	% nodes
 	\node[] (Mesh) {Mesh};
 	\node[FC-Node] (3DSeg) [right=\dx of Mesh] {3D Segmentation};
@@ -42,6 +41,30 @@ Non-convex simple surfaces are subject to 2D segmentation, from which convex sub
 A local coverage path is then planned on each convex region.
 The task of combining the individual paths into a single path is a form of Traveling Salesman Problem (TSP).
 Once the path is complete, the waypoints thereof may be sent to the robot arm tasked with carrying out the cleaning operation.
+
+\section{A Note on Notation}
+To transforma a point from one coordinate system to another one typically uses a transformation matrix, denoted $T$.
+There is no unified notation to indicate in which coordinate system a point resides, nor is there to indicate from which to which coordinate systems a $T$ will transform.
+% There is no unified notation for $T$ to indicate its source and target coordinate systems.
+In order to dispell any confusion, the notation used in this work is explained below.
+As is typical, right subscripts are used to indicate information about the owning quantity.
+To indicate the coordinate system in which point or vector exists, the left superscript is used.
+\begin{equation*}
+	\prescript{0}{}p_i
+\end{equation*}
+represents the $i$-th point in coordinate system 0 (shorthand for global coordinate system).
+For transformation matrices the right subscript is designates the \textit{source} coordinate system, and the left superscript the \textit{target} coordinate system.
+This leaves the right superscript position open for a transpose or inverse symbol.
+\begin{equation*}
+	\prescript{0}{}T_{A}
+\end{equation*}
+gives a transformation matrix from the \textit{A} coordinate system to the global coordinate system.
+This schema provides an inherent check that multiplication between two quantities is valid according to their frames of reference.
+\begin{equation*}
+	\prescript{0}{}p_i = \prescript{0}{}T_{A} \prescript{A}{}p_i
+\end{equation*}
+shows the transformation of point $p_i$ in coordinate system $A$ to the global coordinate system.
+In this last example the coordinate system of $p_i$ and the source coordinate system of $T$ appear adjacent and near vertical of one another, confirming that this is a valid transformation.
 
 \section{Geometric Curvature}
 The first step of \textit{3D Segmentation} is to segment the object's mesh using Watershed segmentation.
@@ -182,7 +205,7 @@ In Equation \ref{eq:lap_beltrami_op} above $p_j$ is a vertex in the ring of vert
 
 \begin{figure}[htb]
 	\centering
-	\begin{subfigure}{0.45\textwidth}
+	\begin{subfigure}[t]{0.47\textwidth}
 		\centering
 \begin{tikzpicture}[
 	hidden/.style={inner sep=0, outer sep=0}]
@@ -199,11 +222,11 @@ In Equation \ref{eq:lap_beltrami_op} above $p_j$ is a vertex in the ring of vert
 	\draw [|-|, thick] ($(node_i.east)+(0.1,0.05)$) -- ($(node_j.east)+(0.1,0.05)$)
 		node [pos=0.65,label={0:$l_{ij}$}] {};
 \end{tikzpicture}
-		\caption{Dihedral angle of adjacent mesh faces. Inspired by~\cite{DDGAppIntro_19_discrete_k_2}.}
+		\caption{Shown is the intersection of two triangular faces, with their shared edge and dihedral angle marked.}
 		\label{sfig:dihedral_angle}
 	\end{subfigure}
 	\hfill
-	\begin{subfigure}{0.45\textwidth}
+	\begin{subfigure}[t]{0.47\textwidth}
 		\centering
 \begin{tikzpicture}[scale=1.1]
 	% based on image in slide 26/44 in DDG-DiscreteCurvatureI.pdf
@@ -228,14 +251,15 @@ In Equation \ref{eq:lap_beltrami_op} above $p_j$ is a vertex in the ring of vert
 	\draw (330:\hexR) +(150:\arcR) arc [radius=\arcR, start angle=150, end angle=210]
 		node [pos=0.5, label={[xshift=2.5mm]180:$\beta_{ij}$}] {};
 \end{tikzpicture}
-		\caption{\raggedright The triangular mesh neighborhood around vertex $i$.}
+		\caption{Shown is vertex i's ring, with noteworthy angles marked.}
 		\label{sfig:mesh_neighborhood}
 	\end{subfigure}
 \caption{
-(a) depicts two adjacent triangular faces connected by edge $ij$, with angle the dihedral angle between them denoted $\phi_{ij}$ and the length of edge $ij$ as $l_{ij}$.
-(b) depicts the neighborhood of faces around vertex $i$ on some triangular mesh.
-The angle between adjacent edges radiating from vertex $i$ is denoted $\Theta_{ijk}$.
-The angles opposite edge $ij$ are indicated as $\alpha_{ij}$ and $\beta_{ij}$.
+Subfigure (a) depicts angle $\phi_{ij}$ and edge length $l_{ij}$ from Equation \ref{eq:dihedral_angle}, wherethey are used to calculate mean curvature.
+Subfigure (b) portrays the opposite angles $\alpha_{ij}$ and $\beta_{ij}$ across from edge $ij$.
+The opposite angles, as well as the positions of vertices $i$ and $j$, are used in Equation \ref{eq:lap_beltrami_op} to calculate the mean curvature normal.
+Subfigure (b) also shows $\Theta_{ijk}$, the angle between adjacent edges used in Equation \ref{eq:disc_gauss_k} to calculate the angle deficit of vertex $i$.
+Both illustrations were based on similar ones in~\cite{DDGAppIntro_19_discrete_k_2}.
 }
 \end{figure}
 
@@ -276,8 +300,9 @@ The root mean square curvature is as the name implies, the square root of the av
 % \end{equation*}
 They found $\kappa_{rms}$ cheaper to compute than the absolute curvature because they computed it from the mean and Gaussian curvatures:
 \begin{equation*}
-	\kappa_{rms} = \sqrt{4H^2 - 2K}.
+	\kappa_{rms} = \sqrt{4H^2 - 2K},
 \end{equation*}
+where $H$ and $K$ are the same mean and Gaussian curvatures explained above.
 % RMS curvature was used during developement prior to implementing the derivative of curvature.
 
 \subsection{Derivative of Curvature}
@@ -366,24 +391,238 @@ Eberly also compares 3 methods of solving Equation \ref{eq:ellipse_dist} for $t$
 \subsubsection{Parabolic and Hyperbolic Regression}
 % TODO: return to this, improve it.?
 The functionality to perform parabolic or hyperbolic regression was omitted from this work due to time constraints.
+
 (? I could layout how to compute the distance and thus error for at least a parabola, but is it worth it if it is not implemented? it is safe to assume the vast majority of curves encountered will be circular, and if not circular then elliptic...)
 
 \section{UV Mapping}
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=0.65\textwidth]{../resources/cube_UV_unwrapping.png}
+	\caption{Visual depiction of a cube's UV map being unwrapped~\cite{UV_map_cube_img}. }
+	\label{fig:uv_map_cube}
+	% NOTE: image requested by HK
+\end{figure}
 UV Mapping is the process of projecting a surface from 3D to 2D, effectively ``unwrapping'' the 3D surface.
-(insert sentence about common usage in 3D modeling / graphics and textures)
+UV maps are used extensively in 3D modeling and computer graphics.
+Figure \ref{fig:uv_map_cube} shows the UV map of a cube being unwrapped.
+Within the context of this work the primary purpose of UV maps are to handle the transformation of points from global to surface coordinates.
+The plan was to have a UV map for each shape primitive to use during the \textit{Geometry Simplification} and \textit{Cellular Path Planning} high level steps.
+% The functions a "UV-Map" in the code accomplishes:
+	% Eigen::Vector2d xyz_to_uv(const Eigen::Vector3d& vec3) const;
+	% Eigen::Vector3d uv_to_xyz(const Eigen::Vector2d& vec2) const;
+	% Eigen::Vector3d pt_dir_intersection(
+	% 	const Eigen::Vector3d& pt, const Eigen::Vector3d& dir) const;
+	% Eigen::Vector3d surface_normal_at_pt(const Eigen::Vector3d& pt) const;
+	% Eigen::Vector3d theta_to_RxRyRz(double theta) const;
+
 The UV map for planar surfaces is trivial, as the 3D surface is already ``unwrapped''.
+% TODO: ask about this
+% (? if necessary i can explain in greater detail, but it seems superfluous...)
 
-\subsection{Conic Surfaces}
-General equation of a conic is:
-\begin{equation}\label{eq:gen_conic}
-	Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0
-\end{equation}
+\subsection{Cylindric Surfaces}
+For the purposes of this project, cylindric surfaces is restricted to extruded ellipses.
+The process is first described for a circular cylinder, and then expanded to a generic ellipse.
 
-\subsubsection{Elliptic Surface}
-General equation:
-\begin{equation}
-	\frac{x^2}{a^2} + \frac{y^2}{b^2} = 1
+\subsubsection{Circular Cylinders}
+The transformation matrix $\prescript{c}{}T_0$ is the core of a circular cylindric UV map.
+The z axis of $\prescript{c}{}T_0$ aligns with the cylinder's axis, and its origin is positioned at one end of the cylinder.
+This can be observed in Figure \ref{sfig:gl_ccyl_transformation} below.
+The transformation procedure is described visually in Figure \ref{fig:gl_ccyl_transform_steps}, and textually below.
+\begin{figure}[htb]
+	\centering
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+\begin{tikzpicture}[scale=1.0]
+	% CSYS
+	\draw[->] (0,0) -- +(210:1.5) node[left] {X};
+	\draw[->] (0,0) -- +(-30:1.5) node[right] {Y};
+	\draw[->] (0,0) -- (0,1.5) node[above] {Z};
+	% Cylinder
+	\node[cylinder,shape border rotate=90,
+		aspect=2.5, minimum height=20mm, minimum width=20mm,
+		draw=blue!60] at (0,0.0) {};
+	% Point
+	\fill[purple] (1,0.5) circle[radius=3pt];
+\end{tikzpicture}
+		\caption{%
+Step 1: Transform point to cylinder coordinates.
+\begin{equation*}
+	\prescript{c}{}p = \prescript{c}{}T_0 \prescript{0}{}p
+\end{equation*}
+}
+		\label{sfig:gl_ccyl_transformation}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+\begin{tikzpicture}[scale=1.0]
+	% CSYS
+	\draw[thin,->] (0,0) -- (1.4,0) node[right] {X};
+	\draw[thin,->] (0,0) -- (0,1.4) node[above] {Y};
+	% Cylinder -> Circle
+	\draw (0,0) circle[radius=10mm,blue];
+	% Point
+	\node[circle,minimum size=6pt,fill=purple,inner sep=0, outer sep=0,label=135:$p$] (p1) at (135:10mm) {};
+	% arrow and angle
+	\draw (0,0) -- (p1);
+	\draw[-stealth,black] (8mm,0) arc[start angle=0, end angle=135, radius=8mm]
+		node[pos=0.37,below left] {$\phi$};
+\end{tikzpicture}
+		\caption{%
+Step 2: Calculate $\phi$ using the point's x and y.
+\begin{equation*}
+	\phi = \arctan \frac{y}{x}
+\end{equation*}
+}
+		% \label{fig:tangent_on_curve}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+\begin{tikzpicture}[scale=1.0]
+	% CSYS
+	\draw[thin,->] (0,0) -- (3.5,0) node[right] {U};
+	\draw[thin,->] (0,0) -- (0,2.1) node[above] {V};
+	% Grid to represent unwrapped surface
+	\draw[xstep=4mm,ystep=9mm,very thin] (0,0) grid (3.2,1.8);
+	% Point
+	\fill[purple] (1.178,1.35) circle[radius=3pt];
+\end{tikzpicture}
+		\caption{%
+Step 3: Calculate UV coordinates.
+% Point $\prescript{c}{}p$ shown on the unwrapped cylinder.
+\begin{equation*}
+	p(u,v) = (L \frac{\phi}{2\pi}, \prescript{c}{}p\text{.z})
+\end{equation*}
+}
+		% \label{fig:tangent_on_curve}
+	\end{subfigure}
+	\caption{Graphic depiction of a point transformed from global to cylinder surface coordinates.}
+	\label{fig:gl_ccyl_transform_steps}
+\end{figure}
+
+First the point is transformed to the cylinder's coordinate system in $R^3$.
+From here the $x$ and $y$ coordinates of the point are used to calculate the angle $\phi$ measured from the $x$ axis.
+The point's $u$ coordinate is calculated as the ratio of $\phi$ to its perimeter using
+\begin{equation}\label{eq:cyl_u_coord}
+	u = L \frac{\phi}{2\pi},
 \end{equation}
+where $L$ is the cylinder's perimeter: $2\pi r$.
+% $\phi$ is used to calculate the arc length position of $\prescript{c}{}p$ along the cylinder's perimeter, which becomes its $u$ position in surface coordinates.
+The point's $z$ in the cylinder's coordinate system becomes its $v$ coordinate in surface coordinates.
+
+To transform a point in surface coordinates to $R^3$, the steps above must be reversed.
+Solving Equation \ref{eq:cyl_u_coord} for $\phi$, the point's $u$ coordinate is converted back to the angle $\phi$:
+\begin{equation*}
+	\phi = 2\pi \frac{u}{L}.
+\end{equation*}
+Next the point's position in cylinder coordinates are calculated as
+\begin{equation*}
+	\prescript{c}{}p(x,y,z) = (r \cos \phi, r \sin \phi, v)
+\end{equation*}
+where $r$ is the circle's radius.
+Finally, the point may be transformed from the cylindric to the global frame of reference using the transformation matrix $\prescript{0}{}T_c$.
+
+\subsubsection{Elliptic Cylinders}
+An ellipse is merely a circle that has been stretched.
+Because of this, the procedure to transform a point from $R^3$ to the surface coordinates of an elliptic cylinder is the same as that of the circular cylinder, save for some different equations.
+Here, the elliptic UV map contains transformation matrix $\prescript{e}{}T_0$, with its z axis aligned with the cylinder's main axis, x axis aligned with the ellipse's major axis, and origin centered on the ellipse.
+Recall that the general equation of an ellipse is
+\begin{equation*}
+	\frac{x^2}{a^2} + \frac{y^2}{b^2} = 1,
+\end{equation*}
+where $a$ is the radius along the major axis, and $b$ is the radius along the minor axis.
+The transformation procedure is described visually in Figure \ref{fig:gl_ecyl_transform_steps}, and textually further below.
+
+\begin{figure}[htb]
+	\centering
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+\begin{tikzpicture}[scale=1.0]
+	% \draw[step=10mm,gray!50,very thin] (-2.2,-0.2) grid (2.2,3.2);
+	% CSYS
+	\draw[->] (0,0) -- +(210:1.5) node[left] {X};
+	\draw[->] (0,0) -- +(-30:1.5) node[right] {Y};
+	\draw[->] (0,0) -- (0,1.7) node[above] {Z};
+	% Ellipse(s)
+	% \draw[gray!50] (0,0.0) ellipse[x radius=12mm, y radius=6mm,rotate=30];
+	\draw[] (24:11.9mm) -- +(0,0.7);
+	\draw[] (203:11.8mm) -- +(0,0.7);
+	\draw (26:12.0mm) {[rotate=30] arc
+		[start angle=-13, delta angle=-180, x radius=12mm, y radius=6mm,rotate=30]};
+	\draw[] (0,0.7) ellipse[x radius=12mm, y radius=6mm,rotate=30];
+	% Point
+	\fill[purple] (1.1,0.7) circle[radius=3pt];
+\end{tikzpicture}
+		\caption{%
+Step 1: Transform point to cylinder coordinates.
+\begin{equation*}
+	\prescript{e}{}p = \prescript{e}{}T_0 \prescript{0}{}p
+\end{equation*}
+}
+		% \label{sfig:gl_ecyl_transformation}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+\begin{tikzpicture}[scale=1.0]
+	% \draw[step=10mm,gray!50,very thin] (-2.2,-0.2) grid (2.2,3.2);
+	% CSYS
+	\draw[thin,->] (0,0) -- (1.5,0) node[right] {X};
+	\draw[thin,->] (0,0) -- (0,1.5) node[above] {Y};
+	% Cylinder -> Circle
+	\draw[] (0,0) ellipse[x radius=12mm, y radius=6mm];
+	% Point
+	\node[circle,minimum size=6pt,fill=purple,inner sep=0, outer sep=0,label=135:$p$] at (-0.96,0.36) {};
+	% arrow and angle
+	% \draw (0,0) -- (p1);
+	% \draw (8mm,0) arc [->,start angle=0, end angle=135, radius=8mm];
+\end{tikzpicture}
+		\caption{%
+Step 2: Calculate $\phi$ using the point's x and y.
+\begin{equation*}
+	\phi = \arctan \frac{y/b}{x/a}
+\end{equation*}
+}
+		\label{sfig:ellipse_xy_coords}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\centering
+\begin{tikzpicture}[scale=1.0]
+	% CSYS
+	\draw[thin,->] (0,0) -- (3.6,0) node[right] {U};
+	\draw[thin,->] (0,0) -- (0,2.0) node[above] {V};
+	% Grid to represent unwrapped surface
+	\draw[xstep=3.4mm,ystep=8mm,very thin] (0,0) grid (3.4,1.6);
+	% Point
+	\fill[purple] (1.36,0.8) circle[radius=3pt];
+\end{tikzpicture}
+		\caption{%
+Step 3: Calculate UV coordinates.
+% Point $\prescript{c}{}p$ shown on the unwrapped cylinder.
+\begin{equation*}
+	p(u,v) = (L \frac{\phi}{2\pi}, \prescript{e}{}p\text{.z})
+\end{equation*}
+}
+		% \label{fig:tangent_on_curve}
+	\end{subfigure}
+	\caption{Graphic depiction of a point transformed from global to cylinder surface coordinates.}
+	\label{fig:gl_ecyl_transform_steps}
+\end{figure}
+
+The first step remains unchanged: Transform the point to the cylinder's coordinate system.
+The objective of the second step remains calculating the arc angle $\phi$, but here the coordinates must be scaled by their corresponding radii to account for the ellipse's eccentricity.
+Note that for an ellipse $\phi$ is not equivalent to the angle to the point measured from the local $x$ axis, as that would be $\arctan y/x$.
+Hence why there is no line or marker indicating $\phi$ in Figure \ref{sfig:ellipse_xy_coords}.
+
+Performing the reverse transformation is equivalent to that of the circular cylinder, with the exception that the individual radii must be used instead of the singular radius $r$:
+\begin{equation*}
+	\prescript{c}{}p(x,y,z) = (a \cos \phi, b \sin \phi, v).
+\end{equation*}
+From here, the point is transformed from cylindric to global coordinates using $\prescript{}{}T_e$.
+
+\iffalse
 To obtain a vector perpendicular to a point on the ellipse, the derivative of said point is rotated 90 degrees.
 The point, as a function of the angle $\theta$:
 \begin{equation}
@@ -398,7 +637,7 @@ Rotated -90 degrees:
 	\text{Rot}_{90}\frac{d}{d\theta}(x,y) = (b\cos\theta, a\sin\theta)
 \end{equation}
 
-\subsubsection{Parabolic Surface}
+\subsubsection{Parabolic and Hyperbolic Surfaces}
 Parabolas are much simpler than and ellipses and hyperbolas, as can be seen by the following equations.
 The parametric general equation of a parabola is:
 \begin{equation}
@@ -489,15 +728,16 @@ Setting 3.7 into 3.8:
 		\cos^2\theta B &= 2 \cos\theta\sin\theta(A + (\sin^2\theta - \cos^2\theta) \frac{\cos^2\theta(A-C)}{(\cos^4\theta - \sin^4\theta)}) \\
 	\end{split}
 \end{equation}
+\fi
 
 \section{Ramer-Douglas-Peucker Algorithm}
 The Ramer-Douglas-Peucker (RDP) algorithm is a method to interatively simplify a line defined by a set of points~\cite{RDP_line_reduction_DP, RDP_line_reduction_R}.
 The only arguments to RDP are a list of points and a tolerance width, within which points will be considered unnecessary and discarded.
 % The algorithm looks at a list of points, draws an imaginary line from the first to the last, finds the point with the farthest normal distance to the comparison line, and if the point's distance to the comparison line is greater than a pre-defined tolerance width, splits the lin
 The algorithm iteratively finds the point farthest from the straight line from point 0 to n-1, and if said distance is greater than the tolerance width, the line is split at the farthest point and the line sections before and after the split are reconsidered individually.
-The procedure is described in greater detail in Algorithm\ref{alg:RDP}.
+The procedure is described in greater detail in Algorithm~\ref{alg:RDP}.
 
-\begin{algorithm}[H]
+\begin{algorithm}[htb]
 \caption{Ramer-Douglas-Peucker}\label{alg:RDP}
 \begin{algorithmic}[1]
 \Function{SimplifyLineRDP}{points $P$, real $w$}
