@@ -95,7 +95,7 @@ Its steps are listed below and described in greater detail in the following sect
 \begin{enumerate}
 	\item Region initialization: Create and initialize each surface region
 	\item Minima Expansion: Expand outward from each region up to a set point, absorbing encountered regions.
-	\item Descent to Minima: Descend from all remaining indepentent vertices to labeled regions
+	\item Descent to Minima: Descend from all remaining independent vertices to labeled regions
 	\item Mini-Merge: Merge small regions into a deep adjacent region
 	\item Shallow-Merge: Merge regions whose watershed depth is below a given threshold into a deep adjacent region
 	\item Boundary Smoothing: Smooth region boundaries by transferring singular points to neighboring region.
@@ -135,7 +135,14 @@ The lack of plateaus on the inclined surface is most likely due to floating poin
 
 \subsubsection{Minima Expansion}
 This step was adopted from Atkar et al.'s implementation of Watershed segmentation~\cite{HierSurfSeg_for_autobody_painting}.
-Each mesh region expands up to a pre-set depth, absorbing any regions encountered.
+All mesh regions are allowed to expand up to a pre-set depth, absorbing any regions encountered.
+This preset depth is calculated using
+\begin{align*}
+	t_{rel} &= \left(h_{max} - h_{min}\right)^{e}, \\
+	d_i &= h_{i-min} + t_{rel}
+\end{align*}
+where $t_{rel}$ is the relative expansion threshold, $h_{max}$ and $h_{min}$ are the maximum and minimum heights of the whole mesh, $e$ is the expansion exponent, $d_i$ is the expansion limit for mesh region $i$, and $h_{i-min}$ is region $i$'s lowest height.
+The expansion exponent $e$ settled to 0.3 through testing.
 Although not essential to the segmentation results, it facilitates subsequent steps by effectively filtering high frequency noise and features from the mesh.
 It is worth noting that Watershed segmentation overall would work without \textit{minima expansion}, but would be slightly slower because the region merging in Watershed steps 4 and 5 are a little more computationally expensive than region merges during \textit{minima expansion}.
 % NOTE: in the code mini-merge is numbered 4.1, and shallow-merge 4.2, but for simplicity they are 4 and 5 here.
@@ -177,7 +184,6 @@ Their solution was to merge shallow regions into adjacent deeper regions (see su
 Through testing small high curvature regions were observed, that due to their high curvature did were not merged into any of the larger more useful regions.
 To combat this, the ``Mini-Merge'' step was developed to merge regions deemed too small to be worth keeping.
 The merge condition changed throughout development, from a fixed number of vertices threshold, to a threshold relative to the total number of vertices in the mesh undergoing Watershed segmentation, to the condition that the number of perimeter vertices in the region be fewer than 50\% of the region's vertices.
-(? reword previous sentence?)
 The \textit{mini-merge} procedure is shown in Algorithm~\ref{alg:WS:mini_merge}.
 
 % TODO: HK wants me to move the algorithm higher?
@@ -185,9 +191,7 @@ The \textit{mini-merge} procedure is shown in Algorithm~\ref{alg:WS:mini_merge}.
 \caption{Mini-Merge}\label{alg:WS:mini_merge}
 \begin{algorithmic}[1]
 \Function{miniMerge}{Mesh sections $S$}
-	% \State Sort $S$ by vertex count in ascending order
 	\For{$s$ in $S$}
-		% \State $s_{small} \leftarrow S$.first
 		\If{$s$.small()}
 			\State $s_{lowside} \leftarrow s$.findLowSideNeighbor()
 			\State $s_{lowside}$.absorb($s$)
@@ -219,7 +223,7 @@ The method to find the low-side adjacent neighboring mesh region is shown below 
 \end{algorithm}
 
 The receiving mesh region is found by searching the vertices adjacent to the mini region's lowest perimeter vertex.
-If for some reason no valid mesh region adjacent to that vertex is found, the neighborhoods of the remaining perimter vertices are checked in ascending order until a valid mesh region is found.
+If for some reason no valid mesh region adjacent to that vertex is found, the neighborhoods of the remaining perimeter vertices are checked in ascending order until a valid mesh region is found.
 
 \begin{figure}[htb]
 	\centering
@@ -299,7 +303,7 @@ This step is more post-processing and ``cleaning'' of the mesh region boundary t
 Due to randomness in the mesh there are situations where a vertex is connected to its region by a single edge.
 Such vertices are named ``web1'' points, due to them having a single webbed connection to their region's perimeter.
 In order to smooth the region boundary, an attempt is made to find an adjacent mesh region more suitable to possess each web1 point.
-Because vertices with only 3 edges are exceedingly rare in well meshed models, it is sufficient to transfer ownership of the web1 point to the adjacent region with the highest number of connecing edges.
+Because vertices with only 3 edges are exceedingly rare in well meshed models, it is sufficient to transfer ownership of the web1 point to the adjacent region with the highest number of connecting edges.
 Thus, for example, A vertex assigned to region 4 through Minima Descent with edges connecting to regions 4, 10, 12, and 12, would be transferred to region 12.
 No explicit tie breaking mechanism was deemed necessary, but lower numbered regions are likely given priority due to how the code was written.
 % At one point perimeter vertices with 3 or more connections to other same-region perimeter vertices were considered a problem,...
@@ -317,12 +321,12 @@ As explained in the following sections, developing a reliable preliminary classi
 Various tests were devised to determine if a given mesh region can be classified as planar.
 An early idea was to cluster the normals of the given mesh region, and perform a sort of statistical analysis on them.
 By clustering all normals within a set allowable deviation, the spread in the number of vertices in each cluster should provide insight into the surface type.
-One would expect a plane to have a normal-cluster with an overwehelming number of vertices relative to other normal-clusters produced.
+One would expect a plane to have a normal-cluster with an overwhelming number of vertices relative to other normal-clusters produced.
 By comparison, a cylinder would be expected to have multiple ``significant'' normal-clusters, with vertex counts of similar magnitude.
 This idea was later deemed unnecessarily complex and too susceptible to mesh deviations, and shelved in favor of other ideas.
 
 Another idea was to calculate an overall normal vector by performing Principal Component Analysis (PCA) on the vertices' normals.
-The vertice's normals were then compared to this overall normal via their dot product.
+The vertices' normals were then compared to this overall normal via their dot product.
 If too many vertex normals deviated beyond a set angular threshold, the mesh region was determined to be non-planar.
 This test works well for ``perfect'' models, such as those from CAD, but is less useful when dealing with noisy meshes and can yield false negatives.
 
@@ -335,7 +339,7 @@ It \textit{is} possible to set useful curvature thresholds for noisy meshes, but
 The second planar test was used for some time until abandoning it in favor of performing regression as a means of classification.
 Planar regression was performed using PCA on the surface's point positions, with the least principal component denoting the plane's normal vector.
 To determine if the surface is indeed planar, the root mean squared error is calculated and compared to a set threshold.
-How to calculate the rmse for a set of points and a plane is described in greater detail in Section \ref{sec:planar_regression}.
+How to calculate the RMSE for a set of points and a plane is described in greater detail in Section \ref{sec:planar_regression}.
 If the RMSE is above the threshold, the surface is deemed non-planar and undergoes further tests to check if it is cylindric.
 % As a check on the test, planar regression via Singular Value Decomposition is performed on the mesh region's vertices, and the root mean squared error is reported.
 % If the RMSE is within a set threshold, the region passes the second check and is classified as planar.
@@ -352,7 +356,7 @@ An issue with using that method for cylindric classification is that a sphere an
 
 A test that examined the mean principal curvature values of the mesh region was also considered, but it failed to prove useful for the same reasons outlined in the previous section.
 Theoretically, the first principal curvature on the surface of a cylinder would fulfill $|\kappa_1| >> 0$ and the second principal curvature would be approximately 0.
-As in the planar case, a threshold that worked well for a denioised or ``clean'' cylinder would be unsuitable for a noisy mesh.
+As in the planar case, a threshold that worked well for a denoised or ``clean'' cylinder would be unsuitable for a noisy mesh.
 % Setting reliable thresholds proved overly difficult.
 
 Another test sought to make use of the vertices' normals by determining the axis direction via PCA, and checking that the dot product between each vertex's normal and the axis was roughly 0:
@@ -371,12 +375,12 @@ Because there exists no direct algebraic solution for the distance from a point 
 This was eventually replaced with an iterative method of calculating the point-surface distance, and then conic regression could be used \textit{as} cylinder classification.
 The method of computing the distance from a point to an ellipse is described further in Section \ref{sec:elliptic_reg}.
 % After implementing a conic error function based on point-surface distance, conic regression could be used \textit{as} cylinder classification.
-A surface that failed planar classification would be suject to cylindric regression, and the resultant RMSE compared to a threshold to determine cylindric categorization.
+A surface that failed planar classification would be subject to cylindric regression, and the resultant RMSE compared to a threshold to determine cylindric categorization.
 
 \subsubsection{Ellipsoidal Classification}
 % The third primitive type would have been ellipsoids, but due to their complexity and time constraints no ellipsoidal indentification or classification functions were developed.
-The third primitive type would have been ellipsoids, but due to their complexity and project time constraints ellipsoidal indentification or classification functions were not fully developed.
-Theoretically, prinicipal curvature values could also be applied here.
+The third primitive type would have been ellipsoids, but due to their complexity and project time constraints ellipsoidal identification or classification functions were not fully developed.
+Theoretically, principal curvature values could also be applied here.
 An ellipsoid curves in both surface directions, thus both the mean $|\kappa_1|$ and mean $|\kappa_2|$ should be noticeably greater than 0.
 An issue with this approach, besides the lack of generalizability, is that it is unable to distinguish between ellipsoidal and composite surfaces.
 A rounded corner surface that contained flat portions as well as a spherical portion would exhibit mean $|\kappa_2| >> 0$, and erroneously be categorized as ellipsoidal.
@@ -504,6 +508,9 @@ These points are then removed from the overall point set $P_{remaining}$ and app
 	% \State comment about source of muv1/2
 	\State new list $E$ \Comment{List of shared edges}
 	\For{$P_{edge}$ in $E_{points}$}\label{alg:edge_refinement_for}
+		\If{Number of points in $P_{edge}$ < $n_{min}$}
+			\State \textbf{continue} \Comment{Assume tiny edges are a mistake and skip them}
+		\EndIf
 		\State Determine the surfaces $s_1$ and $s_2$ adjacent current point line $P_{edge}$
 		\State Obtain UV-maps $m_{UV1}$ and $m_{UV1}$ from $s_1$, $s_2$ and $M$
 		\State clampPointsToSurfaces($P_{edge}$, $m_{UV1}$, $m_{UV2}$)\label{alg:edge_refinement_clamp_pts}
@@ -518,8 +525,9 @@ These points are then removed from the overall point set $P_{remaining}$ and app
 \textbf{Edge refinement} is, relative to \textbf{edge discovery}, fairly simple.
 A new list $E$ is created to store the final shared edges.
 The \verb|for| loop on line \ref{alg:edge_refinement_for} iterates through the lists of edge vertices in $E_{points}$, attempting to create a shared edge from each.
+The \verb|if| statement attempts to filter out tiny edges created where two surfaces share a corner but share no edges.
 On line \ref{alg:edge_refinement_clamp_pts} \verb|clampPointsToSurfaces()| forces the edge points onto an idealized representation of the two bordering mesh sections.
-For an edge between two planar surfaces, this would force all points to be colinear.
+For an edge between two planar surfaces, this would force all points to be collinear.
 Next the clamped points are sorted according to position along the line using the function \verb|sortEdgePoints()|.
 Finally a shared edge is created from the edge points, and then appended to $E$.
 Within the creation of a shared edge the RDP algorithm is used to simplify the line down to only the critical points.
@@ -595,7 +603,7 @@ If such a shared corner is found $t_{target}$ and $t_{near}$ are added to it.
 Otherwise a new shared corner is created from the matching line tips and appended to $C$.
 Finally, the list of shared corners $C$ is returned.
 
-\subsection{Extend Shared Edges}
+\subsection{Extend Shared Edges}\label{sec:extend_shared_edges}
 % Another meaningful name for this would be "force line tip coincidence", at least for the fn
 At this point the shared edges align with the regions they divide, but likely do not extend to meet the shared corners or each other.
 The function \verb|clampLineTips()|, described in Algorithm~\ref{alg:clamp_line_tips}, exists to rectify this.
@@ -976,7 +984,7 @@ Figure \ref{sfig:vg_extend_node_2_3_edges} shows this procedure repeated for nod
 
 \subsection{Polygon Graph}
 To create a polygon graph ``branches'' traverse the completed vertex graph starting at node~0.
-This process is described in detail in algorithmm \ref{alg:PG:create} and visually in Figure \ref{fig:PG:create}.
+This process is described in detail in Algorithm~\ref{alg:PG:create} and visually in Figure \ref{fig:PG:create}.
 
 \begin{algorithm}[!htb]
 \caption{Create Polygon Graph}\label{alg:PG:create}
@@ -1029,7 +1037,7 @@ An example of this is vertex graph edge 2-9.
 An active branch from node 2 to node 9 is created when branch 0$\rightarrow$1 grows to node 2 and splits, and an equivalent branch from node 9 to node 2 is created when the split at node 9 is handled.
 Once $b_{active}$ is confirmed novel, a mature branch whose tip occupies the same node as $b_{active}$ is sought from $B_{mature}$.
 $b_{active}$ is added to the list of mature branches \textit{after} searching for an intersection with a mature branch to preclude $b_{active}$ being identified as converging with itself.
-If a convergin branch is found both branches are traced backwards until a common base node is found.
+If a converging branch is found both branches are traced backwards until a common base node is found.
 In Figure \ref{sfig:pg_branch_convergence} branch 2$\rightarrow$9 is fully grown and has converged with the mature branch 0$\rightarrow$9.
 Figure \ref{sfig:pg_0_1_2_9_polygon} shows the completed polygon node after both branches were traced back to node 0.
 On line 20 in the pseudocode the newly created polygon node is added to the polygon graph.
@@ -1265,9 +1273,23 @@ The method followed in this work is described below in Algorithm~\ref{alg:genera
 
 \begin{figure}[htb]
 	\centering
-	% TODO: recreate this image with tikz
-	\includegraphics[width=0.5\linewidth]{../resources/seg_2d/iee_ex1_atomic_polygons.png}
-\caption{Complete polygon graph of the example polygon (! TODO: improve quality, most likely by replacing/recreating with TikZ)}
+	% \includegraphics[width=0.5\linewidth]{../resources/seg_2d/iee_ex1_atomic_polygons.png}
+\begin{tikzpicture}
+	% \draw[step=10mm,gray!50,very thin] (-0.2,-0.2) grid (6.2,3.2);
+	\draw (0,0) -- (1,0) -- (2,1) -- (0,1) -- cycle;
+	\node at (0.5,0.5) {0};
+	\draw (0,1.5) -- (2,1.5) -- (3,2.5) -- (2,3.5) -- (0,3.5) -- cycle;
+	\node at (1.0,2.5) {1};
+	\draw (2.5,1) -- (4.5,1) -- (3.5,2) -- cycle;
+	\node at (3.5,1.5) {2};
+	\draw (3.5,3) -- (4.5,4) -- (2.5,4) -- cycle;
+	\node at (3.5,3.5) {3};
+	\draw (4,2.5) -- (5,1.5) -- (7,1.5) -- (7,3.5) -- (5,3.5) -- cycle;
+	\node at (6.0,2.5) {4};
+	\draw (5,1) -- (6,0) -- (7,0) -- (7,1) -- cycle;
+	\node at (6.5,0.5) {5};
+\end{tikzpicture}
+\caption{Complete polygon graph of the example polygon}
 	\label{fig:pg_complete}
 \end{figure}
 
@@ -1331,7 +1353,7 @@ Once all guard clauses are passed, a new CMO is created, and added to the set $O
 
 Nielsen et al. discuss the difficulty of blindly checking the convexity of all possible sub-polygon combinations, especially when the number of sub-polygons is great ($N=300$)~\cite{IntEdgeExt}.
 To address this, they developed an approximation scheme to restrict the combinations checked.
-The method they propose is similar to the ``CMO degree'' propsed here, in which only combinations of $\lfloor i/2 \rfloor$ and $\lceil i/2 \rceil$ are considered, where $i$ is the numner of sub-polygons in the target CMOs.
+The method they propose is similar to the ``CMO degree'' proposed here, in which only combinations of $\lfloor i/2 \rfloor$ and $\lceil i/2 \rceil$ are considered, where $i$ is the number of sub-polygons in the target CMOs.
 The example they give is that for a CMO comprised of 6 sub-polygons only input CMOs of 3 sub-polygons are considered.
 % TODO: revise this once find_optimal() is fixed...
 It is unknown how the implementation here compares to theirs, because the set partitioning problem discussed in Section \ref{OptimalCMOs} became a limiting factor before the $N=300$ they encountered.
@@ -1362,7 +1384,7 @@ Due to the way that function is written, this typically results in the simplest,
 \section{Cellular Path Planning}
 Cellular path planning consists of generating the back-and-forth path outline for the given convex polygon.
 The back-and-forth style of path planning has been termed ``boustrophedon path''.
-The word boustrophedon comes from ancient greek, and roughly means ``the way the ox turns'', describing the path an ox would take while ploughing a field.
+The word boustrophedon comes from ancient Greek, and roughly means ``the way the ox turns'', describing the path an ox would take while plowing a field.
 The boustrophedon path planning procedure developed in this work is described in detail in Algorithm~\ref{alg:boustrophedon}, and visually in Figure \ref{fig:bpath_steps}.
 
 % NOTE: the following float seems to only sit where i want it with the !p options...
@@ -1414,50 +1436,23 @@ The boustrophedon path planning procedure developed in this work is described in
 \end{algorithmic}
 \end{algorithm}
 
-\pgfkeys{
-	/pgf/data visualization/style sheets/boustrophedon/.cd,
-	1/.style={mark=*,mark size=1.4pt},
-	2/.style={red},
-	default style/.style={gray!50}
-}
-\tikzset{
-	data visualization/b-system/.style={
-		new Cartesian axis=x axis,
-		new Cartesian axis=y axis,
-		x axis={attribute=x},
-		% xy Cartesian,
-		% outline={style={mark=*,mark size=1.4pt}},
-		% path={style={red,arrow data={0.25}{stealth}}}
-		y axis={attribute=y}
-	}
-}
-%TODO: figure out how to define a style sheet or visualizer to hopefully reduce repeated code...
+% Even after switching to PGFPlots, the styles repeat, so i could make this cleaner by
+% defining and reusing styles
 \begin{figure}[htb]
 	\centering
 	\begin{subfigure}{0.48\textwidth}
 		\centering
-		\begin{tikzpicture}[scale=1.0]
-			\datavisualization[
-				% new Cartesian axis=x axis, x axis={attribute=x},
-				% new Cartesian axis=y axis, y axis={attribute=y},
-				scientific axes,%=clean,
-				all axes={ticks={major={at={}},minor={at={}}}},
-				data/format=table,
-				% yticklabel={\empty},
-				% school book axes,
-				visualize as line/.list={outline,path},
-				% /data point/set/outline/.initial=1
-				% outline={style={}},
-				path={style={red}}
-				]
-				data[
-					headline={x,y},
-					read from file="../resources/boustrophedon/ex_1_polygon.csv",
-					set=outline]
-				data[
-					headline={x,y},
-					read from file="../resources/boustrophedon/ex_1_perim.csv",
-					set=path];
+			\begin{tikzpicture}[scale=1.0]
+			\begin{axis}[
+				axis lines=none,
+				scale mode=scale uniformly,
+				enlargelimits=false,
+			]
+			\addplot[black]
+				table[mark=none,col sep=comma] {../resources/boustrophedon/ex_1_polygon.csv};
+			\addplot[red]
+				table[mark=none,col sep=comma] {../resources/boustrophedon/ex_1_perim.csv};
+			\end{axis}
 		\end{tikzpicture}
 		\caption{Perimeter pass in progress}
 		\label{sfig:bpath_step1}
@@ -1466,32 +1461,24 @@ The boustrophedon path planning procedure developed in this work is described in
 	\begin{subfigure}{0.48\textwidth}
 		\centering
 		\begin{tikzpicture}[scale=1.0]
-			\datavisualization[
-				scientific axes,
-				all axes={ticks={major={at={}},minor={at={}}}},
-				data/format=table,
-				visualize as line/.list={outline,path},
-				path={style={red}}]
-				data[
-					headline={x,y},
-					read from file="../resources/boustrophedon/ex_1_polygon.csv",
-					set=outline]
-				data[
-					headline={x,y},
-					read from file="../resources/boustrophedon/ex_1_sweep_1.csv",
-					set=path]
-				info {
-					\draw (visualization cs:x=-0.61,y=3.89) circle [radius=2pt]
-						node[right]{$c_{curr}$};
-				}
-				info {
-					\draw[red,fill=red] (visualization cs:x=-0.28,y=2.72) circle [radius=1.2pt];
-				}
-				info {
-					\draw[-{Stealth}](visualization cs:x=-0.11,y=2.1) --
-						% (visualization cs:x=-0.56,y=3.71) node[below right]{$e_{curr}$};
-						(visualization cs:x=-0.28,y=2.72) node[right]{$e_{curr}$};
-				};
+			\begin{axis}[
+				axis lines=none,
+				scale mode=scale uniformly,
+				enlargelimits=false,
+			]
+			\addplot[black]
+				table[mark=none,col sep=comma] {../resources/boustrophedon/ex_1_polygon.csv};
+			\addplot[red]
+				table[mark=none,col sep=comma] {../resources/boustrophedon/ex_1_sweep_1.csv};
+			% Mark current corner
+			\draw (axis cs:-0.614514, 3.89323) circle[radius=2pt]
+				node[coordinate,label=right:{$c_{curr}$}] {}; % was pin
+			% Mark post-shift waypoint
+			\draw[red,fill=red] (axis cs:-0.284931, 2.71528) circle[radius=1.2pt];
+			% Mark current direction / edge
+			\draw[-{stealth}] (axis cs:-0.111943, 2.09701) -- (axis cs:-0.284931, 2.71528)
+				node[right] {$e_{curr}$};
+			\end{axis}
 		\end{tikzpicture}
 		\caption{New waypoint from moving up along $e_{curr}$}
 		\label{sfig:bpath_sweep1}
@@ -1500,29 +1487,22 @@ The boustrophedon path planning procedure developed in this work is described in
 	\begin{subfigure}{0.48\textwidth}
 		\centering
 		\begin{tikzpicture}[scale=1.0]
-			\datavisualization[
-				scientific axes,
-				all axes={ticks={major={at={}},minor={at={}}}},
-				data/format=table,
-				visualize as line/.list={outline,path},
-				% outline={style={mark=*,mark size=1.4pt}},
-				path={style=red}]
-				data[
-					headline={x,y},
-					read from file="../resources/boustrophedon/ex_1_polygon.csv",
-					set=outline]
-				data[
-					headline={x,y},
-					read from file="../resources/boustrophedon/ex_1_sweep_2.csv",
-					set=path]
-				info {
-					\draw (visualization cs:x=10.62,y=2.88) circle [radius=2pt]
-						node[above left]{$c_{curr}$};
-				}
-				info {
-					\draw[-Stealth](visualization cs:x=10.6,y=1.5) --
-						(visualization cs:x=10.62,y=2.75) node[below left]{$e_{curr}$};
-				};
+			\begin{axis}[
+				axis lines=none,
+				scale mode=scale uniformly,
+				enlargelimits=false,
+			]
+			\addplot[black]
+				table[mark=none,col sep=comma] {../resources/boustrophedon/ex_1_polygon.csv};
+			\addplot[red]
+				table[mark=none,col sep=comma] {../resources/boustrophedon/ex_1_sweep_2.csv};
+			% Circle at current corner
+			\draw (axis cs:10.6172, 2.88409) circle[radius=2pt]
+				node[coordinate,label={above left:{$c_{curr}$}}] {};
+			% Mark current direction / edge
+			\draw[-{stealth}] (axis cs:10.6, 1.5) -- (axis cs:10.62, 2.75)
+				node[below left] {$e_{curr}$};
+			\end{axis}
 		\end{tikzpicture}
 		\caption{$e_{curr}$ and $c_{curr}$ pre-update}
 		\label{sfig:bpath_sweep2}
@@ -1531,38 +1511,26 @@ The boustrophedon path planning procedure developed in this work is described in
 	\begin{subfigure}{0.48\textwidth}
 		\centering
 		\begin{tikzpicture}[scale=1.0]
-			\datavisualization[
-				scientific axes,
-				all axes={ticks={major={at={}},minor={at={}}}},
-				data/format=table,
-				visualize as line/.list={outline,path},
-				% outline={style={mark=*,mark size=1.4pt}},
-				path={style=red}]
-				data[
-					headline={x,y},
-					read from file="../resources/boustrophedon/ex_1_polygon.csv",
-					set=outline]
-				data[
-					headline={x,y},
-					read from file="../resources/boustrophedon/ex_1_sweep_3.csv",
-					set=path]
-				info {
-					\draw (visualization cs:x=8.77,y=5.67) circle [radius=2pt]
-						node[left]{$c_{curr}$};
-				}
-				info {
-					\draw[red,fill=red] (visualization cs:x=10.62,y=2.72) circle [radius=1.1pt];
-				}
-				info {
-					\draw[red,fill=red] (visualization cs:x=10.62,y=2.88) circle [radius=1.1pt];
-				}
-				info {
-					\draw[red,fill=red] (visualization cs:x=10.19,y=3.52) circle [radius=1.3pt];
-				}
-				info {
-					\draw[-{Stealth[round]}](visualization cs:x=10.62,y=2.88) --
-						(visualization cs:x=10.19,y=3.52) node[below left]{$e_{curr}$};
-				};
+			\begin{axis}[
+				axis lines=none,
+				scale mode=scale uniformly,
+				enlargelimits=false,
+			]
+			\addplot[black]
+				table[mark=none,col sep=comma] {../resources/boustrophedon/ex_1_polygon.csv};
+			\addplot[red]
+				table[mark=none,col sep=comma] {../resources/boustrophedon/ex_1_sweep_3.csv};
+			% Circle at current corner
+			\draw (axis cs:8.76958, 5.67303) circle[radius=2pt]
+				node[coordinate,label={left:{$c_{curr}$}}] {};
+			% Mark waypoints
+			\draw[red,fill=red] (axis cs:10.6151, 2.71528) circle[radius=1.2pt];
+			\draw[red,fill=red] (axis cs:10.6172, 2.88409) circle[radius=1.2pt];
+			\draw[red,fill=red] (axis cs:10.187, 3.51528) circle[radius=1.2pt];
+			% Mark current direction / edge
+			\draw[-{stealth}] (axis cs:10.6172, 2.88409) -- (axis cs:10.187, 3.51528)
+				node[below left] {$e_{curr}$};
+			\end{axis}
 		\end{tikzpicture}
 		\caption{New waypoints post $e_{curr}$ and $c_{curr}$ update}
 		\label{sfig:bpath_sweep3}
@@ -1642,6 +1610,7 @@ Without a mesh loaded the remaining controls are meaningless, hence they are ena
 
 \begin{figure}[htb]
 	\centering
+	% TODO: update this graphic with the newest state of the GUI
 \begin{tikzpicture}[scale=0.9,
 	every node/.style={transform shape},
 	nBalloon/.style={circle,fill=white,draw=black,in front of path,inner sep=1pt,outer sep=0},
@@ -1687,7 +1656,7 @@ Without a mesh loaded the remaining controls are meaningless, hence they are ena
 
 \begin{enumerate}
 	\item \textbf{Load Model}: Opens a dialog box to load a 3D mesh.
-		At the time of writing, only OBJ files were accepted for openeing and processing.
+		At the time of writing, only OBJ files were accepted for opening and processing.
 	\item \textbf{Reload Models}: Reloads the scene elements as well as the 3D mesh, if any.
 		Throughout development various scene elements were created, mostly to represent the rotary table and robotic arm.
 		The plan was to view a simulation of the robot and rotary table executing the planned path.
@@ -1727,8 +1696,8 @@ Without a mesh loaded the remaining controls are meaningless, hence they are ena
 		This is particularly useful when comparing multiple versions of the same model but with different meshes, to ensure there is no confusion as to which mesh is currently loaded.
 \end{enumerate}
 
-Altough not relevant to the research goals of this project, the application critical to development and testing.
-Development of the application and its GUI took a not insignificant portion of the alloted project time, hence the need to mention it.
+Although not relevant to the research goals of this project, the application critical to development and testing.
+Development of the application and its GUI took a not insignificant portion of the allotted project time, hence the need to mention it.
 
 % NOTE: Is there any merit in describing the unit tests created?
 

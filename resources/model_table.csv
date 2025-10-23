@@ -1,5 +1,5 @@
 Filename,Description,Source,Ready,Mesh,Class,Reason,Computation Time,Outcome,Reason
-1344058,low poly tree stand,10k,TRUE,0.6,1,,,Fail,imagines an ellipse
+1344058,low poly tree stand,10k,TRUE,0.6,1,,,Fail,fails to find short edges
 91142,block n,10k,TRUE,1,1,,5.3,Success,
 65779,square furniture foot expander,10k,TRUE,0.7,1,,,Fail,
 1505020,octagonal hollow cylinder,10k,TRUE,0.8,1,,,Success,
@@ -8,12 +8,12 @@ fc004,brutal object,GC: PF,TRUE,0.5,1,,,Failure ,due to IEE loop in R9
 98412,bridge support,10k,TRUE,1,1,,,Fail,finds multiple round surfaces where there is none
 69089,square puzzle piece,10k,TRUE,0.8,1,,,Success,
 fc021,flat chair-like,GC: PF,TRUE,1,1,,,Success,
-90223,irregular D14,10k,FALSE,0.7,1,,,Fail,at GS:1156
+90223,irregular D14,10k,FALSE,0.7,1,,,Fail,Double corners in GS
 90224,irregular D12,10k,FALSE,1,1,,,Fail,faux corner between R9-10
 fc028,blocky chair,GC: PF,TRUE,1,1,,,Success,
 91904,N64 crown,10k,TRUE,1,1,,,Fail,
 1344057,hexagonal rod,10k,TRUE,0.5,1,,,Success,after mesh size reduction
-1344051,low poly rock with flat bottom,10k,FALSE,1,1,,,redownload and remesh,
+1344051,low poly rock with flat bottom,10k,FALSE,1,1,,,untested,
 1344055,low poly tree base,10k,TRUE,1,1,,,untested,
 91655,4 compounds of cubes,10k,True,0.7,2,,,untested,
 91656,4 compounds of cubes,10k,TRUE,1,1,,,untested,

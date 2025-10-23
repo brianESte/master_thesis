@@ -41,7 +41,6 @@
 \usetikzlibrary{
 	arrows.meta,
 	calc,
-	datavisualization,
 	fit,
 	intersections,
 	matrix,
@@ -49,6 +48,8 @@
 	shapes.geometric,
 	ext.paths.ortho
 }
+\usepackage{pgfplots}
+\pgfplotsset{width=7cm,compat=1.15}
 % Define global styles
 \tikzset{
 	FC-Node/.style={rectangle,semithick,align=center,rounded corners=5pt,draw},
@@ -63,6 +64,8 @@
 % Pseudocode
 \usepackage{algpseudocode}
 \usepackage{algorithm}
+% Log snippets / actual code
+\usepackage{listings}
 
 %%%%%%%%%%%%%%%%%%%
 %Sprachanpassung & Verbesserte Trennregeln
@@ -96,6 +99,9 @@
 \usepackage{booktabs}   % Verbesserte Möglichkeiten für Tabellenlayout über horizontale Linien
 \usepackage{csvsimple}
 % ^ to parse CSV for tables
+
+% In order to quickly find overfull hboxes
+\overfullrule=2mm
 
 %%%%%%%%%%%%%%%%%%%
 %Paketvorschläge Mathematik

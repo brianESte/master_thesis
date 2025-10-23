@@ -32,7 +32,7 @@
 The objective is to plan a path covering the surface of an unknown object.
 The intended application of this is to be able to clean a surface via ablation using a planar laser.
 The general flow (? procedure?) presented in this work is as follows.
-The high level procedure is shown in Figure \ref{fig:bkgd_overview}
+The high level procedure is shown in Figure~\ref{fig:bkgd_overview}
 The 3D triangular mesh of an object is provided as input.
 This mesh is segmented using Watershed segmentation into regions of low curvature separated by regions of high curvature.
 These regions are classified into different categories of geometric primitives, or if no classification is possible, subjected to Watershed segmentation again.
@@ -43,10 +43,10 @@ The task of combining the individual paths into a single path is a form of Trave
 Once the path is complete, the waypoints thereof may be sent to the robot arm tasked with carrying out the cleaning operation.
 
 \section{A Note on Notation}
-To transforma a point from one coordinate system to another one typically uses a transformation matrix, denoted $T$.
+To transform a point from one coordinate system to another one typically uses a transformation matrix, denoted $T$.
 There is no unified notation to indicate in which coordinate system a point resides, nor is there to indicate from which to which coordinate systems a $T$ will transform.
 % There is no unified notation for $T$ to indicate its source and target coordinate systems.
-In order to dispell any confusion, the notation used in this work is explained below.
+In order to dispel any confusion, the notation used in this work is explained below.
 As is typical, right subscripts are used to indicate information about the owning quantity.
 To indicate the coordinate system in which point or vector exists, the left superscript is used.
 \begin{equation*}
@@ -69,22 +69,22 @@ In this last example the coordinate system of $p_i$ and the source coordinate sy
 \section{Geometric Curvature}
 The first step of \textit{3D Segmentation} is to segment the object's mesh using Watershed segmentation.
 Watershed segmentation requires a ``height'' function be applied to each vertex of the given mesh.
-See Section \ref{sec:ws_seg} for greater detail on Watershed segmentation.
-In order to segment the mesh along regions of high curvature, the vertice's height must be a function of its curvature.
+See Section~\ref{sec:ws_seg} for greater detail on Watershed segmentation.
+In order to segment the mesh along regions of high curvature, the vertices' height must be a function of its curvature.
 The various forms and types of curvature examined throughout this project are presented in the following sections.
 
-Curvature descibes the rate of change of a curve or surface's tangent.
-Figure \ref{sfig:tangent_on_curve} shows the curvature $\kappa$ as the change of the tangent at the marked point as it moves along the curve.
+Curvature describes the rate of change of a curve or surface's tangent.
+Figure~\ref{fig:tangent_on_curve} shows the curvature $\kappa$ as the change of the tangent at the marked point as it moves along the curve.
 Alternatively, the curvature of a point on a surface can be defined via the osculating circle at that point, which is the circle that best approximates the surface at that point.
 Following that definition, the curvature is the inverse radius of the osculating circle.
+An example of an osculating circle and its relation to curvature can be found in Figure~\ref{fig:principal_k}.
 
 \begin{figure}[ht]
 	\centering
-	\begin{subfigure}{0.47\textwidth}
-		\centering
-\begin{tikzpicture}[scale=1.5]
+\begin{tikzpicture}[scale=2.0]
 	% based on image in slide 22/23 in DDG-Curves.pdf
 	% \draw[step=10mm,gray!50,very thin] (-0.2,-0.2) grid (5.2,3.2);
+	\clip (-0.5,1.1) rectangle (3,-0.1);
 	\draw[] (-0.1,-0.1) .. controls (2.0,2.0) and (2.5,0) .. (1.5,0)
 		% node [sloped,pos=0.1,minimum size=10mm,anchor=south west] (pt1) {}
 		% node [sloped,pos=0.15,minimum size=9mm,anchor=south west] (pt1d) {}
@@ -103,31 +103,17 @@ Following that definition, the curvature is the inverse radius of the osculating
 	\path (pt2d.south west) edge[-Stealth] node[] {} (pt2d.south east);
 	\draw[red] (pt2.south east) -- (pt2d.south east) node[pos=0.5,anchor=west] {$\kappa$};
 \end{tikzpicture}
-		\caption{%
+	\caption{%
 Normal vector of a point on a curve.
 Inspired by~\cite{DDGAppIntro_12_smooth_curves}.}
-		\label{sfig:tangent_on_curve}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}{0.45\textwidth}
-		\centering
-	\includegraphics[width=0.7\textwidth]{../resources/curvature/osculating_circle.png}
-% \begin{tikzpicture}[scale=1.0]\end{tikzpicture}
-		\caption{%
-A curve with osculating circle at point $p$.
-Image from~\cite{DDGAppIntro_12_smooth_curves}, unless replaced by TikZ.
-(? TODO: recreate important parts in TikZ)
-}
-		% \label{sfig:mesh_neighborhood}
-	\end{subfigure}
-	% \caption{}
+	\label{fig:tangent_on_curve}
 \end{figure}
 
 \subsection{Principal Curvatures}
 All combined measures of curvature are based, either in theory or in actuality, on the principal curvatures.
 The principal curvatures at a given point on a surface are simply the maximum $\kappa_1$ and minimum $\kappa_2$ curvature~\cite{DDGAppIntro_17_smooth_k}.
 Note that in this work the first principal curvature is the maximum and the second the minimum, whereas other sources may use the reverse schema.
-The principal curvatures at the top of a hill-like surface are illustrated in Figure \ref{fig:principal_k}.
+The principal curvatures at the top of a hill-like surface are illustrated in Figure~\ref{fig:principal_k}.
 
 \begin{figure}[htb]
 	\centering
@@ -148,7 +134,7 @@ The principal curvatures of a surface $S$ at point $p$ are defined by the 2nd fu
 \begin{equation}
 	\textbf{II}(U,V) = Ldu^2 + 2 M du dv + N dv^2,%\langle dN(X), df(Y)\rangle,
 \end{equation}
-where $U$ and $V$ are orthonormal vectors tangent to the point $(u,v)$ on some surface, $du$ and $dv$ are the changes in the $U$ and $V$ directions, repsectively.
+where $U$ and $V$ are orthonormal vectors tangent to the point $(u,v)$ on some surface, $du$ and $dv$ are the changes in the $U$ and $V$ directions, respectively.
 Additionally, $L$ is ...
 and can be found as the eigenvalues of
 \fi
@@ -160,7 +146,7 @@ The principal curvatures are the eigenvalues of
 	\end{bmatrix},
 \end{equation}
 where $X_1$ and $X_2$ are the aforementioned orthonormal vectors tangent to the surface at point $p$.
-Similarly, the principal directions are the eigenvectors of Equation \ref{eq:2nd_fundamental_tensor}.
+Similarly, the principal directions are the eigenvectors of Equation~\ref{eq:2nd_fundamental_tensor}.
 
 There are however various ways of approximating the principal curvatures on a discrete mesh~\cite{EstCurvOnTriMesh, DiscDiffGeoOpsTriMani}.
 A basic approach is to calculate the mean and Gaussian curvatures, and derive the principal curvatures from them~\cite{DDGAppIntro_19_discrete_k_2, Gauss_mean_k_notes}.
@@ -174,7 +160,7 @@ This tends to occur on planar mesh regions, thus a minimum of 0 can be set for $
 
 Initially, RMS curvature calculated from discrete Gaussian and mean curvature was used as the mesh height.
 But this was eventually replaced with Taubin's method of calculating the principal curvatures directly via curvature tensor estimation~\cite{TaubinTensor}.
-This has the benefit of direct calculation, but has been shown to be succeptible to noise in the mesh~\cite{Comp_k_notes}.
+This has the benefit of direct calculation, but has been shown to be susceptible to noise in the mesh~\cite{Comp_k_notes}.
 % Thiesel et al. calculate the curvature tensor per triangular face in the mesh, based on the face's corner normals~\cite{Norm_based_k_tensor_est}.
 This too was later retired, and replaced with Rusinkiewicz's approach of calculating the curvature tensor for each mesh face via the differences between corner normals~\cite{SRTensor}, then computing the per vertex curvature tensor as a weighted sum over the curvature tensors of the vertex's adjoining triangles via coordinate system transformations.
 % Gatzke and Grimm examine a variety of other curvature estimation methods~\cite{EstCurvOnTriMesh}, most of which were not considered for this work.
@@ -191,7 +177,7 @@ Mean curvature can be approximated on a discrete mesh via sum of dihedral edge a
 	H_i := \frac{1}{2}\sum_{j \in E}l_{ij} \phi_{ij}
 \end{equation}
 where $H_i$ is the mean curvature at vertex $i$, $j$ is a vertex in the ring of $i$, $l_{ij}$ is the length of the edge from $i$ to $j$, and $\phi_{ij}$ is the dihedral angle between the faces adjacent to edge $ij$.
-See Figure \ref{sfig:dihedral_angle} for a graphic depiction.
+See Figure~\ref{sfig:dihedral_angle} for a graphic depiction.
 
 Alternatively, the mean curvature normal $\Delta f$ can be calculated via the discrete Laplace-Beltrami operator~\cite{DDGAppIntro_18_discrete_k_1}
 \begin{equation}\label{eq:lap_beltrami_op}
@@ -201,7 +187,7 @@ and the absolute mean curvature can be calculated as half of the magnitude there
 \begin{equation}
 	|H_i| = \frac{\|(\Delta f)_i \|}{2}.
 \end{equation}
-In Equation \ref{eq:lap_beltrami_op} above $p_j$ is a vertex in the ring of vertex $p_i$ which indicates the current edge, $\alpha_{ij}$ and $\beta_{ij}$ are the angles opposite the current edge (see \ref{sfig:mesh_neighborhood}).
+In Equation~\ref{eq:lap_beltrami_op} above $p_j$ is a vertex in the ring of vertex $p_i$ which indicates the current edge, $\alpha_{ij}$ and $\beta_{ij}$ are the angles opposite the current edge (see \ref{sfig:mesh_neighborhood}).
 
 \begin{figure}[htb]
 	\centering
@@ -255,10 +241,10 @@ In Equation \ref{eq:lap_beltrami_op} above $p_j$ is a vertex in the ring of vert
 		\label{sfig:mesh_neighborhood}
 	\end{subfigure}
 \caption{
-Subfigure (a) depicts angle $\phi_{ij}$ and edge length $l_{ij}$ from Equation \ref{eq:dihedral_angle}, wherethey are used to calculate mean curvature.
+Subfigure (a) depicts angle $\phi_{ij}$ and edge length $l_{ij}$ from Equation~\ref{eq:dihedral_angle}, wherethey are used to calculate mean curvature.
 Subfigure (b) portrays the opposite angles $\alpha_{ij}$ and $\beta_{ij}$ across from edge $ij$.
-The opposite angles, as well as the positions of vertices $i$ and $j$, are used in Equation \ref{eq:lap_beltrami_op} to calculate the mean curvature normal.
-Subfigure (b) also shows $\Theta_{ijk}$, the angle between adjacent edges used in Equation \ref{eq:disc_gauss_k} to calculate the angle deficit of vertex $i$.
+The opposite angles, as well as the positions of vertices $i$ and $j$, are used in Equation~\ref{eq:lap_beltrami_op} to calculate the mean curvature normal.
+Subfigure (b) also shows $\Theta_{ijk}$, the angle between adjacent edges used in Equation~\ref{eq:disc_gauss_k} to calculate the angle deficit of vertex $i$.
 Both illustrations were based on similar ones in~\cite{DDGAppIntro_19_discrete_k_2}.
 }
 \end{figure}
@@ -274,9 +260,9 @@ The discrete Gaussian curvature at a vertex is typically approximated as the ``a
 \begin{equation}\label{eq:disc_gauss_k}
 	K = \frac{2\pi - \sum \Theta_j}{A_i}
 \end{equation}
-where $\Theta_j$ is the angle between adjacent edges from the central vertex ($\Theta_{ijk}$ in Figure \ref{sfig:mesh_neighborhood}), and $A_i$ is the vertex area.
+where $\Theta_j$ is the angle between adjacent edges from the central vertex ($\Theta_{ijk}$ in Figure~\ref{sfig:mesh_neighborhood}), and $A_i$ is the vertex area.
 
-Mean and Gaussian curvature are compared visually in Figure \ref{fig:mean_gauss_k}.
+Mean and Gaussian curvature are compared visually in Figure~\ref{fig:mean_gauss_k}.
 Note that the Gaussian curvature is approximately 0 over the entire surface, because the surface curves in only 1 direction, thus the 2nd principal curvature is ~0.
 The colors shown in the mean curvature plot are effectively due entirely to the 1st principal curvature values.
 
@@ -370,7 +356,7 @@ The specific method and equations to check the validity of the conic regression 
 For $B^2 - 4AC < 0$ the set of points represent an ellipse.
 Computing the distance from a given point to an ellipse or other conic shape is non-trivial and, at the time of writing, no exact algebraic solution was found.
 In place of an exact distance function, the sum of squared residuals was used throughout most of the project's timeline.
-For example, a point on a conic section should satisfy Equation \ref{eq:gen_conic}, but for a point \textit{almost} on a conic section, the result will be non-zero:
+For example, a point on a conic section should satisfy Equation~\ref{eq:gen_conic}, but for a point \textit{almost} on a conic section, the result will be non-zero:
 \begin{equation}
 	R(x,y) = Ax^2 + Bxy + Cy^2 + Dx + Ey + F \neq 0,
 \end{equation}
@@ -386,7 +372,7 @@ Eberly~\cite{GeoTools_pt_to_ellipse} shows that for an origin-centered axis-alig
 \begin{equation}\label{eq:ellipse_dist}
 	F(t) = \left(\frac{a x_p}{t + a^2}\right)^2 + \left(\frac{b y_p}{t + b^2}\right)^2 - 1 = 0.
 \end{equation}
-Eberly also compares 3 methods of solving Equation \ref{eq:ellipse_dist} for $t$, concluding that the bisection method is the most robust.
+Eberly also compares 3 methods of solving Equation~\ref{eq:ellipse_dist} for $t$, concluding that the bisection method is the most robust.
 
 \subsubsection{Parabolic and Hyperbolic Regression}
 % TODO: return to this, improve it.?
@@ -404,7 +390,7 @@ The functionality to perform parabolic or hyperbolic regression was omitted from
 \end{figure}
 UV Mapping is the process of projecting a surface from 3D to 2D, effectively ``unwrapping'' the 3D surface.
 UV maps are used extensively in 3D modeling and computer graphics.
-Figure \ref{fig:uv_map_cube} shows the UV map of a cube being unwrapped.
+Figure~\ref{fig:uv_map_cube} shows the UV map of a cube being unwrapped.
 Within the context of this work the primary purpose of UV maps are to handle the transformation of points from global to surface coordinates.
 The plan was to have a UV map for each shape primitive to use during the \textit{Geometry Simplification} and \textit{Cellular Path Planning} high level steps.
 % The functions a "UV-Map" in the code accomplishes:
@@ -426,8 +412,8 @@ The process is first described for a circular cylinder, and then expanded to a g
 \subsubsection{Circular Cylinders}
 The transformation matrix $\prescript{c}{}T_0$ is the core of a circular cylindric UV map.
 The z axis of $\prescript{c}{}T_0$ aligns with the cylinder's axis, and its origin is positioned at one end of the cylinder.
-This can be observed in Figure \ref{sfig:gl_ccyl_transformation} below.
-The transformation procedure is described visually in Figure \ref{fig:gl_ccyl_transform_steps}, and textually below.
+This can be observed in Figure~\ref{sfig:gl_ccyl_transformation} below.
+The transformation procedure is described visually in Figure~\ref{fig:gl_ccyl_transform_steps}, and textually below.
 \begin{figure}[htb]
 	\centering
 	\begin{subfigure}[b]{0.3\textwidth}
@@ -512,7 +498,7 @@ where $L$ is the cylinder's perimeter: $2\pi r$.
 The point's $z$ in the cylinder's coordinate system becomes its $v$ coordinate in surface coordinates.
 
 To transform a point in surface coordinates to $R^3$, the steps above must be reversed.
-Solving Equation \ref{eq:cyl_u_coord} for $\phi$, the point's $u$ coordinate is converted back to the angle $\phi$:
+Solving Equation~\ref{eq:cyl_u_coord} for $\phi$, the point's $u$ coordinate is converted back to the angle $\phi$:
 \begin{equation*}
 	\phi = 2\pi \frac{u}{L}.
 \end{equation*}
@@ -532,7 +518,7 @@ Recall that the general equation of an ellipse is
 	\frac{x^2}{a^2} + \frac{y^2}{b^2} = 1,
 \end{equation*}
 where $a$ is the radius along the major axis, and $b$ is the radius along the minor axis.
-The transformation procedure is described visually in Figure \ref{fig:gl_ecyl_transform_steps}, and textually further below.
+The transformation procedure is described visually in Figure~\ref{fig:gl_ecyl_transform_steps}, and textually further below.
 
 \begin{figure}[htb]
 	\centering
@@ -614,7 +600,7 @@ Step 3: Calculate UV coordinates.
 The first step remains unchanged: Transform the point to the cylinder's coordinate system.
 The objective of the second step remains calculating the arc angle $\phi$, but here the coordinates must be scaled by their corresponding radii to account for the ellipse's eccentricity.
 Note that for an ellipse $\phi$ is not equivalent to the angle to the point measured from the local $x$ axis, as that would be $\arctan y/x$.
-Hence why there is no line or marker indicating $\phi$ in Figure \ref{sfig:ellipse_xy_coords}.
+Hence why there is no line or marker indicating $\phi$ in Figure~\ref{sfig:ellipse_xy_coords}.
 
 Performing the reverse transformation is equivalent to that of the circular cylinder, with the exception that the individual radii must be used instead of the singular radius $r$:
 \begin{equation*}
@@ -731,7 +717,7 @@ Setting 3.7 into 3.8:
 \fi
 
 \section{Ramer-Douglas-Peucker Algorithm}
-The Ramer-Douglas-Peucker (RDP) algorithm is a method to interatively simplify a line defined by a set of points~\cite{RDP_line_reduction_DP, RDP_line_reduction_R}.
+The Ramer-Douglas-Peucker (RDP) algorithm is a method to iteratively simplify a line defined by a set of points~\cite{RDP_line_reduction_DP, RDP_line_reduction_R}.
 The only arguments to RDP are a list of points and a tolerance width, within which points will be considered unnecessary and discarded.
 % The algorithm looks at a list of points, draws an imaginary line from the first to the last, finds the point with the farthest normal distance to the comparison line, and if the point's distance to the comparison line is greater than a pre-defined tolerance width, splits the lin
 The algorithm iteratively finds the point farthest from the straight line from point 0 to n-1, and if said distance is greater than the tolerance width, the line is split at the farthest point and the line sections before and after the split are reconsidered individually.
@@ -750,7 +736,7 @@ The procedure is described in greater detail in Algorithm~\ref{alg:RDP}.
 		\State new uint $i \leftarrow$ index of point farthest from $n$.line
 		\State new real $d \leftarrow$ distance of $P$[$i$] from $n$.line
 		\If{$d \le w$} \Comment{If farthest point is within tolerance}
-			\State $P_{core}$.append($n$.srcPt) \Comment{line section is complete}
+			\State $P_{core}$.append($n$.srcPt) \Comment{Line section is complete}
 			\State \textbf{continue}
 		\EndIf
 		\State new RDPNode $n_{left} \leftarrow$ RDPNode($n$.srcPt, $P$[$i$])
@@ -764,7 +750,7 @@ The procedure is described in greater detail in Algorithm~\ref{alg:RDP}.
 \end{algorithmic}
 \end{algorithm}
 
-The RDP implementation used in this work uses a struct \textbf{RDPNode} that represents a section of the line.
+The RDP implementation used in this work uses a structure \textbf{RDPNode} that represents a section of the line.
 It contains a start and end point, as well as a line spanning these two points.
 A stack is used to manage the \textbf{RDPNode}s.
 In each iteration of the \verb|while| loop, starting on line 5, the item at the top of the stack is removed and stored in $n$.
@@ -773,7 +759,7 @@ If the perpendicular distance is within the tolerance width then the current lin
 If not, then the current line section is split at the farthest point, with the two new sections represented by RDPNodes $n_{left}$ and $n_{right}$.
 These are then placed on the stack, $n_{right}$ first, so that $n_{left}$ is processed next, ensuring the list of important points $P_{core}$ is always sorted.
 After the \textbf{RDPNode} stack is exhausted the last point in $P$ is appended to $P_{core}$ because only the start point in each node is added to $P_{core}$.
-An alternative implementation that uses recursion may be found on wikipedia.
+An alternative implementation that uses recursion may be found on Wikipedia.
 
 \section{Traveling Salesman Problem}
 The Traveling Salesman Problem (TSP) is a well known problem in combinatorial optimization.
