@@ -202,25 +202,23 @@ A smooth round edge, such as the one shown in Figure \ref{sfig:interior_curve}, 
 Performing \textit{Interior Edge Extension} on such a shape would naturally be impossible.
 \begin{figure}[htb]
 	\centering
-	\begin{subfigure}[t]{0.4\textwidth}
+	\begin{subfigure}[t]{0.3\textwidth}
 		\centering
 		\begin{tikzpicture}[scale=0.85]
-			\draw[thick] (0,3) arc[start angle=90, delta angle=-90, radius=3] -- (5,0)
-				-- (5,5) -- (0,5) -- cycle;
+\draw[thick] (0,3) arc[start angle=90, delta angle=-90, radius=3] -- (5,0) -- (5,5) -- (0,5) -- cycle;
 		\end{tikzpicture}
 		\caption{Concave shape with an interior curve.}
 		\label{sfig:interior_curve}
 	\end{subfigure}
 	\hfill
-	\begin{subfigure}[t]{0.4\textwidth}
+	\begin{subfigure}[t]{0.3\textwidth}
 		\centering
 		\begin{tikzpicture}[scale=0.85]
-			\clip (0,0) rectangle (5,5);
-			\draw[thick] (0,3) arc[start angle=90, delta angle=-90, radius=3] -- (5,0)
-				-- (5,5) -- (0,5) -- cycle;
-			\foreach \a in {15,30,...,75}{
-				\draw[red, dashed] ($(\a:3)+(\a-90:5)$) -- +(\a+90:10);
-			}
+\clip (0,0) rectangle (5,5);
+\draw[thick] (0,3) arc[start angle=90, delta angle=-90, radius=3] -- (5,0) -- (5,5) -- (0,5) -- cycle;
+\foreach \a in {15,30,...,75} {
+	\draw[red, dashed] ($(\a:3)+(\a-90:5)$) -- +(\a+90:10);
+}
 		\end{tikzpicture}
 		\caption{%
 The curve's line segments are extended.
@@ -229,12 +227,30 @@ The curve's line segments are extended.
 }
 		\label{sfig:int_curve_ext}
 	\end{subfigure}
-	% TODO: Expand boustrophedon to handle the shape shown here, and add another subfigure showing the results
+	\hfill
+	\begin{subfigure}[t]{0.3\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=0.85]
+\begin{axis}[
+	anchor=origin,
+	width=5.8cm,
+	scale only axis,
+	axis lines=none,
+	scale mode=scale uniformly,
+	enlargelimits=false,
+]
+\addplot[thick]
+	table[mark=none,col sep=comma] {../resources/boustrophedon/ex_3_polygon.csv};
+\addplot
+	table[mark=none,col sep=comma] {../resources/boustrophedon/ex_3_path.csv};
+\end{axis}
+		\end{tikzpicture}
+	\end{subfigure}
 	\caption{%
 Subfigure (a) gives an example shape that \textit{Interior Edge Extension} is not able to handle well.
 In Subfigure (b) the shape's curved edge has been discretized into 6 segments.
 Assuming a discretization of the curve into 6 equal segments, Subfigure (b) shows the extended edges of that curve as dashed red lines.
-% TODO:talk about fig (c), if there is one
+The boustrophedon path shown in Subfigure (c) illustrates that it is not even neecessary for the example shape to be segmented.
 }
 \end{figure}
 Curves encountered by \textit{Geometry Simplification} are stored as discretized approximations.

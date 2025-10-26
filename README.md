@@ -9,9 +9,11 @@ could be run without sudo privileges.
 ## TODO:
 
 - [x] Somehow the final version of the exposé was lost. I would like to update the tracked document from a printed copy
-- [x] Write initial version of Related Work chapter
-- [x] Begin writing background chapter
-- [ ] Write initial version of Methodology
+- [x] Related Work
+  - [ ] Finish fixing HK edits
+- [x] Background
+- [x] Methodology
+- [ ] Figure out how to "link" TUDa template to git repo?
 - [ ] Maybe try to clean up the IGD logo svg file?
 
 Reminders:
@@ -20,8 +22,6 @@ Reminders:
 - Conforming to this template, there is no point in referencing a subsubsection by `\label{}` / `\ref{}` because the number shown will be at most that of the containing subsection. Thus it is (probably) better to reference subsubsections by name instead.
 
 ## Notes
-Regarding LaTeX floats: floats seem to place themselves where i want them with when they are placed at the top / beginning of a section/chapter and the text that describe them thereafter.
-The text then "floats" up to fill empty space caused by the actual floats being forced down, typically because they are too large for whatever space was initially alloted them.
 
 ### TUDa Template Installation
 
@@ -47,6 +47,17 @@ Getting the TUDa template to work required various dependencies. Below are those
 I am in the process of setting up NeoVim to work properly with LaTeX. So far VimTeX and TexLab have been integrated, and auto-completion and syntax highlighting works. The following resources helped me thus far: [2,3,5,6].
 I noticed that when trying to use a new package, even after installing with `tlmgr`, the TeX LSP continues to insist that it cannot find the sought package. Running vim-tex clean: `<leader>lc` fixes this.
 
+### LaTeX
+
+#### Floats
+
+Floats seem to place themselves where i want them with when they are placed at the top / beginning of a section/chapter and the text that describe them thereafter.
+The text then "floats" up to fill empty space caused by the actual floats being forced down, typically because they are too large for whatever space was initially alloted them.
+
+#### TikZ datavisualization vs PGFplots
+
+Initially i tried using TikZ's datavisualization library, and it worked pretty well.
+I ended up switching to PGFplots when i discovered that i could achieve what i wanted with it while using less code.
 
 ## References
 

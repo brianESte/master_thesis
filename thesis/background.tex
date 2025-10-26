@@ -7,7 +7,7 @@
 	\node[FC-Node] (3DSeg) [right=\dx of Mesh] {3D Segmentation};
 	\node[FC-Node] (GeoSimp) [right=\dx of 3DSeg] {Geometry Simplification};
 	\node[FC-Node] (2DSeg) [right=\dx of GeoSimp] {2D Segmentation};
-	\node[FC-Node,text width=27mm] (Bpath) [below=10mm of Mesh, xshift=10mm] {Cellular path planning};
+	\node[FC-Node,text width=27mm] (Bpath) [below=10mm of Mesh, xshift=10mm] {Cellular Path Planning};
 	\node[FC-Node,text width=30mm] (TSP) [right=\dx of Bpath] {Modified TSP};
 	\node[FC-Node,text width=20mm] (InvKin) [right=\dx of TSP] {Inverse Kinematics};
 	\node[text width=20mm] (Poses) [right=\dx of InvKin] {Actuator Poses};
@@ -30,18 +30,18 @@
 	\label{fig:bkgd_overview}
 \end{figure}
 The objective is to plan a path covering the surface of an unknown object.
-The intended application of this is to be able to clean a surface via ablation using a planar laser.
-The general flow (? procedure?) presented in this work is as follows.
-The high level procedure is shown in Figure~\ref{fig:bkgd_overview}
+The intended application of this is to clean the surface of the object via laser ablation.
+% using a planar laser.
+The general procedure is described below and presented visually in Figure~\ref{fig:bkgd_overview}.
 The 3D triangular mesh of an object is provided as input.
-This mesh is segmented using Watershed segmentation into regions of low curvature separated by regions of high curvature.
-These regions are classified into different categories of geometric primitives, or if no classification is possible, subjected to Watershed segmentation again.
-Once all regions have been classified, idealized geometric representations, termed ``simple surfaces'', are created from each based on their primitive classification.
-Non-convex simple surfaces are subject to 2D segmentation, from which convex sub-regions are produced.
-A local coverage path is then planned on each convex region.
-The task of combining the individual paths into a single path is a form of Traveling Salesman Problem (TSP).
-Once the path is complete, the waypoints thereof may be sent to the robot arm tasked with carrying out the cleaning operation.
+First the mesh is segmented and its mesh sections classified in the \textit{3D Segmentation} step.
+In \textit{Geometry Simplification} idealized surfaces are created from each classified mesh section.
+\textit{2D Segmentation} checks the convexity of each idealized surface's unwrapped form, and segments the non-convex ones into convex polygons.
+The actual path planning takes place in \textit{Cellular Path Planning}, where a simple back-and-forth path is planned on each convex surface.
+The task of combining the individual paths into a single path is a form of Traveling Salesman Problem (TSP) and is handled in \textit{Modified TSP}.
+Once the path is complete, \textit{Inverse Kinematics} handles sending the path's waypoints to the robot arm tasked with carrying out the cleaning operation.
 
+\vspace{1cm} % To force notation section to start on a new page
 \section{A Note on Notation}
 To transform a point from one coordinate system to another one typically uses a transformation matrix, denoted $T$.
 There is no unified notation to indicate in which coordinate system a point resides, nor is there to indicate from which to which coordinate systems a $T$ will transform.
@@ -52,7 +52,7 @@ To indicate the coordinate system in which point or vector exists, the left supe
 \begin{equation*}
 	\prescript{0}{}p_i
 \end{equation*}
-represents the $i$-th point in coordinate system 0 (shorthand for global coordinate system).
+represents the $i$-th point in coordinate system 0 (shorthand for the global coordinate system).
 For transformation matrices the right subscript is designates the \textit{source} coordinate system, and the left superscript the \textit{target} coordinate system.
 This leaves the right superscript position open for a transpose or inverse symbol.
 \begin{equation*}
@@ -68,7 +68,7 @@ In this last example the coordinate system of $p_i$ and the source coordinate sy
 
 \section{Geometric Curvature}
 The first step of \textit{3D Segmentation} is to segment the object's mesh using Watershed segmentation.
-Watershed segmentation requires a ``height'' function be applied to each vertex of the given mesh.
+Watershed segmentation requires that a ``height'' function be applied to each vertex of the given mesh.
 See Section~\ref{sec:ws_seg} for greater detail on Watershed segmentation.
 In order to segment the mesh along regions of high curvature, the vertices' height must be a function of its curvature.
 The various forms and types of curvature examined throughout this project are presented in the following sections.
@@ -113,7 +113,8 @@ Inspired by~\cite{DDGAppIntro_12_smooth_curves}.}
 All combined measures of curvature are based, either in theory or in actuality, on the principal curvatures.
 The principal curvatures at a given point on a surface are simply the maximum $\kappa_1$ and minimum $\kappa_2$ curvature~\cite{DDGAppIntro_17_smooth_k}.
 Note that in this work the first principal curvature is the maximum and the second the minimum, whereas other sources may use the reverse schema.
-The principal curvatures at the top of a hill-like surface are illustrated in Figure~\ref{fig:principal_k}.
+The direction of a principal is known as a principal direction, and is typically denoted $X_i$.
+The principal curvatures and directions at the top of a hill-like surface are illustrated in Figure~\ref{fig:principal_k}.
 
 \begin{figure}[htb]
 	\centering
@@ -129,7 +130,7 @@ The cutaway views show this as an osculating circle in each projection of the su
 \end{figure}
 
 Determining principal curvatures for a continuous surface is unambiguous.
-The principal curvatures of a surface $S$ at point $p$ are defined by the 2nd fundamental form~\cite{DiffGeo_curves_surfaces, Basic_diff_geo_of_surfaces, DDGAppIntro_17_smooth_k} $\textbf{II}(X,Y)$, where $X$ and $Y$ are orthonormal vectors at $p$.
+The principal curvatures of a surface $S$ at point $p$ are defined by the 2nd fundamental form $\textbf{II}(X,Y)$, where $X$ and $Y$ are orthonormal tangent vectors at $p$~\cite{DiffGeo_curves_surfaces, Basic_diff_geo_of_surfaces, DDGAppIntro_17_smooth_k}.
 \iffalse
 \begin{equation}
 	\textbf{II}(U,V) = Ldu^2 + 2 M du dv + N dv^2,%\langle dN(X), df(Y)\rangle,
@@ -148,17 +149,18 @@ The principal curvatures are the eigenvalues of
 where $X_1$ and $X_2$ are the aforementioned orthonormal vectors tangent to the surface at point $p$.
 Similarly, the principal directions are the eigenvectors of Equation~\ref{eq:2nd_fundamental_tensor}.
 
-There are however various ways of approximating the principal curvatures on a discrete mesh~\cite{EstCurvOnTriMesh, DiscDiffGeoOpsTriMani}.
+There are, however, various ways of approximating the principal curvatures on a discrete mesh~\cite{EstCurvOnTriMesh, DiscDiffGeoOpsTriMani}.
 A basic approach is to calculate the mean and Gaussian curvatures, and derive the principal curvatures from them~\cite{DDGAppIntro_19_discrete_k_2, Gauss_mean_k_notes}.
-Given the mean curvature $H$ and Gaussian curvature $K$ (see Sections \ref{sec:mean_k} and \ref{sec:gauss_k}), the principal curvatures can be calculated from Equations \ref{eq:mean_k} and \ref{eq:gauss_k}, or the discrete approximations from Equations \ref{eq:dihedral_angle} and \ref{eq:disc_gauss_k}.
+Given the mean curvature $H$ and Gaussian curvature $K$ (see Sections \ref{sec:mean_k} and \ref{sec:gauss_k}), the principal curvatures can be calculated from
+% Given the mean curvature $H$ and Gaussian curvature $K$ (see Sections \ref{sec:mean_k} and \ref{sec:gauss_k}), the principal curvatures can be calculated from Equations \ref{eq:mean_k} and \ref{eq:gauss_k}, or the discrete approximations from Equations \ref{eq:dihedral_angle} and \ref{eq:disc_gauss_k}.
 \begin{align*}
-	\kappa_1 &= H - \sqrt{H^2 - K} \\
-	\kappa_2 &= H + \sqrt{H^2 - K}
+	\kappa_1 &= H - \sqrt{H^2 - K}, \\
+	\kappa_2 &= H + \sqrt{H^2 - K}.
 \end{align*}
 Although theoretically impossible, discretization errors can cause $H^2$ to be less than $K$, resulting in ``imaginary'' curvature.
 This tends to occur on planar mesh regions, thus a minimum of 0 can be set for $H^2 - K$, because the root term would have been near 0 regardless, but it does highlight a flaw in this measure of curvature.
 
-Initially, RMS curvature calculated from discrete Gaussian and mean curvature was used as the mesh height.
+Initially, the root mean square (RMS) curvature calculated from discrete Gaussian and mean curvature was used as the mesh height.
 But this was eventually replaced with Taubin's method of calculating the principal curvatures directly via curvature tensor estimation~\cite{TaubinTensor}.
 This has the benefit of direct calculation, but has been shown to be susceptible to noise in the mesh~\cite{Comp_k_notes}.
 % Thiesel et al. calculate the curvature tensor per triangular face in the mesh, based on the face's corner normals~\cite{Norm_based_k_tensor_est}.
@@ -167,12 +169,13 @@ This too was later retired, and replaced with Rusinkiewicz's approach of calcula
 
 \subsection{Mean Curvature}\label{sec:mean_k}
 The discrete mean curvature was used early in development as part of the RMS curvature calculation.
-Mean curvature is, as the name implies, the mean of the principal curvatures~\cite{DDGAppIntro_19_discrete_k_2}
-\begin{equation}\label{eq:mean_k}
-	H = \frac{\kappa_1 + \kappa_2}{2}
-\end{equation}
+Mean curvature is, as the name implies, the mean of the principal curvatures~\cite{DDGAppIntro_19_discrete_k_2}.
+The mean curvature calculation is
+\begin{equation*}%\label{eq:mean_k}
+	H = \frac{\kappa_1 + \kappa_2}{2},
+\end{equation*}
 where $H$ is the mean curvature.
-Mean curvature can be approximated on a discrete mesh via sum of dihedral edge angle length products:
+Mean curvature can be approximated on a discrete mesh via the sum of dihedral angle and edge length products:
 \begin{equation}\label{eq:dihedral_angle}
 	H_i := \frac{1}{2}\sum_{j \in E}l_{ij} \phi_{ij}
 \end{equation}
@@ -183,11 +186,11 @@ Alternatively, the mean curvature normal $\Delta f$ can be calculated via the di
 \begin{equation}\label{eq:lap_beltrami_op}
 	(\Delta f)_i := \frac{1}{2}\sum_{j \in E}(\cot \alpha_{ij} + \cot \beta_{ij})(p_j - p_i),
 \end{equation}
-and the absolute mean curvature can be calculated as half of the magnitude thereof
-\begin{equation}
+and the absolute mean curvature can be calculated as half of the magnitude thereof:
+\begin{equation*}
 	|H_i| = \frac{\|(\Delta f)_i \|}{2}.
-\end{equation}
-In Equation~\ref{eq:lap_beltrami_op} above $p_j$ is a vertex in the ring of vertex $p_i$ which indicates the current edge, $\alpha_{ij}$ and $\beta_{ij}$ are the angles opposite the current edge (see \ref{sfig:mesh_neighborhood}).
+\end{equation*}
+In Equation~\ref{eq:lap_beltrami_op} above $p_j$ is a vertex in the ring of vertex $p_i$, and $\alpha_{ij}$ and $\beta_{ij}$ are the angles opposite edge from $p_i$ to $p_j$ (see Figure~\ref{sfig:mesh_neighborhood} for a visual clarification).
 
 \begin{figure}[htb]
 	\centering
@@ -241,7 +244,7 @@ In Equation~\ref{eq:lap_beltrami_op} above $p_j$ is a vertex in the ring of vert
 		\label{sfig:mesh_neighborhood}
 	\end{subfigure}
 \caption{
-Subfigure (a) depicts angle $\phi_{ij}$ and edge length $l_{ij}$ from Equation~\ref{eq:dihedral_angle}, wherethey are used to calculate mean curvature.
+Subfigure (a) depicts angle $\phi_{ij}$ and edge length $l_{ij}$ from Equation~\ref{eq:dihedral_angle}, where they are used to calculate mean curvature.
 Subfigure (b) portrays the opposite angles $\alpha_{ij}$ and $\beta_{ij}$ across from edge $ij$.
 The opposite angles, as well as the positions of vertices $i$ and $j$, are used in Equation~\ref{eq:lap_beltrami_op} to calculate the mean curvature normal.
 Subfigure (b) also shows $\Theta_{ijk}$, the angle between adjacent edges used in Equation~\ref{eq:disc_gauss_k} to calculate the angle deficit of vertex $i$.
@@ -251,22 +254,18 @@ Both illustrations were based on similar ones in~\cite{DDGAppIntro_19_discrete_k
 
 \subsection{Gaussian Curvature}\label{sec:gauss_k}
 Similar to mean curvature, discrete Gaussian curvature was used as part of the RMS curvature calculation.
-Gaussian curvature is the product of the principal curvatures
-\begin{equation}\label{eq:gauss_k}
-	K = \kappa_1 \cdot \kappa_2
-\end{equation}
+Gaussian curvature is the product of the principal curvatures and can be calculated using
+\begin{equation*}%\label{eq:gauss_k}
+	K = \kappa_1 \cdot \kappa_2,
+\end{equation*}
 where $K$ is the Gaussian curvature~\cite{TheoremaEgregium}.
-The discrete Gaussian curvature at a vertex is typically approximated as the ``angle defect'' divided by the vertex's area
+The discrete Gaussian curvature at a vertex is typically approximated as the ``angle defect'' divided by the vertex's area using
 \begin{equation}\label{eq:disc_gauss_k}
 	K = \frac{2\pi - \sum \Theta_j}{A_i}
 \end{equation}
 where $\Theta_j$ is the angle between adjacent edges from the central vertex ($\Theta_{ijk}$ in Figure~\ref{sfig:mesh_neighborhood}), and $A_i$ is the vertex area.
 
-Mean and Gaussian curvature are compared visually in Figure~\ref{fig:mean_gauss_k}.
-Note that the Gaussian curvature is approximately 0 over the entire surface, because the surface curves in only 1 direction, thus the 2nd principal curvature is ~0.
-The colors shown in the mean curvature plot are effectively due entirely to the 1st principal curvature values.
-
-\begin{figure}
+\begin{figure}[htb]
 	\centering
 	% TODO: create a tikz picture to replace this image
 	\includegraphics[width=0.9\textwidth]{../resources/curvature/gaussian_mean_k.png}
@@ -274,12 +273,16 @@ The colors shown in the mean curvature plot are effectively due entirely to the 
 	\label{fig:mean_gauss_k} % NOTE: Label should be declared after caption
 \end{figure}
 
+Mean and Gaussian curvature are compared visually in Figure~\ref{fig:mean_gauss_k}.
+Note that the Gaussian curvature is approximately 0 over the entire surface, because the surface curves in only 1 direction, thus the 2nd principal curvature is ~0.
+The colors shown in the mean curvature plot are effectively due entirely to the 1st principal curvature values.
+
 \subsection{Root Mean Square Curvature}
 Pulla et al. compared different types of curvature for the purpose of Watershed segmentation and found that although the absolute curvature produced the best results, the root mean square curvature produced similar results and was less computationally expensive.
-The root mean square curvature is as the name implies, the square root of the average of the principal curvatures squared:
-\begin{equation}
+The root mean square curvature is, as the name implies, the square root of the average of the principal curvatures squared:
+\begin{equation*}
 	\kappa_{rms} = \sqrt{\frac{\kappa_1^2 + \kappa_2^2}{2}}.
-\end{equation}
+\end{equation*}
 % They compared different measures of curvature for this purpose and found that it was approximately as good as absolute curvature:
 % \begin{equation*}
 % 	\kappa_{abs} = |\kappa_1| + |\kappa_2|,
@@ -288,7 +291,7 @@ They found $\kappa_{rms}$ cheaper to compute than the absolute curvature because
 \begin{equation*}
 	\kappa_{rms} = \sqrt{4H^2 - 2K},
 \end{equation*}
-where $H$ and $K$ are the same mean and Gaussian curvatures explained above.
+where $H$ and $K$ are the mean and Gaussian curvatures explained above.
 % RMS curvature was used during developement prior to implementing the derivative of curvature.
 
 \subsection{Derivative of Curvature}
@@ -298,43 +301,40 @@ Because watershed segmentation expects a single value rather than a tensor, the 
 
 \section{Surface Regression}
 The second high level step within \textit{3D Segmentation} is \textit{Surface Classification}, which attempts to classify the mesh segments yielded by Watershed segmentation as belonging to one of the defined geometric primitives.
-Fitting 3D points to the various primitives was a part of \textit{Surface Classification}, initially as a means of confirming an initial shape primitive estimation, and later as means of direct shape primitive classification.
+Fitting 3D points to the various primitives was a part of \textit{Surface Classification}, initially as a means of confirming initial shape primitive estimations, and later as means of direct shape primitive classification.
 In both uses the regression results were confirmed by comparing the error value, obtained from the difference between the fitted primitive and the set of 3D points, to a pre-defined threshold.
 The methods to perform and validate regression on the shape primitives implemented in this work are described in the following sections.
 
 \subsection{Planar Regression}\label{sec:planar_regression}
 A plane may be defined by a normal vector and a point on the plane.
-% To perform planar regression on a set of 3D points principal component analysis is used to
 Given a set of 3D points, principal component analysis (PCA) can be used to calculate the plane's normal vector as the PCA's least principal component.
-% Given a set of 3D points, the least principal component from a PCA of the points is the regression plane's normal vector.
-% That it, the direction that explains the least variance of the 3D points ... is the most significant for the normal vec?
 The mean of the points is sufficient to produce the intersection point on the plane.
-Calculating the error of such a regression is done by computing the distance from each point to the plane and calculating the root mean square of said distances like so:
-\begin{equation}
+Calculating the error of such a regression is done by computing the distance from each point to the plane and calculating the root mean square of said distances according to
+\begin{equation*}
 	e_{RMSE} = \left(\frac{1}{N}\sum_{i}^{N}d_i^2 \right)^{\frac{1}{2}}.
-\end{equation}
+\end{equation*}
 % The distance from a point $p_i$ to a plane described by point $p_P$ and normalized normal vector $\vec{n}$ may be calculated by transforming the point $p_i$ to the plane's coordinate system, with the origin at $p_P$ and which $\vec{n} = \vec{e_z}$.
 The distance from a point $p_i$ to a plane described by point $p_P$ and normalized normal vector $\vec{n}$ may be calculated by transforming the target point to the plane's coordinate system, and taking the transformed point's $z$ coordinate as the distance.
 % The distance from a point $p_i$ to a plane may be calculated by transforming the target point to the plane's coordinate system, with the origin at $p_P$ and which $\vec{n} = \vec{e_z}$:
-\begin{equation}
+\begin{equation*}
 	\prescript{P}{}p_i = \prescript{P}{}T_0 \prescript{0}{}p_i
-\end{equation}
-\begin{equation}
+\end{equation*}
+\begin{equation*}
 	d_i = \vec{e_z} \cdot \prescript{P}{}p_i
-\end{equation}
+\end{equation*}
 where $\prescript{P}{}T_0$ is the homogeneous transformation matrix from global to planar coordinate systems.
-Alternatively, if there is no other reason to compute the transformation matrix for the plane's local coordinate system, it is simpler to calculate the point-plane distance as the dot product of the plane normal with the vector $p_i - p_P$ as shown:
-\begin{equation}
-	d_i = \langle p_i - p_P, \vec{n}\rangle,
-\end{equation}
+Alternatively, if there is no other reason to compute the transformation matrix for the plane's local coordinate system, it is simpler to calculate the point-plane distance as the dot product of the plane normal with the vector $p_i - p_P$ as shown by
+\begin{equation*}
+	d_i = \langle p_i - p_P, \vec{n}\rangle.
+\end{equation*}
 
 \subsection{Cylindric Regression}
 Cylinders in this context can be understood as an extruded conic section.
-While there are methods of ascertaining (? better word?) a cylinder from a mere collection of 3D points~\cite{PCL_cyl_regression}, the process employed here was simplified by exploiting the mesh's normals.
+While there are methods of fitting a cylinder to a mere collection of 3D points~\cite{PCL_cyl_regression}, the process employed here was simplified by exploiting the mesh's normals.
 For a cylindric mesh of constant radius with vertex normals, the normals will all be perpendicular to the main axis.
 Thus, the least principal component from a PCA performed on the mesh's normals will yield a vector along the main axis.
 From here a coordinate system may be created such that the z axis is the cylinder's main axis.
-The origin of the cylindric coordinate system is for cylindric, and thus conic regression, inconsequential, but is typically set initially to the mean point position of the mesh.
+The origin of the cylindric coordinate system is for the cylinder, and the ensuing conic regression, inconsequential, but is typically set initially to the mean point position of the mesh.
 Next, the mesh vertices are projected onto the XY plane of the cylinder's coordinate system, so that the specific type of conic may be deduced.
 The general equation of a conic is:
 \begin{equation}\label{eq:gen_conic}
@@ -343,9 +343,9 @@ The general equation of a conic is:
 % Treating this as the error function to be minimized via least squares
 Fitting a given set of 3D points to this equation can be achieved via total least squares.
 Rosin shows that it is useful to set $F=1$~\cite{Ellipse_least_squares}, both to normalize the equation, and to avoid the trivial solution
-\begin{equation}
+\begin{equation*}
 	A = B = C = D = E = F = 0.
-\end{equation}
+\end{equation*}
 Once the coefficients have been obtained, the specific type of conic represented by the points may be discerned by the determinant
 \begin{equation*}
 	B^2 - 4AC.
@@ -361,14 +361,14 @@ For example, a point on a conic section should satisfy Equation~\ref{eq:gen_coni
 	R(x,y) = Ax^2 + Bxy + Cy^2 + Dx + Ey + F \neq 0,
 \end{equation}
 where $R(x,y)$ is known as the residual. The error function then becomes
-\begin{equation}
+\begin{equation}\label{eq:sq_residual}
 	e = \sum_i \left(Ax_i^2 + Bx_i y_i + Cy_i^2 + Dx_i + Ey_i + F\right)^2.
 \end{equation}
 While easy to calculate, this value is unreliable as an indicator of whether or not the given surface is actually a conic surface.
 During testing cases were encountered in which obviously non-cylindric surfaces yielded extremely low error values, resulting in false positives.
 This realization fueled the need for a proper point-to-ellipse distance function.
 
-Eberly~\cite{GeoTools_pt_to_ellipse} shows that for an origin-centered axis-aligned ellipse described by major and minor diameters $a$ and $b$, and a target point $(x_p, y_p)$, the distance $t$ from the target point to the ellipse must satisfy the equation
+Eberly~\cite{GeoTools_pt_to_ellipse} shows that for an origin-centered axis-aligned ellipse described by major and minor radii $a$ and $b$, and a target point $(x_p, y_p)$, the distance $t$ from the target point to the ellipse must satisfy the equation
 \begin{equation}\label{eq:ellipse_dist}
 	F(t) = \left(\frac{a x_p}{t + a^2}\right)^2 + \left(\frac{b y_p}{t + b^2}\right)^2 - 1 = 0.
 \end{equation}
@@ -407,7 +407,7 @@ The UV map for planar surfaces is trivial, as the 3D surface is already ``unwrap
 
 \subsection{Cylindric Surfaces}
 For the purposes of this project, cylindric surfaces is restricted to extruded ellipses.
-The process is first described for a circular cylinder, and then expanded to a generic ellipse.
+The process of unwrapping a cylinder is first described for a circular cylinder, and then expanded to the elliptic case.
 
 \subsubsection{Circular Cylinders}
 The transformation matrix $\prescript{c}{}T_0$ is the core of a circular cylindric UV map.
@@ -495,7 +495,7 @@ The point's $u$ coordinate is calculated as the ratio of $\phi$ to its perimeter
 \end{equation}
 where $L$ is the cylinder's perimeter: $2\pi r$.
 % $\phi$ is used to calculate the arc length position of $\prescript{c}{}p$ along the cylinder's perimeter, which becomes its $u$ position in surface coordinates.
-The point's $z$ in the cylinder's coordinate system becomes its $v$ coordinate in surface coordinates.
+The point's $z$ coordinate in the cylinder's coordinate system becomes its $v$ coordinate in surface coordinates.
 
 To transform a point in surface coordinates to $R^3$, the steps above must be reversed.
 Solving Equation~\ref{eq:cyl_u_coord} for $\phi$, the point's $u$ coordinate is converted back to the angle $\phi$:
@@ -511,7 +511,7 @@ Finally, the point may be transformed from the cylindric to the global frame of 
 
 \subsubsection{Elliptic Cylinders}
 An ellipse is merely a circle that has been stretched.
-Because of this, the procedure to transform a point from $R^3$ to the surface coordinates of an elliptic cylinder is the same as that of the circular cylinder, save for some different equations.
+Because of this, the procedure to transform a point from $R^3$ to the surface coordinates of an elliptic cylinder is the same as that of the circular cylinder, save for a different equation.
 Here, the elliptic UV map contains transformation matrix $\prescript{e}{}T_0$, with its z axis aligned with the cylinder's main axis, x axis aligned with the ellipse's major axis, and origin centered on the ellipse.
 Recall that the general equation of an ellipse is
 \begin{equation*}
@@ -597,10 +597,11 @@ Step 3: Calculate UV coordinates.
 	\label{fig:gl_ecyl_transform_steps}
 \end{figure}
 
-The first step remains unchanged: Transform the point to the cylinder's coordinate system.
+The first step remains unchanged from the circular case: Transform the point to the cylinder's coordinate system.
 The objective of the second step remains calculating the arc angle $\phi$, but here the coordinates must be scaled by their corresponding radii to account for the ellipse's eccentricity.
 Note that for an ellipse $\phi$ is not equivalent to the angle to the point measured from the local $x$ axis, as that would be $\arctan y/x$.
 Hence why there is no line or marker indicating $\phi$ in Figure~\ref{sfig:ellipse_xy_coords}.
+The point's position in surface coordinates is given by $u$ from Equation~\ref{eq:cyl_u_coord} and the $\prescript{e}{}p$'s z coordinate.
 
 Performing the reverse transformation is equivalent to that of the circular cylinder, with the exception that the individual radii must be used instead of the singular radius $r$:
 \begin{equation*}
@@ -750,16 +751,16 @@ The procedure is described in greater detail in Algorithm~\ref{alg:RDP}.
 \end{algorithmic}
 \end{algorithm}
 
-The RDP implementation used in this work uses a structure \textbf{RDPNode} that represents a section of the line.
+The RDP implementation used in this work (see Algorithm~\ref{alg:RDP}) uses a structure \textbf{RDPNode} that represents a section of the line.
 It contains a start and end point, as well as a line spanning these two points.
 A stack is used to manage the \textbf{RDPNode}s.
-In each iteration of the \verb|while| loop, starting on line 5, the item at the top of the stack is removed and stored in $n$.
+In each iteration of the \verb|while| loop starting on line 5, the item at the top of the stack is removed and stored in $n$.
 The point farthest from this line section is found, and on line 10 the distance thereof is compared against the tolerance width.
 If the perpendicular distance is within the tolerance width then the current line section is complete and the initial point in the section is added to $P_{core}$ (line 11).
 If not, then the current line section is split at the farthest point, with the two new sections represented by RDPNodes $n_{left}$ and $n_{right}$.
 These are then placed on the stack, $n_{right}$ first, so that $n_{left}$ is processed next, ensuring the list of important points $P_{core}$ is always sorted.
 After the \textbf{RDPNode} stack is exhausted the last point in $P$ is appended to $P_{core}$ because only the start point in each node is added to $P_{core}$.
-An alternative implementation that uses recursion may be found on Wikipedia.
+An alternative procedure that uses recursion may be found on Wikipedia.
 
 \section{Traveling Salesman Problem}
 The Traveling Salesman Problem (TSP) is a well known problem in combinatorial optimization.
@@ -776,7 +777,7 @@ For the vast majority of applications symmetric node-to-node costs can be assume
 	n_{\text{routes}} = \frac{(n-1)!}{2}.
 \end{equation*}
 The number of real world TSP applications is similarly large~\cite{TSP_theory_applications}, ranging from determining the drill order of holes in printed circuit board manufacturing~\cite{TSP_PCB_manufacturing}, to mail delivery and vehicle routing in general~\cite{TSP_mail_delivery}, to X-ray crystallography~\cite{TSP_xray_crystallography}.
-The algorithm described in this work produces a set of convex surfaces from the target object.
+The algorithm described in this work produces a set of convex surfaces from the target object (steps \textit{3D Segmentation} to \textit{2D Segmentation} in Figure~\ref{fig:bkgd_overview}).
 Within each convex surface region a simple path is planned.
 % NOTE the verb tense/case! "would" because it is not implemented
 It is the traversal of these surface regions that would be formulated as a TSP with the distance between each region and the change in end-effector orientation serving as the travel costs.
