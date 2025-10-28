@@ -15,61 +15,75 @@ The objective of applied CPP is typically for an agent to perform some function 
 Examples of this include spray painting car parts~\cite{Automatic_spray_painting_path}, spray forming glass reinforced cement~\cite{Robotic_grc_spraying}, metal polishing~\cite{Metal_polishing_robot_sys}, floor cleaning~\cite{CCPP_guidance_for_cleaning_robots}, demining~\cite{CPP_demining}, lawn mowing~\cite{CPP_autonomous_lawn_mower}, farming~\cite{Vision_perception_auto_harvester, CPP_alg_agriculture}, underwater inspection of ship hulls~\cite{CPP_inspect_complex_structures}, and producing mosaicked images of the ocean floor~\cite{Terrain_covering_AUV}.
 
 In the past few years drones have become increasing popular, including as CPP agents~\cite{CPP_UAV_survey, CPP_2D_convex_regions_uav, CPP_multi_UAV, CPP_spraying_drones}.
-Luna et al. presented a multi-UAV approach to scan a set of disjointed land areas~\cite{CPP_multi_UAV}.
-(? Maybe talk about UAV CPP more?)
+While drones present a high degree of translational maneuverability, their orientation relative to gravity remains fairly constant, which can limit their applications.
+Luna et al.\ presented a multi-UAV approach to scan a set of disjointed land areas~\cite{CPP_multi_UAV}.
+Their approach is hierarchical: A global plan is developed and sent to each UAV, which then refines its part of the plan.
 
 CPP algorithms can be off-line, in which the environment is known at the start and is assumed constant, or on-line, in which the path planning agent must deal with an unknown or changing environment~\cite{CPP_survey_for_robotics}.
 On-line applications include the aforementioned car part spray painting, panel spray forming~\cite{Robotic_grc_spraying}, and metal polishing.
-Liu et al. propose an algorithm for cleaning robots in an unknown environment by combining random path movement and locally complete coverage paths~\cite{CCPP_cleaning_robots}.
+Liu et al.\ propose an algorithm for cleaning robots in an unknown environment by combining random path movement and locally complete coverage paths~\cite{CCPP_cleaning_robots}.
 Their locally complete coverage paths follow a ``comb-like'' path that likens a Boustrophedon path.
 
 % \section{Spatial Complexity}
 The spatial complexity of CPP problems extends to 2.5D and 3D, though solutions to such problems typically involve segmenting the working region into sub-regions that can be approximated as 2D without significant loss of precision.
 
-2D applications of coverage path planning are characterized by the ROI and agent's range of motion being limited to 2D.
+2D applications of coverage path planning are characterized by the region of interest (ROI) and agent's range of motion being limited to 2D.
 Any 3rd dimension aspects are negligible.
 The classic example thereof is robot vacuum cleaners, such as iRobot's ``Roomba'' and Electrolux's ``Trilobite''\cite{CCPP_cleaning_robots}, whereas less obvious examples include drones that operate at a constant elevation~\cite{CPP_2D_convex_regions_uav}.
-Gajjar et al. discretize the given 2D space to a grid in order to simplify agent movement~\cite{CCPP_known_2D_env}.
+Gajjar et al.\ discretize the given 2D space to a grid in order to simplify agent movement~\cite{CCPP_known_2D_env}.
 
 2.5D problems exhibit a working area with non-uniform height, but can otherwise still be mapped to a 2D space.
 Jin and Tang developed a CPP algorithm for uneven farmland terrain which accounted for farmland relevant costs, such as: Headland turning, soil erosion, and curved paths~\cite{CPP_farming_terrain}.
-Hameed et al. calculate the height value for their waypoints via bilinear interpolation from the Digital Elevation Model of their target area~\cite{CPP_2.5D_agriculture}.
-Gao et al. use a 2.5D grid discretization as the basis for their algorithm~\cite{CPP_2.5D_grid_map}.
+Hameed et al.\ calculate the height value for their waypoints via bilinear interpolation from the Digital Elevation Model of their target area~\cite{CPP_2.5D_agriculture}.
+Gao et al.\ use a 2.5D grid discretization as the basis for their algorithm~\cite{CPP_2.5D_grid_map}.
 Coverage path planning performed by UAVs in a 2D space covering an otherwise 3D ROI is seemingly common~\cite{CPP_2.5D_SAA_grid_based_UAV_3D_recons, CPP_2.5D_UAV_3D_terrain_recons, CPP_multi_UAV, CPP_2D_convex_regions_uav}.
 % This style of CPP feels more 2D than 2.5D, despite the results typically being 3D
-Galceran and Carreras demonstrate the complexity of a ROI with varying distance to the agent~\cite{CPP_2.5D_seabed_2012}, as holding the depth of their autonomous underwater vehicle constant results in a varying FOV observed.
+Galceran and Carreras demonstrate the complexity of a ROI with varying distance to the agent~\cite{CPP_2.5D_seabed_2012}, as holding the depth of their autonomous underwater vehicle constant results in a varying field of view (FOV) observed.
 % NOTE: If i talked more about AUVs, it would be worth creating and using the initialism...
 They solve this by segmenting the given seabed map into regions of depth constant enough to be approximated as 2D.
 In a subsequent paper Galceran and Carreras tackle a similar problem by segmenting the given bathymetric map into ``high-slope'' regions and relatively planar regions~\cite{CPP_2.5D_seabed_2013}.
 
 Three dimensional CPP problems require movement in all 3 dimensions relative to the ROI~\cite{CPP_survey_for_robotics}.
-Cao et al. present a hierarchical solution to CPP in thoroughly 3D environments, by dividing the region of interest into subspaces and planning a paths for individual subspaces~\cite{HiCPP_cplx_3D_env}.
-They rely on a global TSP to determine the traversal order of the subspaces, as well as local TSPs to plan the traversal of viewpoints within each subspace.
+Cao et al.\ present a hierarchical solution to CPP in thoroughly 3D environments, by dividing the ROI into subspaces and planning paths for the individual subspaces~\cite{HiCPP_cplx_3D_env}.
+They rely on a global Traveling Salesman Problem (TSP) to determine the traversal order of the subspaces, as well as local TSPs to plan the traversal of viewpoints within each subspace.
 
 The ROIs in most of the CPP applications presented above are environments, as opposed to planning a path on an object.
 In such situations the agent is typically a robotic arm with sensors and/or tools affixed to the end effector~\cite{Metal_polishing_robot_sys, Automatic_spray_painting_unknown_parts}.
 The target of Asakawa and Takeuchi's path planning algorithm was a 6 degree of freedom (DOF) robotic arm with end effector mounted spray painting tool~\cite{Automatic_spray_painting_path}.
 They developed an algorithm to generate robot control commands from CAD data for the purpose of replacing the manual spray painting of car bumpers.
-Atkar et al. have also examined trajectory generation for a spray painting robot~\cite{Uniform_cov_auto_surfaces, Exact_cell_decomp_orientable_surfaces}.
-The algorithm propose in their earlier work does not plan a path on the object's surface directly, but rather a virtual surface offset from the actual surface.
-The path is formed by the repeated intersection of a slicing plane with the offset surface.
-% Mizugaki et al. created a program to generate fractal paths so that a 6-DOF industrial robot
+Atkar et al.\ have also examined trajectory generation for a spray painting robot~\cite{Uniform_cov_auto_surfaces, Exact_cell_decomp_orientable_surfaces}.
+They follow the common approach of segmenting the target surface into simple regions to be handled individually.
+their approach to local path planning is based on optimizing the seed curve to ensure uniform paint deposition and minimize the overall cycle time.
+Seed curve in this context is the curve that sets the orientation of the back-and-forth motions used to cover the region.
+% NOTE: I do not fully understand Atkar et al.'s "virtual surfaces", so mention thereof has been removed.
+% The algorithm proposed in their earlier work does not plan a path on the object's surface directly, but rather a virtual surface offset from the actual surface.
+% The path is formed by the repeated intersection of a slicing plane with the offset surface.
+
+% Mizugaki et al.\ created a program to generate fractal paths so that a 6-DOF industrial robot
 
 % \section{3D Segmentation}
 Decomposing a fully 3D space into more manageable subspaces is typically done either in a hierarchical manner~\cite{HiCPP_cplx_3D_env}, or via segmentation of the target's mesh representation~\cite{Mesh_segm_technik_survey}.
-% TODO:
-(? I had considered writing more about the different types of 3D mesh decomposition, but that would have been another page, at least, and the chapter is already ~3.5 pages...)
-% Within 3D mesh segmentation...
-% TODO: expand on the types of mesh segmentation discussed in MSTS
+% TODO:?
+Most mesh segmentation methods use a heuristic to determine which vertices belong to which regions.
+These heuristics are generally based on mesh attributes, such as differences in adjacent vertex normals, dihedral angles, curvature, symmetry, and convexity, among others.
+% 1. Region growing
+the simplest segmentation method examined by Shamir is known as region growing, in which sub-meshes start from a seed element and expand therefrom~\cite{Mesh_segm_technik_survey}.
+The next segmentation method is ``multiple source region grow'', where multiple seeds are picked and expanded in parallel.
+Another approach was ``iterative clustering'', which sought to optimally partition the given mesh into $n$ sub-meshes, where $n$ was a set input parameter.
+This method follows the classic $k$-means clustering algorithm, but applied to vertices in a mesh.
 
-Pichler et al. present a different procedure than those discussed above, one based on physical feature detection.
+% (? I had considered writing more about the different types of 3D mesh decomposition, but that would have been another page, at least, and the chapter is already ~3.5 pages...)
+% TODO: consider expanding on the types of mesh segmentation discussed in MSTS
+
+Pichler et al.\ present 3D segmentation method based not on mesh attributes, but on physical feature detection.
 Their procedure compares a point cloud sampled from an unknown industrial component with a ``Geometry Library'', a collection of complex geometric definitions~\cite{Automatic_spray_painting_unknown_parts}.
 In the paper presented, their geometry library was only capable of detecting ribs and cavities.
 The concept was to detect elementary geometries that could be linked to a specific predefined path planning procedure.
 Non-rib / -cavity regions are termed ``free-form'', and are painted with a pattern of straight strokes.
 
 % \section{2D Segmentation}
-Given a complex planar representation of a ROI most path planning algorithms will first decompose the complex map into simpler connected regions~\cite{Cell_decomposition_survey}(cite Van Stryk GdR lectures).
+Given a complex planar representation of a ROI most path planning algorithms will first decompose the complex map into simpler connected regions~\cite{Cell_decomposition_survey, GdR}.
+% (? TODO: update von Stryk GdR lecture citation?)
 The majority of these methods exist for the purpose of pathfinding, and are not well suited for coverage path planning.
 The following are decomposition methods applicable to coverage path planning.
 
@@ -84,13 +98,13 @@ Hence, given an unrotated rectangular obstacle, a line would be extended from th
 The extended lines end when they encounter another object, the map boundary or another line extension.
 From there the procedure follows that of \textit{exact cellular decomposition}.
 
-Choset and Pignon proposed the boustrophedon cellular decomposition (BCD)\cite{Bous_cellular_decomp}.
+Choset and Pignon proposed the boustrophedon cellular decomposition (BCD)~\cite{Bous_cellular_decomp}.
 Based on the \textit{exact cellular decomposition}, a vertical line is swept across the polygonal map.
 Cells are created only at the horizontal ends of obstacles, that is, the left-most and right-most points.
 In their paper, they term these points ``IN'' events and ``OUT'' events, presumably when an obstacle moves \textit{in}to or \textit{out} of the swept line.
 This adaptation has the effect of merging all cells that would have been formed via \textit{exact cellular decomposition} between the ``IN'' and ``OUT'' events, thus reducing the number of cells that need to be traversed.
 
-Nielsen et al. present an algorithm to minimize the number of turns by segmenting the given region into \textit{optimal} convex sub-polygons~\cite{IntEdgeExt}.
+Nielsen et al.\ present an algorithm to minimize the number of turns by segmenting the given region into \textit{optimal} convex sub-polygons~\cite{IntEdgeExt}.
 In order to apply a square zig-zag pattern akin to the boustrophedon path, they divide the given map into convex sub-polygons by extending the map's interior edges, hence their name for the algorithm \textit{interior extension of edges}.
 % They named their algorithm \textit{interior extension of edges} because it forms sub-polygons by extending the interior edges of the given map.
 In order to minimize the number of turns within a given sub-polygon cell, they propose merging the sub-polygon cells into \textit{optimal} sub-polygons.

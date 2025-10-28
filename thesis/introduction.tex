@@ -1,4 +1,59 @@
 %! TeX root = thesis.tex
 \chapter{Introduction}
 \IMRADlabel{introduction}
+Coverage path planning is the process of planning a path that guides an agent over the entirety of the region of interest.
+% Parents would need an explainer for ``agent'', but the target audience should know already
+% NOTE: (? could replace ROI with environment)
+% The relevance of the research: How does this work fit into existing studies on the topic?
+Applications thereof include floor cleaning robots~\cite{CCPP_cleaning_robots}, demining~\cite{CPP_demining}, automobile part spray painting~\cite{Automatic_spray_painting_path}, and processing of irradiated waste and debris~\cite{ROBBE}.
+Without coverage path planning these would be at best less efficient, and at worst incomplete.
+% The relevance of the research: How does this work fit into existing studies on the topic?
+For the cleaning robot and demining applications the region of interest is a proper environment: a building's floor, and open terrain, respectively.
+% In the case of floor cleaning robots and ocean mapping, the region of interest is the floor of a building, and the ocean floor, respectively.
+Whereas for the car part spray painting and irradiated waste processing tasks the region of interest is an object, either in part or in whole.
+This project follows the last example, in tackling the processing of hazardous waste, specifically low and medium level nuclear waste created during dismantling.
+% This project tackles the same application as the last example, the processing of hazardous waste.
+
+% The topic, in context: what does the reader need to know to understand the thesis?
+% Throughout the operation of a nuclear power plant, various components become contaminated with nuclear material and irradiated.
+Throughout normal operation at nuclear power plants, various components come into contact with radioactive material and become contaminated.
+During the decommissioning and dismantling of these plants, the irradiated components pose a waste disposal challenge.
+Parts within the nuclear power plant that are expected to be subjected to nuclear contamination receive a protective coating during installation~\cite{NRC_coatings}.
+By absorbing radiation and blocking radioactive nuclides from reaching the metal underneath, the coatings protect metal components from corrosion, and reduce general wear.
+Decommissioning is also facilitated by the coating, because it allows the underlying metal to be reprocessed and recycled like ordinary waste, once the coating has been completely removed~\cite{DeconTechInDecommissioning}.
+This greatly reduces the volume of material that requires special treatment and storage.
+
+Manually cleaning irradiated waste and debris risks contamination to the operators and is often physically taxing.
+By creating a system that can automate the cleaning process this project hopes to reduce the risk to human operators.
+The envisioned setup consists of a robotic arm with an end effector mounted ablation laser to handle coating removal.
+Contaminated parts would be placed in a vice on a rotary table within the robotic arm's workspace.
+% For the purpose of removing the contaminated coatings a combination ablation laser and vacuum aparatus is envisioned.
+
+% Focus and scope: What specific aspect of the topic will be addressed?
+Due to the destructive nature of the dismantling process, the geometry of the objects to be processed is unknown, and assumed to be arbitrary.
+Upstream of this project the target objects are scanned and a 3D mesh representation created.
+% In order to plan a coverage path on arbitrary geometry
+The inputs to the program developed during this project are the target object's mesh, and the ablation laser's characteristics.
+
+The objective of this project is to develop a coverage path planning process capable of handling arbitrary geometry.
+% This work draws on the fields of geometric curvature, mesh segmentation, geometric shape fitting, high-level path planning, and low-level path planning.
+To achieve this, the fields of geometric curvature, mesh segmentation, geometric shape fitting, high-level path planning, and low-level path planning are drawn upon.
+The concept proposed in this work is one of segmentation and simplification.
+The object's mesh is segmented along regions of high geomtric curvature, in order to produce mesh sections that may be classified as a certain geometric primitive.
+% The 3D segmentation process is performed using Watershed segmentation.
+Simplified geometric representations are then created from the classified mesh sections.
+Non-convex surfaces are segmented further to yield convex surfaces.
+Next a basic back-and-forth path is planned on each convex region.
+These individual paths are unified via a Traveling Salesman Problem and then sent to a robotic arm for demonstration.
+The procedure developed is assessed based on the successful path planning of various CAD objects.
+
+% To achieve this, research from various fields (geometric curvature, mesh segmentation, geometric shape fitting, UAV path planning, cellular path planning...) is brought together.
+
+% An overview of the paper structure: what does each section contribute to the overall aim?
+The next chapter discusses research related to the project.
+Chapter~\ref{sec:bkgd} lays the foundation upon which this work is based.
+The methods developed throughout this project are explained in Chapter~\ref{sec:mtdy}, and the results are presented in Chapter~\ref{sec:results}.
+A discussion of the issues encountered as well as possible improvements is found in Chapter~\ref{sec:discussion}.
+This paper concludes with suggestions regarding the future of this project.
+% NOTE: still not quite satisfied with this line ^
 

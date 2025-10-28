@@ -1,5 +1,5 @@
 %! TeX root = thesis.tex
-\chapter{Background}
+\chapter{Background}\label{sec:bkgd}
 \tikzset{HighLevelProcedure/.pic={
 	\def\dx{6mm}
 	% nodes
@@ -109,6 +109,14 @@ Inspired by~\cite{DDGAppIntro_12_smooth_curves}.}
 	\label{fig:tangent_on_curve}
 \end{figure}
 
+Initially, the root mean square (RMS) curvature calculated from discrete Gaussian and mean curvature was used as the mesh height.
+This was chosen following Pulla et al.'s work showing benefit of RMS curvature for Watershed segmentation~\cite{Imp_k_estimation_for_WS}.
+But this was eventually replaced with Taubin's method of calculating the principal curvatures (described below) directly via curvature tensor estimation~\cite{TaubinTensor}.
+This has the benefit of direct calculation, but has been shown to be susceptible to noise in the mesh~\cite{Comp_k_notes}.
+% Thiesel et al.\ calculate the curvature tensor per triangular face in the mesh, based on the face's corner normals~\cite{Norm_based_k_tensor_est}.
+This too was later retired, and replaced with Rusinkiewicz's approach of calculating the curvature tensor for each mesh face via the differences between corner normals~\cite{SRTensor}, then computing the per vertex curvature tensor as a weighted sum over the curvature tensors of the vertex's adjoining triangles via coordinate system transformations.
+% Gatzke and Grimm examine a variety of other curvature estimation methods~\cite{EstCurvOnTriMesh}, most of which were not considered for this work.
+
 \subsection{Principal Curvatures}
 All combined measures of curvature are based, either in theory or in actuality, on the principal curvatures.
 The principal curvatures at a given point on a surface are simply the maximum $\kappa_1$ and minimum $\kappa_2$ curvature~\cite{DDGAppIntro_17_smooth_k}.
@@ -147,7 +155,7 @@ The principal curvatures are the eigenvalues of
 	\end{bmatrix},
 \end{equation}
 where $X_1$ and $X_2$ are the aforementioned orthonormal vectors tangent to the surface at point $p$.
-Similarly, the principal directions are the eigenvectors of Equation~\ref{eq:2nd_fundamental_tensor}.
+Similarly, the principal directions are the eigenvectors of Equation~\eqref{eq:2nd_fundamental_tensor}.
 
 There are, however, various ways of approximating the principal curvatures on a discrete mesh~\cite{EstCurvOnTriMesh, DiscDiffGeoOpsTriMani}.
 A basic approach is to calculate the mean and Gaussian curvatures, and derive the principal curvatures from them~\cite{DDGAppIntro_19_discrete_k_2, Gauss_mean_k_notes}.
@@ -159,13 +167,6 @@ Given the mean curvature $H$ and Gaussian curvature $K$ (see Sections \ref{sec:m
 \end{align*}
 Although theoretically impossible, discretization errors can cause $H^2$ to be less than $K$, resulting in ``imaginary'' curvature.
 This tends to occur on planar mesh regions, thus a minimum of 0 can be set for $H^2 - K$, because the root term would have been near 0 regardless, but it does highlight a flaw in this measure of curvature.
-
-Initially, the root mean square (RMS) curvature calculated from discrete Gaussian and mean curvature was used as the mesh height.
-But this was eventually replaced with Taubin's method of calculating the principal curvatures directly via curvature tensor estimation~\cite{TaubinTensor}.
-This has the benefit of direct calculation, but has been shown to be susceptible to noise in the mesh~\cite{Comp_k_notes}.
-% Thiesel et al. calculate the curvature tensor per triangular face in the mesh, based on the face's corner normals~\cite{Norm_based_k_tensor_est}.
-This too was later retired, and replaced with Rusinkiewicz's approach of calculating the curvature tensor for each mesh face via the differences between corner normals~\cite{SRTensor}, then computing the per vertex curvature tensor as a weighted sum over the curvature tensors of the vertex's adjoining triangles via coordinate system transformations.
-% Gatzke and Grimm examine a variety of other curvature estimation methods~\cite{EstCurvOnTriMesh}, most of which were not considered for this work.
 
 \subsection{Mean Curvature}\label{sec:mean_k}
 The discrete mean curvature was used early in development as part of the RMS curvature calculation.
@@ -182,15 +183,19 @@ Mean curvature can be approximated on a discrete mesh via the sum of dihedral an
 where $H_i$ is the mean curvature at vertex $i$, $j$ is a vertex in the ring of $i$, $l_{ij}$ is the length of the edge from $i$ to $j$, and $\phi_{ij}$ is the dihedral angle between the faces adjacent to edge $ij$.
 See Figure~\ref{sfig:dihedral_angle} for a graphic depiction.
 
-Alternatively, the mean curvature normal $\Delta f$ can be calculated via the discrete Laplace-Beltrami operator~\cite{DDGAppIntro_18_discrete_k_1}
+Alternatively, the mean curvature normal $\Delta f$ for the vertex $i$ can be calculated via the discrete Laplace-Beltrami operator~\cite{DDGAppIntro_18_discrete_k_1}
 \begin{equation}\label{eq:lap_beltrami_op}
 	(\Delta f)_i := \frac{1}{2}\sum_{j \in E}(\cot \alpha_{ij} + \cot \beta_{ij})(p_j - p_i),
 \end{equation}
-and the absolute mean curvature can be calculated as half of the magnitude thereof:
+where each $j$ is a vertex in vertex $i$'s neighborhood, $p_i$ and $p_j$ are the 3D positions of vertices $i$ and $j$, and $\alpha_{ij}$ and $\beta_{ij}$ are the angles opposite the edge from $i$ to $j$.
+The spatial relation of vertices $i$, $j$, and angles $\alpha_{ij}$ and $\beta_{ij}$ is illustrated in Figure~\ref{sfig:mesh_neighborhood}.
+A vertex's neighborhood is the group of vertices all adjacent it.
+% Note that some sources will call this a ``1-ring'', meaning the ring of vertices 1 edge away from the center vertex.
+The absolute mean curvature can be calculated as half of the magnitude of the mean curvature normal using
 \begin{equation*}
-	|H_i| = \frac{\|(\Delta f)_i \|}{2}.
+	|H_i| = \frac{\|(\Delta f)_i \|}{2},
 \end{equation*}
-In Equation~\ref{eq:lap_beltrami_op} above $p_j$ is a vertex in the ring of vertex $p_i$, and $\alpha_{ij}$ and $\beta_{ij}$ are the angles opposite edge from $p_i$ to $p_j$ (see Figure~\ref{sfig:mesh_neighborhood} for a visual clarification).
+where $H_i$ is the mean curvature for vertex $i$ and $(\Delta f)_i$ is the mean curvature normal defined in Equation~\eqref{eq:lap_beltrami_op}.
 
 \begin{figure}[htb]
 	\centering
@@ -240,14 +245,14 @@ In Equation~\ref{eq:lap_beltrami_op} above $p_j$ is a vertex in the ring of vert
 	\draw (330:\hexR) +(150:\arcR) arc [radius=\arcR, start angle=150, end angle=210]
 		node [pos=0.5, label={[xshift=2.5mm]180:$\beta_{ij}$}] {};
 \end{tikzpicture}
-		\caption{Shown is vertex i's ring, with noteworthy angles marked.}
+		\caption{Shown is vertex i's neighborhood, with noteworthy angles marked.}
 		\label{sfig:mesh_neighborhood}
 	\end{subfigure}
 \caption{
-Subfigure (a) depicts angle $\phi_{ij}$ and edge length $l_{ij}$ from Equation~\ref{eq:dihedral_angle}, where they are used to calculate mean curvature.
+Subfigure (a) depicts angle $\phi_{ij}$ and edge length $l_{ij}$ from Equation~\eqref{eq:dihedral_angle}, where they are used to calculate mean curvature.
 Subfigure (b) portrays the opposite angles $\alpha_{ij}$ and $\beta_{ij}$ across from edge $ij$.
-The opposite angles, as well as the positions of vertices $i$ and $j$, are used in Equation~\ref{eq:lap_beltrami_op} to calculate the mean curvature normal.
-Subfigure (b) also shows $\Theta_{ijk}$, the angle between adjacent edges used in Equation~\ref{eq:disc_gauss_k} to calculate the angle deficit of vertex $i$.
+The opposite angles, as well as the positions of vertices $i$ and $j$, are used in Equation~\eqref{eq:lap_beltrami_op} to calculate the mean curvature normal.
+Subfigure (b) also shows $\Theta_{ijk}$, the angle between adjacent edges used in Equation~\eqref{eq:disc_gauss_k} to calculate the angle deficit of vertex $i$.
 Both illustrations were based on similar ones in~\cite{DDGAppIntro_19_discrete_k_2}.
 }
 \end{figure}
@@ -278,7 +283,7 @@ Note that the Gaussian curvature is approximately 0 over the entire surface, bec
 The colors shown in the mean curvature plot are effectively due entirely to the 1st principal curvature values.
 
 \subsection{Root Mean Square Curvature}
-Pulla et al. compared different types of curvature for the purpose of Watershed segmentation and found that although the absolute curvature produced the best results, the root mean square curvature produced similar results and was less computationally expensive.
+Pulla et al.\ compared different types of curvature for the purpose of Watershed segmentation and found that although the absolute curvature produced the best results, the root mean square curvature produced similar results and was less computationally expensive~\cite{Imp_k_estimation_for_WS}.
 The root mean square curvature is, as the name implies, the square root of the average of the principal curvatures squared:
 \begin{equation*}
 	\kappa_{rms} = \sqrt{\frac{\kappa_1^2 + \kappa_2^2}{2}}.
@@ -341,7 +346,7 @@ The general equation of a conic is:
 	Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0.
 \end{equation}
 % Treating this as the error function to be minimized via least squares
-Fitting a given set of 3D points to this equation can be achieved via total least squares.
+Fitting a given set of 2D points to this equation can be achieved via total least squares.
 Rosin shows that it is useful to set $F=1$~\cite{Ellipse_least_squares}, both to normalize the equation, and to avoid the trivial solution
 \begin{equation*}
 	A = B = C = D = E = F = 0.
@@ -356,11 +361,12 @@ The specific method and equations to check the validity of the conic regression 
 For $B^2 - 4AC < 0$ the set of points represent an ellipse.
 Computing the distance from a given point to an ellipse or other conic shape is non-trivial and, at the time of writing, no exact algebraic solution was found.
 In place of an exact distance function, the sum of squared residuals was used throughout most of the project's timeline.
-For example, a point on a conic section should satisfy Equation~\ref{eq:gen_conic}, but for a point \textit{almost} on a conic section, the result will be non-zero:
+For example, a point on a conic section should satisfy Equation~\eqref{eq:gen_conic}, but for a point \textit{almost} on a conic section, the result will be non-zero:
 \begin{equation}
 	R(x,y) = Ax^2 + Bxy + Cy^2 + Dx + Ey + F \neq 0,
 \end{equation}
-where $R(x,y)$ is known as the residual. The error function then becomes
+where $R(x,y)$ is known as the residual.
+Using each point's residual as its error value, the error function may be written as
 \begin{equation}\label{eq:sq_residual}
 	e = \sum_i \left(Ax_i^2 + Bx_i y_i + Cy_i^2 + Dx_i + Ey_i + F\right)^2.
 \end{equation}
@@ -372,19 +378,23 @@ Eberly~\cite{GeoTools_pt_to_ellipse} shows that for an origin-centered axis-alig
 \begin{equation}\label{eq:ellipse_dist}
 	F(t) = \left(\frac{a x_p}{t + a^2}\right)^2 + \left(\frac{b y_p}{t + b^2}\right)^2 - 1 = 0.
 \end{equation}
-Eberly also compares 3 methods of solving Equation~\ref{eq:ellipse_dist} for $t$, concluding that the bisection method is the most robust.
+While Equation~\eqref{eq:ellipse_dist} has no direct analytic solution, Eberly shows 3 methods for computing it numerically.
+He discusses the merits of each and concludes that the bisection method is best due to its robustness.
+% also compares 3 methods of solving Equation~\eqref{eq:ellipse_dist} for $t$, concluding that the bisection method is the most robust.
+\vspace{1cm}
+% TODO: figure out a more elegant way to force the TSP section after the RDP pseudocode...
 
 \subsubsection{Parabolic and Hyperbolic Regression}
 % TODO: return to this, improve it.?
 The functionality to perform parabolic or hyperbolic regression was omitted from this work due to time constraints.
 
-(? I could layout how to compute the distance and thus error for at least a parabola, but is it worth it if it is not implemented? it is safe to assume the vast majority of curves encountered will be circular, and if not circular then elliptic...)
+% (? I could layout how to compute the distance and thus error for at least a parabola, but is it worth it if it is not implemented? it is safe to assume the vast majority of curves encountered will be circular, and if not circular then elliptic...)
 
 \section{UV Mapping}
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.65\textwidth]{../resources/cube_UV_unwrapping.png}
-	\caption{Visual depiction of a cube's UV map being unwrapped~\cite{UV_map_cube_img}. }
+	\caption{Visual depiction of a cube's UV map being unwrapped~\cite{UV_map_cube_img}.}
 	\label{fig:uv_map_cube}
 	% NOTE: image requested by HK
 \end{figure}
@@ -392,7 +402,7 @@ UV Mapping is the process of projecting a surface from 3D to 2D, effectively ``u
 UV maps are used extensively in 3D modeling and computer graphics.
 Figure~\ref{fig:uv_map_cube} shows the UV map of a cube being unwrapped.
 Within the context of this work the primary purpose of UV maps are to handle the transformation of points from global to surface coordinates.
-The plan was to have a UV map for each shape primitive to use during the \textit{Geometry Simplification} and \textit{Cellular Path Planning} high level steps.
+The plan was to have a UV map for each shape primitive to use during the high level step \textit{Geometry Simplification}.
 % The functions a "UV-Map" in the code accomplishes:
 	% Eigen::Vector2d xyz_to_uv(const Eigen::Vector3d& vec3) const;
 	% Eigen::Vector3d uv_to_xyz(const Eigen::Vector2d& vec2) const;
@@ -406,13 +416,14 @@ The UV map for planar surfaces is trivial, as the 3D surface is already ``unwrap
 % (? if necessary i can explain in greater detail, but it seems superfluous...)
 
 \subsection{Cylindric Surfaces}
-For the purposes of this project, cylindric surfaces is restricted to extruded ellipses.
+For the purposes of this project, cylindric surfaces are understood to be extruded ellipses.
 The process of unwrapping a cylinder is first described for a circular cylinder, and then expanded to the elliptic case.
 
+% \vspace{2cm}
 \subsubsection{Circular Cylinders}
-The transformation matrix $\prescript{c}{}T_0$ is the core of a circular cylindric UV map.
+The transformation matrix $\prescript{c}{}T_0$ is the core of a circular cylinder's UV map.
 The z axis of $\prescript{c}{}T_0$ aligns with the cylinder's axis, and its origin is positioned at one end of the cylinder.
-This can be observed in Figure~\ref{sfig:gl_ccyl_transformation} below.
+An example thereof can be seen in Figure~\ref{sfig:gl_ccyl_transformation} below.
 The transformation procedure is described visually in Figure~\ref{fig:gl_ccyl_transform_steps}, and textually below.
 \begin{figure}[htb]
 	\centering
@@ -498,7 +509,7 @@ where $L$ is the cylinder's perimeter: $2\pi r$.
 The point's $z$ coordinate in the cylinder's coordinate system becomes its $v$ coordinate in surface coordinates.
 
 To transform a point in surface coordinates to $R^3$, the steps above must be reversed.
-Solving Equation~\ref{eq:cyl_u_coord} for $\phi$, the point's $u$ coordinate is converted back to the angle $\phi$:
+Solving Equation~\eqref{eq:cyl_u_coord} for $\phi$, the point's $u$ coordinate is converted back to the angle $\phi$:
 \begin{equation*}
 	\phi = 2\pi \frac{u}{L}.
 \end{equation*}
@@ -601,7 +612,7 @@ The first step remains unchanged from the circular case: Transform the point to 
 The objective of the second step remains calculating the arc angle $\phi$, but here the coordinates must be scaled by their corresponding radii to account for the ellipse's eccentricity.
 Note that for an ellipse $\phi$ is not equivalent to the angle to the point measured from the local $x$ axis, as that would be $\arctan y/x$.
 Hence why there is no line or marker indicating $\phi$ in Figure~\ref{sfig:ellipse_xy_coords}.
-The point's position in surface coordinates is given by $u$ from Equation~\ref{eq:cyl_u_coord} and the $\prescript{e}{}p$'s z coordinate.
+The point's position in surface coordinates is given by $u$ from Equation~\eqref{eq:cyl_u_coord} and the $\prescript{e}{}p$'s z coordinate.
 
 Performing the reverse transformation is equivalent to that of the circular cylinder, with the exception that the individual radii must be used instead of the singular radius $r$:
 \begin{equation*}
@@ -717,7 +728,7 @@ Setting 3.7 into 3.8:
 \end{equation}
 \fi
 
-\section{Ramer-Douglas-Peucker Algorithm}
+\section{Ramer-Douglas-Peucker Algorithm}\label{sec:RDP}
 The Ramer-Douglas-Peucker (RDP) algorithm is a method to iteratively simplify a line defined by a set of points~\cite{RDP_line_reduction_DP, RDP_line_reduction_R}.
 The only arguments to RDP are a list of points and a tolerance width, within which points will be considered unnecessary and discarded.
 % The algorithm looks at a list of points, draws an imaginary line from the first to the last, finds the point with the farthest normal distance to the comparison line, and if the point's distance to the comparison line is greater than a pre-defined tolerance width, splits the lin
@@ -772,7 +783,9 @@ It can be shown~\cite{TSP_in_pursuit_of} that for $n$ nodes the number of possib
 \begin{equation*}
 	n_{\text{routes}} = (n-1)!.
 \end{equation*}
-For the vast majority of applications symmetric node-to-node costs can be assumed, and the number of permutations is reduced to \textit{only}
+For the vast majority of applications symmetric node-to-node costs can be assumed, and the number of permutations is reduced to
+% previous sentence previously ended with \textit{only}
+% as a tiny bit of sass in this otherwise serious paper.
 \begin{equation*}
 	n_{\text{routes}} = \frac{(n-1)!}{2}.
 \end{equation*}
@@ -784,6 +797,6 @@ It is the traversal of these surface regions that would be formulated as a TSP w
 Considering only the traversal of the surface regions, the start and end nodes need not be the same, and the situation can be modeled as a modified TSP.
 The common way to modify a TSP to achieve different start and end nodes is to introduce a dummy node with 0-cost edges to the other nodes~\cite{TSP_dummy_node_mod}.
 After insertion of the dummy node, the TSP can be solved like normal.
-Once the TSP has been solved the nodes adjacent to the dummy node are the start and end nodes.
+Once the TSP has been solved, the nodes adjacent to the dummy node are the start and end nodes.
 If the robot's starting or home position is included as a node, the application can be handled as a classic TSP.
 

@@ -10,13 +10,16 @@
 	ruledheaders=section,%Ebene bis zu der die Überschriften mit Linien abgetrennt werden, vgl. DEMO-TUDaPub
 	class=report,% Basisdokumentenklasse. Wählt die Korrespondierende KOMA-Script Klasse
 	thesis={type=master},% Dokumententyp Thesis, für Dissertationen siehe die Demo-Datei DEMO-TUDaPhd
-	accentcolor=9c,% Auswahl der Akzentfarbe
+	accentcolor=2c,% Default is 9c, 2c for CCPS / IAT
 	custommargins=true,% Ränder werden mithilfe von typearea automatisch berechnet
 	marginpar=false,% Kopfzeile und Fußzeile erstrecken sich nicht über die Randnotizspalte
-	%BCOR=5mm,%Bindekorrektur, falls notwendig
+	BCOR=0mm,%Bindekorrektur. auf 10mm ändern, falls Druck und Bindung
 	parskip=half-,%Absatzkennzeichnung durch Abstand vgl. KOMA-Script
 	fontsize=11pt,%Basisschriftgröße laut Corporate Design ist mit 9pt häufig zu klein
+	oneside,% Auf "twoside" ändern, falls Druck unf Bindung
 %	logofile=example-image, %Falls die Logo Dateien nicht vorliegen
+	numbers=noendperiod,
+	fleqn,
 ]{tudapub}
 
 
@@ -85,7 +88,7 @@
 \usepackage[
 	backend=bibtex,
 	% Year (descending) -> Name -> Title
-	sorting=ydnt
+	% sorting=ydnt
 ]{biblatex}   % Literaturverzeichnis
 \addbibresource{references.bib}
 %\bibliography{references}
@@ -100,6 +103,7 @@
 \usepackage{booktabs}   % Verbesserte Möglichkeiten für Tabellenlayout über horizontale Linien
 \usepackage{csvsimple}
 % ^ to parse CSV for tables
+\usepackage{pdfpages}
 
 % In order to quickly find overfull hboxes
 \overfullrule=2mm
@@ -169,10 +173,16 @@
 
 \maketitle
 
-% \affidavit
-\affidavit[affidavit=digital,signature-image={
-	\includegraphics[width=0.3\linewidth]{../resources/sig_rotated.png}
-}]
+% If there is an affidavit file, use it, otherwise default to the built-in one
+\IfFileExists{../resources/affidavit.pdf}{
+	% Despite the template having an affidavit option / macro, it was required to
+	% print out the official one, sign it, scan it, and include it here.
+	\includepdf{../resources/affidavit.pdf}
+}{
+	\affidavit[affidavit=digital,signature-image={
+		\includegraphics[width=0.3\linewidth]{../resources/sig_rotated.png}
+	}]
+}
 % oder \affidavit[digital] falls eine rein digitale Abgabe vorgesehen ist.
 % Es gibt mit Version 3.20 die Möglichkeit ein Bild als Signatur einzubinden.
 % TUDa-CI kann nicht garantieren, dass dies zulässig ist oder eine eigenhändige Unterschrift ersetzt.

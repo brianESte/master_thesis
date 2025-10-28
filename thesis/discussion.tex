@@ -1,5 +1,5 @@
 %! TeX root = thesis.tex
-\chapter{Discussion}
+\chapter{Discussion}\label{sec:discussion}
 \IMRADlabel{discussion}
 Discussion! did it work?
 
@@ -111,6 +111,7 @@ Through testing this fake edge test showed false positives.
 That is, legitimate edges were filtered out because they contained too few vertices.
 Possible solutions to this are still being pondered.
 
+% NOTE: This is a cool little section, but i could just fix this?
 The second issue hampering successful path planning of class 1 models is corners of 4 or more edges (hereafter termed ``quad+ corners'').
 This issue can be illustrated with the help of the log file snippet shown in Listing \ref{lst:log_snippet} below.
 \begin{lstlisting}[
@@ -156,7 +157,7 @@ That is, while a Roomba would be less effective if it were to traverse its envir
 % need not rotate at each switchback because it is
 Hence, the goal of minimzing the number of switchbacks was unnecessary for this work.
 
-Nielsen et al. do not explain why the final polygons should be convex, treating it as a given.
+Nielsen et al.\ do not explain why the final polygons should be convex, treating it as a given.
 Boustrophedon path planning requires cells to be \textit{semi}-convex, not necessarily truly convex.
 This is illustrated in Figure \ref{fig:bpath_semi_convex} below.
 
