@@ -1,9 +1,9 @@
 \chapter{Conclusion}
 % This is what it /can/ do well, and /this/ is where it falls short.
 This project, or at a minimum the overall concept chosen, proved more arduous than anticipated and requiring more time than available.
-The complete pipeline is capable of processing models with planar surfaces.
-At the time of writing, corners where four or more edges converge cause issues, and should be avoided if possible.
-(? Given a few extra days, fixing this should be easily possible.)
+The complete pipeline is generally capable of processing models with planar surfaces.
+At the time of writing, corners where four or more edges converge often cause issues, and should be avoided if possible.
+% (? Given a few extra days, fixing this should be easily possible.)
 As for curved surfaces, concave curves will at a minimum cause oversegmentation during the \textit{2D Segmentation} step, as discussed in the previous chapter.
 The procedure is also unable to properly handle convex curves, but would require less effort to finish that functionality.
 Furthermore, smooth transitions between primitive types constitute another open challenge.

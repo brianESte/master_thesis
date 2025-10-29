@@ -1,13 +1,14 @@
 %! TeX root = thesis.tex
 \chapter{Discussion}\label{sec:discussion}
 \IMRADlabel{discussion}
-Discussion! did it work?
-
-and if not, what could be done better? how could the ideas / project be expanded?
-
 % \section{Discussion of Results}
 
 % \section{Organizational Improvements}
+% Despite the successes of the class 1 models, there is ample room for improvement.
+
+% Despite long preparation, insufficent research was conducted examining the proposed methods, and whether or not they were suitable for this project.
+% The issues regarding curvature and the selection of a height function could not have been foreseen during the research and planning phase of the project.
+% However, the interaction of \textit{Interior Edge Extension} and curved edges could have been detected during the planning phase.
 
 % \section{Curvature Selection}
 % Curvature calculations: The curvature calculations seem to be correct.
@@ -84,12 +85,18 @@ The mesh would be segmented initially with RMS curvature as the height function,
 
 % \section{Watershed Segmentation}
 Watershed segmentation, as implemented here, generally functioned as intended.
-However, after reverting the height function to RMS curvature, the second Watershed step, \textit{Minima Expansion}, caused regions to expand far further than they had when the height function was the curvature gradient.
+% Despite this, some models encountered issues during Watershed segmentation on well defined edges.
+Although, after reverting the height function to RMS curvature, the second Watershed step, \textit{Minima Expansion}, caused regions to expand far further than they had when the height function was set to the curvature gradient.
 Because the expansion exponent in \textit{Minima Expansion} is fixed throughout segmentation, an unsuitable value cannot be escaped or overcome the way a high merge exponent can be.
 Thus \textit{Minima Expansion} was disabled.
 % Based on the results observed, the cause of any segmentation issues is believed to lie with the height function chosen.
-The other main modification to the Watershed process, namely the \textit{Mini-Merge} step, was found toqualitatively improve the Watershed process by reducing over-segmentation.
+The other main modification to the Watershed process, namely the \textit{Mini-Merge} step, was found to qualitatively improve the Watershed process by reducing over-segmentation.
 % Though not thoroughly tested, the Watershed modifications made in this work are expected to have been non-detrimental.
+The \textit{Mini-Merge} step however, was found to occasionally cause over-merging on low-density meshes.
+This was sometimes the case with narrow planar regions, but was generally resolved through adequate remeshing.
+While remeshing of models to further development is acceptable, in order for the system to be properly automated, either a more reliable solution for handling narrow surface regions should be developed, or remeshing should be incorporated into the pipeline.
+% , either of the entire model, or of the target feature.
+% NOTE: hm, could word it less vaguely...
 
 % \section{Surface Classification}
 Of the implemented primitives, plane and elliptic cylinder, \textit{Surface Classification} works as intended.
@@ -103,16 +110,28 @@ For both of these Eberly once again offers solutions~\cite{GeoTools_least_square
 % The region of geometric feature space where GS reliably produces simplified geometry, is smaller than hoped.
 The range of geometric features and types of models from which \textit{Geometry Simplification} can reliably produce simplified geometry is smaller than hoped.
 Readers may notice that plenty class 1 test shapes, the shapes for which paths were expected to be easily plannable, are marked as failures.
-Two causes were identified: short edges and corners where 4 or more edges intersect.
+Two causes were identified: short edges and invalid corners.
 
-Short edges, specifically narrow regions, were actually expected to be an issue during Watershed segmentation, but this was solved by increasing the mesh density and reverting the height function to RMS curvature.
+Short edges, specifically narrow regions, were actually expected to be an issue during Watershed segmentation, but this was generally solved by increasing the mesh density and reverting the height function to RMS curvature.
 Readers may recall that the purpose of the \verb|if| statement in Algorithm~\ref{alg:shared_edges_2} in \textit{Create Shared Edges} is to filter out tiny edges assumed to be mistakes.
 Through testing this fake edge test showed false positives.
 That is, legitimate edges were filtered out because they contained too few vertices.
-Possible solutions to this are still being pondered.
+% TODO: Perhaps add a picture of a model with narrow / short edges to illustrate the point?
+This too can be resolved by locally increasing the mesh density to the point that edges formed have sufficient vertices to escape omission.
+Though this again weakens the automation aspect of the project.
+A better solution would be to develop an edge filter not based on the number of vertices contained in the given edge.
+Possible implementations to this are still being pondered.
 
-% NOTE: This is a cool little section, but i could just fix this?
-The second issue hampering successful path planning of class 1 models is corners of 4 or more edges (hereafter termed ``quad+ corners'').
+The second issue hampering successful path planning of class 1 models are ``invalid corners''.
+When dealing with models that contain only planar surfaces, all corners will adjoin at least three surfaces.
+During testing instances of corners that connected only two surfaces were encountered, which caused errors during the \textit{Extend Shared Edges} step.
+These are the aforementioned invalid corners.
+% The exact cause of these invalid corners is unknown, but corners where four or more edges converged tended to be segmented poo
+% ... but corners where four or more edges converged tended to be segmented poo
+The segmentation of the regions around corners where four or more edges converged tended to be qualitatively poorer than not.
+The regions around corners where four or more edges converged were prone to qualitatively poorer segmentation results.
+Though the exact cause of these invalid corners is unknown, it was observed that the regions of poorer segmentation tended to correlate with their occurence.
+\iffalse
 This issue can be illustrated with the help of the log file snippet shown in Listing \ref{lst:log_snippet} below.
 \begin{lstlisting}[
 	frame=tb,captionpos=b,
@@ -135,8 +154,11 @@ These excess corners trip up (? maybe use more sophisticated word?) the program 
 The quick solution to this issue is to filter out redundant and duplicate shared corners.
 A better solution would be to determine how and why redundant shared corners were created at all.
 This is a clear point of potential improvement, should this project be continued in the future.
+\fi
 % This is a minor issue that could be solved by filtering out the redundant or duplicate shared corners, and would have been solved given more development time.
 % Creating idealized forms from the mesh regions in \textit{Geometry Simplification} worked ok, but was not without issue.
+
+Due to time constraints handling of cylindric regions was not fully implemented in the \textit{Geometry Simplification} step, and as such, future work should aim to rectify this.
 
 % \section{2D Segmentation}
 % NOTE: ensure that this line stays with the enumerate below it

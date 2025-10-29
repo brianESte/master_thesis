@@ -104,6 +104,7 @@
 \usepackage{csvsimple}
 % ^ to parse CSV for tables
 \usepackage{pdfpages}
+% ^ to include the scanned affidavit
 
 % In order to quickly find overfull hboxes
 \overfullrule=2mm
@@ -171,7 +172,22 @@
 
 % \dedication{Für alle, die \TeX{} nutzen.}
 
+\frontmatter
 \maketitle
+% From IAT template
+\clearpage
+\setcounter{page}{1}
+\section*{Aufgabenstellung}
+
+    Aufgabenstellungstext vom Betreuer
+
+ \vspace{0.5cm}
+\begin{tabular}{ll}
+    Beginn: 	& 02.05.25 \\
+    Ende: 		& 30.10.25 \\
+    Seminar: 	& 18.11.25 \\
+\end{tabular}
+\clearpage
 
 % If there is an affidavit file, use it, otherwise default to the built-in one
 \IfFileExists{../resources/affidavit.pdf}{
@@ -189,9 +205,13 @@
 % Dies ist durch Studierende vor der Verwendung abzuklären.
 % Die Verwendung funktioniert so:
 %\affidavit[signature-image={\includegraphics[width=\width,height=1cm]{example-image}}, <hier können andere Optionen wie z.B. affidavit=digital zusätzlich stehen>]
+\include{abstract}
 
+\cleardoublepage
 \tableofcontents
+\cleardoublepage
 
+\mainmatter
 \include{introduction}
 
 \include{related_work}

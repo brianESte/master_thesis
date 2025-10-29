@@ -2,7 +2,7 @@
 \chapter{Test Objects}\label{app:model_table}
 
 The following are the 3D models used to test the program.
-The values listed under `source' have the following meanings:
+The values listed under \textbf{Source} have the following meanings:
 \begin{itemize}
 	\item \textbf{GC-PF}: Model downloaded from GrabCAD created by user paulocferreira 3D\cite{GC-PF}.
 		User paulocferreira 3D numbers their basic models, which makes finding the source for a given model fairly straightforward.
@@ -15,27 +15,41 @@ The values listed under `source' have the following meanings:
 		Specific Thingiverse webpages can be found by replacing the \verb|XXX| in \verb|https://www.thingiverse.com/thing:XXX| with the ID from the table.
 \end{itemize}
 
+% The causes of failure generally fall into one of five categories.
+% An elaboration of each \textbf{Explanation} message is found in the following:
+The notes in the \textbf{Explanation} column expand to the following meanings:
+\begin{itemize}
+	\item Mesh increase: A mesh increase enabled the path planning success
+	\item Disabled corner check: Path generation was able to proceed after disabling the duplicate corner check.
+	\item Watershed error: Watershed repeatedly produced a composite mesh section, even as the merge threshold approached 0, causing an error.
+	\item Narrow region: A narrow region was determined to be the root cause of a Watershed error
+	\item Invalid corner: A corner was created with only two adjacent regions.
+	\item Cylinder: Model contains a cylinder or other complete round edge, which is unable to be processed by \textit{Geometry Simplification}
+	\item Soft edge: The model contains a smooth transition from one primitive type to another.
+	\item Out-of-scope geometry: The model contains geometry that is beyond the scope of this project, such as swept curves.
+\end{itemize}
+
+\vspace{5mm}
 \csvreader[%
-	longtable = |lcccl|,
+	longtable = |lcccll|,
 	respect underscore = true,
 	table head = \hline
 	\textbf{ID} &
 	\textbf{Source} &
 	\textbf{Mesh} &
 	\textbf{Class} &
-	% \textbf{Explanation} &
-	\textbf{Outcome}\\\hline\hline,
+	\textbf{Outcome} &
+	\textbf{Explanation}\\\hline\hline,
 	late after line = \\\hline,
 	late after last line = \\\hline
 ]{../resources/model_table.csv}{
 	Filename=\id,
-	% Description=\desc,
 	Source=\src,
 	Mesh=\mesh,
 	Class=\class,
-	% Reason=\reason,
-	Outcome=\outcome
+	Outcome=\outcome,
+	Explanation=\explanation
 } {% Comment to prevent first couple lines from being shifted right slightly
-	\id & \src & \mesh & \class & \outcome
+	\id & \src & \mesh & \class & \outcome & \explanation
 }% https://tex.stackexchange.com/a/619232
 

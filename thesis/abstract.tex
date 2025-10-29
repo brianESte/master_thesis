@@ -1,0 +1,23 @@
+%! TeX root = thesis.tex
+\section*{Abstract}
+The handling and processing of hazardous waste poses unnecessary risks to humans in the modern age.
+In order to protect metal components from corrosion and facilitate decomissioning, nuclear power plants employ a protective coating on parts that are expected to come into contact with radioactive nuclides.
+During dismantling the protective coating is stripped from those parts so that the material underneath may be processed normally.
+% The processing of irradiated material, specifically from the dismantling of nuclear power plants, requires the removal of the protective coating therefrom.
+% To minimize human contact with hazardous waste, the processing thereof must be automated.
+% The complete removal of this protective coating is an application of coverage path planning.
+The pieces removed during the dismantling process can take any form, complicating the task of removing their coating.
+% In this project a coverage path planning method based on segmentation and simplification is presented.
+This project presents a coverage path planning method based on segmentation and simplification with the aim of automating the waste cleaning process.
+
+Watershed segmentation is harnessed for the 3D segmentation step to divide the mesh along regions of high curvature.
+The resultant mesh sections are classified as geometric primitives, and subsequently simplified down to those forms.
+The problem is reduced to 2D by unwrapping these simplified surfaces.
+Non-convex regions are further decomposed to achieve convexity in order to facilitate local path planning.
+Upon each convex region a boustrophedon path is planned.
+The individual paths are joined into one, with the traversal order determined via a Traveling Salesman Problem in order to minimize the overall path length.
+With the path complete, it is send via XMLRPC to the robotic arm tasked with the path's execution.
+
+%\clearpage
+% \section*{Kurzfassung}
+% Auch auf Deutsch?

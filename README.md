@@ -13,6 +13,9 @@ could be run without sudo privileges.
   - [ ] Finish fixing HK edits
 - [x] Background
 - [x] Methodology
+- [x] Discussion
+- [x] Conclusion
+- [x] Introduction
 - [ ] Figure out how to "link" TUDa template to git repo?
 - [ ] Maybe try to clean up the IGD logo svg file?
 
