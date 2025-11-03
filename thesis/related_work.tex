@@ -11,7 +11,7 @@ Dijkstra's algorithm is well suited for navigating between cities~\cite{Dijkstra
 While Dijkstra's algorithm picks the next node to check only considering the cost from the start node to the next node, A* also factors in an estimate of the cost from that node to the goal.
 
 In contrast to this, the goal of coverage path planning (CPP) is to traverse as much of the given working area as possible.
-The objective of applied CPP is typically for an agent to perform some function over the entire working area.
+The objective of CPP is typically for an agent to perform some function over the entire working area.
 Examples of this include spray painting car parts~\cite{Automatic_spray_painting_path}, spray forming glass reinforced cement~\cite{Robotic_grc_spraying}, metal polishing~\cite{Metal_polishing_robot_sys}, floor cleaning~\cite{CCPP_guidance_for_cleaning_robots}, demining~\cite{CPP_demining}, lawn mowing~\cite{CPP_autonomous_lawn_mower}, farming~\cite{Vision_perception_auto_harvester, CPP_alg_agriculture}, underwater inspection of ship hulls~\cite{CPP_inspect_complex_structures}, and producing mosaicked images of the ocean floor~\cite{Terrain_covering_AUV}.
 
 In the past few years drones have become increasing popular, including as CPP agents~\cite{CPP_UAV_survey, CPP_2D_convex_regions_uav, CPP_multi_UAV, CPP_spraying_drones}.
@@ -21,19 +21,19 @@ Their approach is hierarchical: A global plan is developed and sent to each UAV,
 
 CPP algorithms can be off-line, in which the environment is known at the start and is assumed constant, or on-line, in which the path planning agent must deal with an unknown or changing environment~\cite{CPP_survey_for_robotics}.
 On-line applications include the aforementioned car part spray painting, panel spray forming~\cite{Robotic_grc_spraying}, and metal polishing.
-Liu et al.\ propose an algorithm for cleaning robots in an unknown environment by combining random path movement and locally complete coverage paths~\cite{CCPP_cleaning_robots}.
+Liu et al.\ propose an algorithm for floor cleaning robots in an unknown environment by combining random path movement and locally complete coverage paths~\cite{CCPP_cleaning_robots}.
 Their locally complete coverage paths follow a ``comb-like'' path that likens a Boustrophedon path.
 
 % \section{Spatial Complexity}
 The spatial complexity of CPP problems extends to 2.5D and 3D, though solutions to such problems typically involve segmenting the working region into sub-regions that can be approximated as 2D without significant loss of precision.
 
-2D applications of coverage path planning are characterized by the region of interest (ROI) and agent's range of motion being limited to 2D.
+2D applications of coverage path planning are characterized by the region of interest (ROI) and the agent's range of motion being limited to 2D.
 Any 3rd dimension aspects are negligible.
 The classic example thereof is robot vacuum cleaners, such as iRobot's ``Roomba'' and Electrolux's ``Trilobite''\cite{CCPP_cleaning_robots}, whereas less obvious examples include drones that operate at a constant elevation~\cite{CPP_2D_convex_regions_uav}.
 Gajjar et al.\ discretize the given 2D space to a grid in order to simplify agent movement~\cite{CCPP_known_2D_env}.
 
 2.5D problems exhibit a working area with non-uniform height, but can otherwise still be mapped to a 2D space.
-Jin and Tang developed a CPP algorithm for uneven farmland terrain which accounted for farmland relevant costs, such as: Headland turning, soil erosion, and curved paths~\cite{CPP_farming_terrain}.
+Jin and Tang developed a CPP algorithm for uneven farmland terrain which accounted for farmland relevant costs, such as headland turning, soil erosion, and curved paths~\cite{CPP_farming_terrain}.
 Hameed et al.\ calculate the height value for their waypoints via bilinear interpolation from the Digital Elevation Model of their target area~\cite{CPP_2.5D_agriculture}.
 Gao et al.\ use a 2.5D grid discretization as the basis for their algorithm~\cite{CPP_2.5D_grid_map}.
 Coverage path planning performed by UAVs in a 2D space covering an otherwise 3D ROI is seemingly common~\cite{CPP_2.5D_SAA_grid_based_UAV_3D_recons, CPP_2.5D_UAV_3D_terrain_recons, CPP_multi_UAV, CPP_2D_convex_regions_uav}.
@@ -51,7 +51,7 @@ The ROIs in most of the CPP applications presented above are environments, as op
 In such situations the agent is typically a robotic arm with sensors and/or tools affixed to the end effector~\cite{Metal_polishing_robot_sys, Automatic_spray_painting_unknown_parts}.
 The target of Asakawa and Takeuchi's path planning algorithm was a 6 degree of freedom (DOF) robotic arm with end effector mounted spray painting tool~\cite{Automatic_spray_painting_path}.
 They developed an algorithm to generate robot control commands from CAD data for the purpose of replacing the manual spray painting of car bumpers.
-Atkar et al.\ have also examined trajectory generation for a spray painting robot~\cite{Uniform_cov_auto_surfaces, Exact_cell_decomp_orientable_surfaces}.
+Atkar et al.\ also examine trajectory generation for a spray painting robot~\cite{Uniform_cov_auto_surfaces, Exact_cell_decomp_orientable_surfaces}.
 They follow the common approach of segmenting the target surface into simple regions to be handled individually.
 their approach to local path planning is based on optimizing the seed curve to ensure uniform paint deposition and minimize the overall cycle time.
 Seed curve in this context is the curve that sets the orientation of the back-and-forth motions used to cover the region.
@@ -83,7 +83,6 @@ Non-rib / -cavity regions are termed ``free-form'', and are painted with a patte
 
 % \section{2D Segmentation}
 Given a complex planar representation of a ROI most path planning algorithms will first decompose the complex map into simpler connected regions~\cite{Cell_decomposition_survey, GdR}.
-% (? TODO: update von Stryk GdR lecture citation?)
 The majority of these methods exist for the purpose of pathfinding, and are not well suited for coverage path planning.
 The following are decomposition methods applicable to coverage path planning.
 
@@ -110,7 +109,7 @@ In order to apply a square zig-zag pattern akin to the boustrophedon path, they 
 In order to minimize the number of turns within a given sub-polygon cell, they propose merging the sub-polygon cells into \textit{optimal} sub-polygons.
 They term a convex polygon composed from one or more adjacent sub-polygon cells a \textit{convex merge option}.
 The set of convex merge options is created from the initial sub-polygons cells.
-To determine which subset of convex merge options constitutes the \textit{optimal} sub-polygons is a set partitioning problem with the optimal sub-polygons selected via an integer programming model.
+To determine which subset of convex merge options constitutes the \textit{optimal} sub-polygons is a set cover problem with the optimal sub-polygons selected via an integer programming model.
 
 % To plan a path within a convex or semi-convex (as is the case via BCD) polygon two motion planning options are immediately apparent: a spiral patter and a back-and-forth pattern also known as a boustrophedon path.
 % Between these, the boustrophedon path is generally favored over the spiral pattern because it is simpler and because the spiral pattern requires a direction change at each corner, whereas an omnidirectional agent, such as a UAV or robotic arm, following a boustrophedon path need not change orientation between sweep lines, only position.

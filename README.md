@@ -10,12 +10,13 @@ could be run without sudo privileges.
 
 - [x] Somehow the final version of the exposé was lost. I would like to update the tracked document from a printed copy
 - [x] Related Work
-  - [ ] Finish fixing HK edits
 - [x] Background
 - [x] Methodology
 - [x] Discussion
 - [x] Conclusion
 - [x] Introduction
+- [x] Finish fixing HK edits
+- [x] Finish fixing EL edits
 - [ ] Figure out how to "link" TUDa template to git repo?
 - [ ] Maybe try to clean up the IGD logo svg file?
 

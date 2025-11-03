@@ -25,8 +25,9 @@ creationdate.lua
 # Compressed files
 *.zip
 
-# Notes files
+# Notes / comment files
 *notes
+comments_*
 
 # Old / unnecessary files
 old_files/

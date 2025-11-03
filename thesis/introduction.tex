@@ -2,8 +2,6 @@
 \chapter{Introduction}
 \IMRADlabel{introduction}
 Coverage path planning is the process of planning a path that guides an agent over the entirety of the region of interest.
-% Parents would need an explainer for ``agent'', but the target audience should know already
-% NOTE: (? could replace ROI with environment)
 % The relevance of the research: How does this work fit into existing studies on the topic?
 Applications thereof include floor cleaning robots~\cite{CCPP_cleaning_robots}, demining~\cite{CPP_demining}, automobile part spray painting~\cite{Automatic_spray_painting_path}, and processing of irradiated waste and debris~\cite{ROBBE}.
 Without coverage path planning these would be at best less efficient, and at worst incomplete.
@@ -39,7 +37,7 @@ The objective of this project is to develop a coverage path planning process cap
 % This work draws on the fields of geometric curvature, mesh segmentation, geometric shape fitting, high-level path planning, and low-level path planning.
 To achieve this, the fields of geometric curvature, mesh segmentation, geometric shape fitting, high-level path planning, and low-level path planning are drawn upon.
 The concept proposed in this work is one of segmentation and simplification.
-The object's mesh is segmented along regions of high geomtric curvature, in order to produce mesh sections that may be classified as a certain geometric primitive.
+The object's mesh is segmented along regions of high geometric curvature, in order to produce mesh sections that may be classified as a certain geometric primitive.
 % The 3D segmentation process is performed using Watershed segmentation.
 Simplified geometric representations are then created from the classified mesh sections.
 Non-convex surfaces are segmented further to yield convex surfaces.

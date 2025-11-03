@@ -20,7 +20,8 @@ Next is \textit{Geometry Simplification}, which unwraps each mesh section in ord
 \textit{2D Segmentation} is an optional step, that segments non-convex simplified surfaces into convex ones.
 The local path planning takes place in \textit{Cellular Path Planning}.
 The individually planned paths are joined together in the \textit{Modified TSP} step.
-In \textit{Inverse Kinematics} the waypoints of the complete path are converted to actuator positions and sent via XMLRPC to the connected robotic arm and rotary table to be executed.
+% In \textit{Inverse Kinematics} the waypoints of the complete path are converted to actuator positions and sent via XMLRPC to the connected robotic arm and rotary table to be executed.
+In \textit{Inverse Kinematics} the waypoints of the complete path are converted to actuator positions and sent to the connected robotic arm and rotary table to be executed.
 
 \section{3D Segmentation}
 \begin{figure}[H]
@@ -29,8 +30,8 @@ In \textit{Inverse Kinematics} the waypoints of the complete path are converted 
 	\def\dx{6mm}
 	% nodes
 	\node (Mesh) {Complete Mesh};
-	\node[FC-Node, text width=30mm] (WS) [right=\dx of Mesh] {Watershed Segmentation};
-	\node[FC-Node, text width=30mm] (PrimCl) [right=\dx of WS] {Primitive Classification};
+	\node[FC-Node, text width=28mm] (WS) [right=\dx of Mesh] {Watershed Segmentation};
+	\node[FC-Node, text width=28mm] (PrimCl) [right=\dx of WS] {Surface Classification};
 	\node[text width=25mm, align=center] (MRs) [right=\dx of PrimCl] {Classified Mesh Sections};
 	% connections
 	\draw [FC-Arrow] (Mesh) -- (WS);
@@ -39,7 +40,7 @@ In \textit{Inverse Kinematics} the waypoints of the complete path are converted 
 	% \path (PrimCl.south) -- node[below=5mm of PrimCl] (CompPrim) {Composite Primitive} (WS.south);
 	% \draw [FC-Arrow, rounded corners=5pt] (PrimCl.south) |- (CompPrim) -| (WS.south);
 	\draw [FC-Arrow, rounded corners=5pt] (PrimCl.south) -- +(0,-0.4) -| (WS.south)
-		node[pos=0.5,below right]{Composite primitives};
+		node[pos=0.5,below right]{Composite surfaces};
 	% Segmentation 3D container node
 	\draw[thick, dashed, rounded corners=8pt] ($(WS.north west)+(-0.3,0.3)$) rectangle ($(PrimCl.south east)+(0.3,-1.2)$);
 	\node [] at (5.7, 1.1) {3D Segmentation};
@@ -382,7 +383,6 @@ If the RMSE is above the threshold, the surface is deemed non-planar and undergo
 As mentioned in the planar classification section, an early idea was to perform statistical analysis on clustered normals.
 The number of normals in each of a cylinder's normal clusters would be expected to be similar in magnitude.
 An issue with using this method for cylindric classification is that a sphere and a cylinder would yield similar normal-cluster histograms.
-% (? I could probably go into greater detail about why this was a foolish notion, but i would rather write about ideas that had a higher chance of success.)
 
 A test that examined the mean principal curvature values of the mesh region was also considered, but it failed to prove useful for the same reasons outlined in the previous section.
 Theoretically, the first principal curvature on the surface of a cylinder would fulfill $|\kappa_1| \gg 0$ and the second principal curvature would be approximately 0.
@@ -390,17 +390,12 @@ As in the planar case, a threshold that worked well for a denoised or ``clean'' 
 % Setting reliable thresholds proved overly difficult.
 
 Another test sought to make use of the vertices' normals by determining the axis direction via PCA, and checking that the dot product between each vertex's normal and the axis was roughly 0:
-% NOTE: is this even worth writing out?
 \begin{equation*}
 	\vec{v}_{axis} \cdot \vec{n_i} \approx 0.
 \end{equation*}
 This approach has a glaring flaw: planes pass this test.
 % , and cones do not pass.
 % Various tests that take into account the vertices' normals were conceived, but all were either abandoned due to inefficacy, or simply unimplemented due to time constraints.
-
-% TODO:
-% (? talk about other flaws? This was definitely a weak point in my work)
-% "This will be discussed in results and conclusion, here you are just explaining what you did"
 
 Because there exists no direct algebraic solution for the distance from a point to an ellipse, the sum of squared residuals (see Equation~\eqref{eq:sq_residual}) was initially used as the error value when confirming the surface as cylindric.
 This was eventually replaced with an iterative method of calculating the point-surface distance, and then conic regression could be used as cylinder classification.
@@ -1721,7 +1716,7 @@ Before performing the actual sweep pass, $e_{curr}$ and $c_{curr}$ are switched 
 This can be observed by comparing figures \ref{sfig:bpath_sweep1} and \ref{sfig:bpath_sweep2}.
 On lines 27-29 the y coordinate of the last waypoint, and subsequent intersection post sweep, is checked against the newly switched current corner.
 If the last waypoint is above the corner, the current edge and corner are advanced to their next positions until the y coordinate of $c_{curr}$ is above the last waypoint.
-This is to ensure that the intersection of the sweep direciton extended from the last waypoint and the current edge is correct.
+This is to ensure that the intersection of the sweep direction extended from the last waypoint and the current edge is correct.
 % This is to ensure that the intersection between the current waypoint along the sweep direction and the current edge is correct.
 At the end of the \verb|while| loop the intersection is calculated, $w$ is updated and added to $W_{bous}$, and the process repeats.
 Once the local path is complete, the waypoints are transformed back to the polygon coordinate system and returned.

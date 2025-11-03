@@ -15,7 +15,7 @@
 It was discovered towards the end of the project that the \textit{height} function chosen as the input to Watershed segmentation, namely the magnitude of the gradient of curvature, did not work well for all edges as hoped.
 Curvature, specifically Gaussian and RMS curvature, produces boundaries at ``hard'' model edges, but not at ``soft'' model edges.
 If the bordering primitives are tangent or near tangent to one another the edge is considered soft; otherwise, it is considered hard.
-The derivative of curvature however, is better suited to producing boundaries at soft edges, but produces ``double'' boundaries at hard edges.
+The derivative of curvature is better suited to producing boundaries at soft edges, but produces ``double'' boundaries at hard edges.
 Figures \ref{sfig:m7_rmsk} and \ref{sfig:m7_gradk} give a visual comparison of the singular and double edges produced at hard edges.
 % On the other hand, the derivative of curvature (the "magnitude" thereof as used in this work) is more useful for soft edges, but produces a "double" edge at hard edges, which can lead to poor (watershed) segmentation results.
 \begin{figure}[htb]
@@ -33,12 +33,12 @@ Figures \ref{sfig:m7_rmsk} and \ref{sfig:m7_gradk} give a visual comparison of t
 		\caption{Curvature gradient magnitude shown in grayscale.}
 		\label{sfig:m7_gradk}
 	\end{subfigure}
-	\caption{Comparison of the RMS curvature and the curvature gradient magnitude height functions.}
+	\caption{Comparison of the RMS curvature and the curvature gradient magnitude height functions shown on model ``7120369''.}
 \end{figure}
 
 Intuitively, this is a problem because the resultant mesh regions should be divided at hard edges, rather than occupy them.
 Recall that the first step of \textit{Watershed Segmentation} starts a mesh region at every local minima and minimum plateau.
-This means that Watershed will create mesh regions directly on the hard edge due to the double edge produced when using the gradient magnitude as Watershed's height function.
+This means that Watershed will create mesh regions directly on the hard edge due to the double edge produced when using the gradient magnitude as the height function.
 Figures \ref{sfig:m7_rmsk_init} and \ref{sfig:m7_gradk_init} present the initial mesh regions created from the mesh heights shown in Figures \ref{sfig:m7_rmsk} and \ref{sfig:m7_gradk}, respectively.
 
 \begin{figure}[htb]
@@ -47,7 +47,7 @@ Figures \ref{sfig:m7_rmsk_init} and \ref{sfig:m7_gradk_init} present the initial
 		\includegraphics[width=\linewidth]{../resources/curvature/m7120369_rmsk_init.png}
 		\caption{%
 Initialized mesh regions with RMS curvature as the height function.
-Black indicates unindexed vertices, while the other colors indicate a mesh region.
+Black indicates un-indexed vertices, while the other colors indicate a mesh region.
 }
 		\label{sfig:m7_rmsk_init}
 	\end{subfigure}
@@ -57,7 +57,7 @@ Black indicates unindexed vertices, while the other colors indicate a mesh regio
 		\includegraphics[width=\linewidth]{../resources/curvature/m7120369_gradk_init.png}
 		\caption{%
 Initialized mesh regions with curvature gradient magnitude as the height function.
-Black indicates unindexed vertices, while the other colors indicate a mesh region.
+Black indicates un-indexed vertices, while the other colors indicate a mesh region.
 }
 		\label{sfig:m7_gradk_init}
 	\end{subfigure}
@@ -76,10 +76,10 @@ It was found through testing that this issue could be mitigated by increasing th
 Higher mesh density, especially at the true edges, limits the distance the edge regions may spread during \textit{Descent to Minima}.
 Because the spillover vertices are closer to the edge, they are less likely to disqualify the region from being classified as its true surface class.
 Because of this issue, the primary height function was reverted to RMS curvature.
-This facilitated operating on models with hard edges, but made it[the algorithm] unsuitable for models with soft edges.
+This facilitated operating on models with hard edges, but made the procedure unsuitable for models with soft edges.
 
 Two possible solutions to this were devised.
-The first possible solution would be to create a height function that combines takes into account both curvature and its derivative.
+The first possible solution would be to create a height function that takes into account both curvature and its derivative.
 Another idea is to alternate between using a curvature based height function and a curvature derivative based height function during \textit{2D Segmentation}.
 The mesh would be segmented initially with RMS curvature as the height function, and during the next round of segmentation the curvature gradient magnitude would be used as the height function to handle any soft edges.
 
@@ -87,7 +87,7 @@ The mesh would be segmented initially with RMS curvature as the height function,
 Watershed segmentation, as implemented here, generally functioned as intended.
 % Despite this, some models encountered issues during Watershed segmentation on well defined edges.
 Although, after reverting the height function to RMS curvature, the second Watershed step, \textit{Minima Expansion}, caused regions to expand far further than they had when the height function was set to the curvature gradient.
-Because the expansion exponent in \textit{Minima Expansion} is fixed throughout segmentation, an unsuitable value cannot be escaped or overcome the way a high merge exponent can be.
+Because the expansion exponent in \textit{Minima Expansion} is fixed throughout operation, an unsuitable value cannot be escaped or overcome the way a high merge exponent can be.
 Thus \textit{Minima Expansion} was disabled.
 % Based on the results observed, the cause of any segmentation issues is believed to lie with the height function chosen.
 The other main modification to the Watershed process, namely the \textit{Mini-Merge} step, was found to qualitatively improve the Watershed process by reducing over-segmentation.
@@ -95,8 +95,6 @@ The other main modification to the Watershed process, namely the \textit{Mini-Me
 The \textit{Mini-Merge} step however, was found to occasionally cause over-merging on low-density meshes.
 This was sometimes the case with narrow planar regions, but was generally resolved through adequate remeshing.
 While remeshing of models to further development is acceptable, in order for the system to be properly automated, either a more reliable solution for handling narrow surface regions should be developed, or remeshing should be incorporated into the pipeline.
-% , either of the entire model, or of the target feature.
-% NOTE: hm, could word it less vaguely...
 
 % \section{Surface Classification}
 Of the implemented primitives, plane and elliptic cylinder, \textit{Surface Classification} works as intended.
@@ -116,8 +114,34 @@ Short edges, specifically narrow regions, were actually expected to be an issue 
 Readers may recall that the purpose of the \verb|if| statement in Algorithm~\ref{alg:shared_edges_2} in \textit{Create Shared Edges} is to filter out tiny edges assumed to be mistakes.
 Through testing this fake edge test showed false positives.
 That is, legitimate edges were filtered out because they contained too few vertices.
-% TODO: Perhaps add a picture of a model with narrow / short edges to illustrate the point?
+Examples of short edges can be seen in Figure~\ref{fig:short_edges} below.
+
+\begin{figure}[htb]
+	\begin{subfigure}[t]{0.45\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{../resources/geo_simp/1344058_short_edge_cr.png}
+		\caption{%
+A short edge on model ``1344058'' is shown with equal mesh density as the rest of the model.}
+		\label{sfig:1344058_short_edge}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[t]{0.45\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{../resources/geo_simp/1344055_short_edge_cr.png}
+		\caption{%
+A short edge on model ``1344055'' is shown with increased mesh density.}
+		\label{sfig:1344055_short_edge}
+	\end{subfigure}
+	\caption{%
+A comparison of short edges without (a) and with (b) increased mesh density.
+The short edges in each image are highlighted in cyan.
+}
+	\label{fig:short_edges}
+\end{figure}
+
 This too can be resolved by locally increasing the mesh density to the point that edges formed have sufficient vertices to escape omission.
+Compare the edge highlighted in Figure~\ref{sfig:1344058_short_edge} with the one in Figure~\ref{sfig:1344055_short_edge}.
+The first edge can expect to be filtered out, while the second will remain.
 Though this again weakens the automation aspect of the project.
 A better solution would be to develop an edge filter not based on the number of vertices contained in the given edge.
 Possible implementations to this are still being pondered.
@@ -130,7 +154,7 @@ These are the aforementioned invalid corners.
 % ... but corners where four or more edges converged tended to be segmented poo
 The segmentation of the regions around corners where four or more edges converged tended to be qualitatively poorer than not.
 The regions around corners where four or more edges converged were prone to qualitatively poorer segmentation results.
-Though the exact cause of these invalid corners is unknown, it was observed that the regions of poorer segmentation tended to correlate with their occurence.
+Though the exact cause of these invalid corners is unknown, it was observed that the regions of poorer segmentation tended to correlate with their occurrence.
 \iffalse
 This issue can be illustrated with the help of the log file snippet shown in Listing \ref{lst:log_snippet} below.
 \begin{lstlisting}[
@@ -161,6 +185,8 @@ This is a clear point of potential improvement, should this project be continued
 Due to time constraints handling of cylindric regions was not fully implemented in the \textit{Geometry Simplification} step, and as such, future work should aim to rectify this.
 
 % \section{2D Segmentation}
+At the time of writing, the \textit{Interior Edge Extension} part of the program was not completely bug-free: Model ``fc004'' experienced a duplicate vertex during the interior edge extension step, as indicated in Appendix~\ref{app:model_table}.
+Despite this, the \textit{Interior Edge Extension} method, typically accomplished what it was designed to do.
 % NOTE: ensure that this line stays with the enumerate below it
 The stated goals of the \textit{Interior Edge Extension}\cite{IntEdgeExt} are:
 \begin{enumerate}
@@ -175,9 +201,8 @@ However the cost of direction change for a robot arm is minimal.
 Furthermore, the envisioned end-effector tool is a planar ablation laser, which has no forward or backward direction, only the direction normal to the laser plane.
 % (? rethink previous sentence...?)
 That is, while a Roomba would be less effective if it were to traverse its environment backwards, the laser module suffers no such loss of efficacy.
-% a ``planar laser'' (? revisit with better wording)
 % need not rotate at each switchback because it is
-Hence, the goal of minimzing the number of switchbacks was unnecessary for this work.
+Hence, the goal of minimizing the number of switchbacks was unnecessary for this work.
 
 Nielsen et al.\ do not explain why the final polygons should be convex, treating it as a given.
 Boustrophedon path planning requires cells to be \textit{semi}-convex, not necessarily truly convex.
@@ -191,7 +216,7 @@ This is illustrated in Figure \ref{fig:bpath_semi_convex} below.
 			scale mode=scale uniformly,
 			enlargelimits=false,
 		]
-		\addplot
+		\addplot[thick]
 			table[mark=none,col sep=comma] {../resources/boustrophedon/ex_2_polygon.csv};
 		\addplot
 			table[mark=none,col sep=comma] {../resources/boustrophedon/ex_2_path.csv};
@@ -201,24 +226,81 @@ This is illustrated in Figure \ref{fig:bpath_semi_convex} below.
 	\label{fig:bpath_semi_convex}
 \end{figure}
 
-For semi-convex polygons the best sweep direction may no longer coincide with the polygon's longest edge, and thus cannot be chosen based on that.
+For semi-convex polygons the best sweep direction may no longer coincide with the polygon's longest edge, and thus it cannot be chosen based on that.
 The sweep direction must be chosen such that a line parallel to the sweep direction reaches the entire polygon when swept along the shift direction.
 % A formal definition of ``semi-convex'' is beyond the scope of this work, and left for future work, but ..?
 Although a formal definition of ``semi-convex'' is beyond the scope of this work, an informal one may be attempted.
 
 % \subsection{Isovist Line}
-% TODO: new name... "bivist line" ?
+% NOTE new name... "bivist line" ?
 To define a useful measure of "semi-convexity" the notion of the isovist is helpful.
 Benedikt gives the definition of an isovist as "the set of all points visible from a given vantage point in space and with respect to an environment"\cite{Isovists}.
+Figure~\ref{sfig:isovist} depicts an isovist in a rectilinear polygon.
 While the isovist concept is primarily used in architecture and urban spaces, it can also be applied to computational geometry.
 In the \textit{art gallery problem} each guard represents an isovist, and the solution to a given art gallery problem is the minimum number of isovists to completely cover the given environment.
 A similar problem in computational geometry is the \textit{watchman route problem}, in which the a single mobile watchman is tasked with guarding an environment with obstacles.
 The challenge lies in determining the shortest path the watchman should take to observe the entire environment.
 Determining a polygon's ``semi-convexity'' draws on both of these problems by reducing the number of guards is to one, whose scope of observation is further reduced to a single line in both directions, but who \textit{is} allowed to move perpendicular to the viewing direction.
+This is illustrated in Figure~\ref{sfig:bous_guard}.
 % Extending the art gallery problem to create a semi-convexity-test for a polygon, the number of guards is reduced to one, whose scope of observation is further reduced to a single line in both directions, but who \texti{is} allowed to move perpendicular to the viewing direction.
 If ``guarding'' the polygon this way is feasible, then the polygon is at least semi-convex, and boustrophedon path planning may be applied, with the shift direction set to the guard's direction of movement, and the sweep direction perpendicular thereto.
-Naturally, convex polygons pass this test as well.
+% Naturally, convex polygons pass this test as well.
+An example of a polygon that fails this test is depicted in Figure~\ref{sfig:concave_bous_guard}.
+Changing the guard's orientation by $90^{\circ}$ would allow the dotted regions to be mutually inclusive, but would cause the lower alcoves to be mutually exclusive.
 % Each guard is reduced to looking along a single line in both directions, but is allowed to move along a line perpendicular to the viewing direction.
+\begin{figure}[htb]
+	\centering
+	\begin{subfigure}[t]{0.3\textwidth}
+		\centering
+\begin{tikzpicture}[scale=0.70]
+	\draw[fill=gray!50,draw=none] (1,-1) -- (2,-2) -- (3,-2) -- (3,2) -- (1,2) -- (0.5,1) -- (-3,1) -- (-3,-2) -- (-1.5,-1) -- cycle;
+	\draw[thick] (1,-1) -- (1,-2) -- (3,-2) -- (3,2) -- (0.5,2) -- (0.5,1) -- (-3,1) -- (-3,-2) -- (-1.5,-2) -- (-1.5,-1) -- cycle;
+	\node[vertex] (guard) at (0,0) {};
+\end{tikzpicture}
+		\caption{%
+An isovist (grayed area) in a rectilinear polygon.
+% The vantage point is marked with a solid dot, and the visible area therefrom is shown in gray.
+}
+		\label{sfig:isovist}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[t]{0.3\textwidth}
+		\centering
+\begin{tikzpicture}[scale=0.70]
+	\draw[thick] (1,-1) -- (1,-2) -- (3,-2) -- (3,2) -- (0.5,2) -- (0.5,1) -- (-3,1) -- (-3,-2) -- (-1.5,-2) -- (-1.5,-1) -- cycle;
+	\node[vertex] (guard) at (-2,0) {};
+	\draw[->] (guard) -- +(90:1);
+	\draw[->] (guard) -- +(270:2);
+	\draw[->,dashed] (guard) -- +(0:5);
+	\draw[->,dashed] (guard) -- +(180:1);
+\end{tikzpicture}
+		\caption{\raggedright Guard movement in a semi-convex polygon.}
+		\label{sfig:bous_guard}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[t]{0.3\textwidth}
+		\centering
+\begin{tikzpicture}[scale=0.70]
+	\draw[pattern=dots,draw=none] (2,-1) rectangle (3,-2);
+	\draw[pattern=dots,draw=none] (2,2) rectangle (3,1);
+	\draw[thick] (1,-1) -- (1,-2) -- (3,-2) -- (3,-1) -- (2,-1) -- (2,1) -- (3,1) -- (3,2) -- (0.5,2) -- (0.5,1) -- (-3,1) -- (-3,-2) -- (-1.5,-2) -- (-1.5,-1) -- cycle;
+		\node[vertex] (guard) at (1.5,0) {};
+	\draw[->] (guard) -- +(90:2);
+	\draw[->] (guard) -- +(270:2);
+	\draw[->,dashed] (guard) -- +(0:0.5);
+	\draw[->,dashed] (guard) -- +(180:4.5);
+\end{tikzpicture}
+		\caption{%
+A non-convex rectilinear polygon.
+%Boustrophedon paths planned in the dotted regions are mutually exclusive.
+}
+		\label{sfig:concave_bous_guard}
+	\end{subfigure}
+	\caption{%
+The polygon shown in (a) and (b) is semi-convex, and can be covered with a boustrophedon path.
+Whereas the polygon in (c) cannot, as paths planned in the dotted regions are mutually exclusive.
+}
+\end{figure}
 
 Another issue with \textit{Interior Edge Extension} is how it handles round edges.
 A smooth round edge, such as the one shown in Figure \ref{sfig:interior_curve}, theoretically has an infinite number of infinitesimal edges.
@@ -273,16 +355,16 @@ The curve's line segments are extended.
 Subfigure (a) gives an example shape that \textit{Interior Edge Extension} is not able to handle well.
 In Subfigure (b) the shape's curved edge has been discretized into 6 segments.
 Assuming a discretization of the curve into 6 equal segments, Subfigure (b) shows the extended edges of that curve as dashed red lines.
-The boustrophedon path shown in Subfigure (c) illustrates that it is not even neecessary for the example shape to be segmented.
+The boustrophedon path shown in Subfigure (c) illustrates that it is not even necessary for the example shape to be segmented.
 }
 \end{figure}
-Curves encountered by \textit{Geometry Simplification} are stored as discretized approximations.
+% Curves encountered by \textit{Geometry Simplification} are stored as discretized approximations.
 Curves on a 3D mesh are inherently discrete and the number of their edge segments is finite.
 Despite this, \textit{Interior Edge Extension} is still ill-suited to handling curves.
 Suppose the curved edge shown in Figure \ref{sfig:interior_curve} were discretized into 6 equal line segments.
 Figure \ref{sfig:int_curve_ext} shows the resultant extended interior edges from such a discretization.
 Even with the best computational resources, most of the ``optimal'' sub-regions produced would likely be long slip triangles.
-\textit{Interior Edge Extension} is only useful for simple polygons with all straight edges.
+Hence \textit{Interior Edge Extension} is only useful for simple polygons with all straight edges.
 % Technically, having a curved edge would disqualify a shape from _being_ a "polygon"
 
 % \section{Cellular Path Planning}

@@ -18,8 +18,12 @@
 	fontsize=11pt,%Basisschriftgröße laut Corporate Design ist mit 9pt häufig zu klein
 	oneside,% Auf "twoside" ändern, falls Druck unf Bindung
 %	logofile=example-image, %Falls die Logo Dateien nicht vorliegen
+	% captions=oneline,
+	% ^ Tried to use that, but the equations in captions in the background caused errors
 	numbers=noendperiod,
-	fleqn,
+	% fleqn,
+	% NOTE:^ Honestly, having all of the equations pushed left looked a bit ugly,
+	% so this option was commented out
 ]{tudapub}
 
 
@@ -39,7 +43,6 @@
 % \fi
 % \usepackage{svg}
 
-\usepackage{standalone}
 \usepackage{tikz}
 \usetikzlibrary{
 	arrows.meta,
@@ -47,6 +50,7 @@
 	fit,
 	intersections,
 	matrix,
+	patterns,
 	positioning,
 	shapes.geometric,
 	ext.paths.ortho
@@ -87,6 +91,8 @@
 %%%%%%%%%%%%%%%%%%%
 \usepackage[
 	backend=bibtex,
+	% style=ieee,
+	bibencoding=utf8
 	% Year (descending) -> Name -> Title
 	% sorting=ydnt
 ]{biblatex}   % Literaturverzeichnis
@@ -177,17 +183,20 @@
 % From IAT template
 \clearpage
 \setcounter{page}{1}
+
+% Aufgabenstellung page removed.
+% Probably because the thesis was done externally, and there was no official Aufgabenstellung
+\iffalse
 \section*{Aufgabenstellung}
-
-    Aufgabenstellungstext vom Betreuer
-
- \vspace{0.5cm}
+Aufgabenstellungstext vom Betreuer
+\vspace{0.5cm}
 \begin{tabular}{ll}
-    Beginn: 	& 02.05.25 \\
-    Ende: 		& 30.10.25 \\
-    Seminar: 	& 18.11.25 \\
+    Beginn:   & 02.05.25 \\
+    Ende:     & 30.10.25 \\
+    Seminar:  & 18.11.25 \\
 \end{tabular}
 \clearpage
+\fi
 
 % If there is an affidavit file, use it, otherwise default to the built-in one
 \IfFileExists{../resources/affidavit.pdf}{

@@ -70,12 +70,12 @@ In this last example the coordinate system of $p_i$ and the source coordinate sy
 The first step of \textit{3D Segmentation} is to segment the object's mesh using Watershed segmentation.
 Watershed segmentation requires that a ``height'' function be applied to each vertex of the given mesh.
 See Section~\ref{sec:ws_seg} for greater detail on Watershed segmentation.
-In order to segment the mesh along regions of high curvature, the vertices' height must be a function of its curvature.
+In order to segment the mesh along regions of high curvature, the vertices' height must be a function of their curvature.
 The various forms and types of curvature examined throughout this project are presented in the following sections.
 
 Curvature describes the rate of change of a curve or surface's tangent.
 Figure~\ref{fig:tangent_on_curve} shows the curvature $\kappa$ as the change of the tangent at the marked point as it moves along the curve.
-Alternatively, the curvature of a point on a surface can be defined via the osculating circle at that point, which is the circle that best approximates the surface at that point.
+Alternatively, the curvature of a point on a surface can be defined via the osculating circle at that point, which is the circle that best approximates the surface at said point.
 Following that definition, the curvature is the inverse radius of the osculating circle.
 An example of an osculating circle and its relation to curvature can be found in Figure~\ref{fig:principal_k}.
 
@@ -111,7 +111,7 @@ Inspired by~\cite{DDGAppIntro_12_smooth_curves}.}
 
 Initially, the root mean square (RMS) curvature calculated from discrete Gaussian and mean curvature was used as the mesh height.
 This was chosen following Pulla et al.'s work showing benefit of RMS curvature for Watershed segmentation~\cite{Imp_k_estimation_for_WS}.
-But this was eventually replaced with Taubin's method of calculating the principal curvatures (described below) directly via curvature tensor estimation~\cite{TaubinTensor}.
+This was eventually replaced with Taubin's method of calculating the principal curvatures (described below) directly via curvature tensor estimation~\cite{TaubinTensor}.
 This has the benefit of direct calculation, but has been shown to be susceptible to noise in the mesh~\cite{Comp_k_notes}.
 % Thiesel et al.\ calculate the curvature tensor per triangular face in the mesh, based on the face's corner normals~\cite{Norm_based_k_tensor_est}.
 This too was later retired, and replaced with Rusinkiewicz's approach of calculating the curvature tensor for each mesh face via the differences between corner normals~\cite{SRTensor}, then computing the per vertex curvature tensor as a weighted sum over the curvature tensors of the vertex's adjoining triangles via coordinate system transformations.
@@ -121,7 +121,7 @@ This too was later retired, and replaced with Rusinkiewicz's approach of calcula
 All combined measures of curvature are based, either in theory or in actuality, on the principal curvatures.
 The principal curvatures at a given point on a surface are simply the maximum $\kappa_1$ and minimum $\kappa_2$ curvature~\cite{DDGAppIntro_17_smooth_k}.
 Note that in this work the first principal curvature is the maximum and the second the minimum, whereas other sources may use the reverse schema.
-The direction of a principal is known as a principal direction, and is typically denoted $X_i$.
+The direction of a principal curvature is known as a principal direction, and is typically denoted $X_i$.
 The principal curvatures and directions at the top of a hill-like surface are illustrated in Figure~\ref{fig:principal_k}.
 
 \begin{figure}[htb]
@@ -166,7 +166,7 @@ Given the mean curvature $H$ and Gaussian curvature $K$ (see Sections \ref{sec:m
 	\kappa_2 &= H + \sqrt{H^2 - K}.
 \end{align*}
 Although theoretically impossible, discretization errors can cause $H^2$ to be less than $K$, resulting in ``imaginary'' curvature.
-This tends to occur on planar mesh regions, thus a minimum of 0 can be set for $H^2 - K$, because the root term would have been near 0 regardless, but it does highlight a flaw in this measure of curvature.
+This tends to occur on planar mesh regions, thus a minimum of 0 can be set for $H^2 - K$, because the root term would have been near 0 regardless, but it does highlight a flaw in this method of calculating prinicpal curvature.
 
 \subsection{Mean Curvature}\label{sec:mean_k}
 The discrete mean curvature was used early in development as part of the RMS curvature calculation.
@@ -180,7 +180,7 @@ Mean curvature can be approximated on a discrete mesh via the sum of dihedral an
 \begin{equation}\label{eq:dihedral_angle}
 	H_i := \frac{1}{2}\sum_{j \in E}l_{ij} \phi_{ij}
 \end{equation}
-where $H_i$ is the mean curvature at vertex $i$, $j$ is a vertex in the ring of $i$, $l_{ij}$ is the length of the edge from $i$ to $j$, and $\phi_{ij}$ is the dihedral angle between the faces adjacent to edge $ij$.
+where $H_i$ is the mean curvature at vertex $i$, $j$ is a vertex in the neighborhood of $i$, $l_{ij}$ is the length of the edge from $i$ to $j$, and $\phi_{ij}$ is the dihedral angle between the faces adjacent to edge $ij$.
 See Figure~\ref{sfig:dihedral_angle} for a graphic depiction.
 
 Alternatively, the mean curvature normal $\Delta f$ for the vertex $i$ can be calculated via the discrete Laplace-Beltrami operator~\cite{DDGAppIntro_18_discrete_k_1}
@@ -189,7 +189,7 @@ Alternatively, the mean curvature normal $\Delta f$ for the vertex $i$ can be ca
 \end{equation}
 where each $j$ is a vertex in vertex $i$'s neighborhood, $p_i$ and $p_j$ are the 3D positions of vertices $i$ and $j$, and $\alpha_{ij}$ and $\beta_{ij}$ are the angles opposite the edge from $i$ to $j$.
 The spatial relation of vertices $i$, $j$, and angles $\alpha_{ij}$ and $\beta_{ij}$ is illustrated in Figure~\ref{sfig:mesh_neighborhood}.
-A vertex's neighborhood is the group of vertices all adjacent it.
+A vertex's neighborhood is the group of vertices directly adjacent it.
 % Note that some sources will call this a ``1-ring'', meaning the ring of vertices 1 edge away from the center vertex.
 The absolute mean curvature can be calculated as half of the magnitude of the mean curvature normal using
 \begin{equation*}
@@ -279,7 +279,7 @@ where $\Theta_j$ is the angle between adjacent edges from the central vertex ($\
 \end{figure}
 
 Mean and Gaussian curvature are compared visually in Figure~\ref{fig:mean_gauss_k}.
-Note that the Gaussian curvature is approximately 0 over the entire surface, because the surface curves in only 1 direction, thus the 2nd principal curvature is ~0.
+Note that the Gaussian curvature is approximately 0 over the entire surface, because the surface curves in only 1 direction, thus the 2nd principal curvature is \textasciitilde0.
 The colors shown in the mean curvature plot are effectively due entirely to the 1st principal curvature values.
 
 \subsection{Root Mean Square Curvature}
@@ -292,7 +292,7 @@ The root mean square curvature is, as the name implies, the square root of the a
 % \begin{equation*}
 % 	\kappa_{abs} = |\kappa_1| + |\kappa_2|,
 % \end{equation*}
-They found $\kappa_{rms}$ cheaper to compute than the absolute curvature because they computed it from the mean and Gaussian curvatures:
+They found $\kappa_{rms}$ cheaper to compute than the absolute curvature because they computed it from the mean and Gaussian curvatures using
 \begin{equation*}
 	\kappa_{rms} = \sqrt{4H^2 - 2K},
 \end{equation*}
@@ -305,7 +305,7 @@ Rusinkiewicz proposes a method of taking the derivative of the curvature tensor~
 Because watershed segmentation expects a single value rather than a tensor, the magnitude of the derivative of the curvature tensor was approximated as the sum of squares of said tensor.
 
 \section{Surface Regression}
-The second high level step within \textit{3D Segmentation} is \textit{Surface Classification}, which attempts to classify the mesh segments yielded by Watershed segmentation as belonging to one of the defined geometric primitives.
+The second high-level step within \textit{3D Segmentation} is \textit{Surface Classification}, which attempts to classify the mesh segments yielded by Watershed segmentation as belonging to one of the defined geometric primitives.
 Fitting 3D points to the various primitives was a part of \textit{Surface Classification}, initially as a means of confirming initial shape primitive estimations, and later as means of direct shape primitive classification.
 In both uses the regression results were confirmed by comparing the error value, obtained from the difference between the fitted primitive and the set of 3D points, to a pre-defined threshold.
 The methods to perform and validate regression on the shape primitives implemented in this work are described in the following sections.
@@ -388,8 +388,6 @@ He discusses the merits of each and concludes that the bisection method is best 
 % TODO: return to this, improve it.?
 The functionality to perform parabolic or hyperbolic regression was omitted from this work due to time constraints.
 
-% (? I could layout how to compute the distance and thus error for at least a parabola, but is it worth it if it is not implemented? it is safe to assume the vast majority of curves encountered will be circular, and if not circular then elliptic...)
-
 \section{UV Mapping}
 \begin{figure}[htb]
 	\centering
@@ -399,10 +397,10 @@ The functionality to perform parabolic or hyperbolic regression was omitted from
 	% NOTE: image requested by HK
 \end{figure}
 UV Mapping is the process of projecting a surface from 3D to 2D, effectively ``unwrapping'' the 3D surface.
-UV maps are used extensively in 3D modeling and computer graphics.
+UV maps are used extensively in 3D modeling and computer graphics to apply textures to models.
 Figure~\ref{fig:uv_map_cube} shows the UV map of a cube being unwrapped.
 Within the context of this work the primary purpose of UV maps are to handle the transformation of points from global to surface coordinates.
-The plan was to have a UV map for each shape primitive to use during the high level step \textit{Geometry Simplification}.
+The plan was to have a UV map for each shape primitive to use during the high-level step \textit{Geometry Simplification}.
 % The functions a "UV-Map" in the code accomplishes:
 	% Eigen::Vector2d xyz_to_uv(const Eigen::Vector3d& vec3) const;
 	% Eigen::Vector3d uv_to_xyz(const Eigen::Vector2d& vec2) const;
@@ -412,8 +410,6 @@ The plan was to have a UV map for each shape primitive to use during the high le
 	% Eigen::Vector3d theta_to_RxRyRz(double theta) const;
 
 The UV map for planar surfaces is trivial, as the 3D surface is already ``unwrapped''.
-% TODO: ask about this
-% (? if necessary i can explain in greater detail, but it seems superfluous...)
 
 \subsection{Cylindric Surfaces}
 For the purposes of this project, cylindric surfaces are understood to be extruded ellipses.

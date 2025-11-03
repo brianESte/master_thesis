@@ -3,12 +3,13 @@
 This project, or at a minimum the overall concept chosen, proved more arduous than anticipated and requiring more time than available.
 The complete pipeline is generally capable of processing models with planar surfaces.
 At the time of writing, corners where four or more edges converge often cause issues, and should be avoided if possible.
-% (? Given a few extra days, fixing this should be easily possible.)
-As for curved surfaces, concave curves will at a minimum cause oversegmentation during the \textit{2D Segmentation} step, as discussed in the previous chapter.
-The procedure is also unable to properly handle convex curves, but would require less effort to finish that functionality.
+% NOTE:(? Given a few extra days, fixing this should be easily possible.)
+As for curved surfaces, concave curves will at a minimum cause over-segmentation during the \textit{2D Segmentation} step, as discussed in the previous chapter.
+The procedure is also unable to properly handle convex curves.
+% but would require less effort to finish that functionality.
 Furthermore, smooth transitions between primitive types constitute another open challenge.
 
-Throughout development great emphasis was placed on reaching a point where the program and procedure could be tested in its entirety, and imroved from there.
+Throughout development great emphasis was placed on reaching a point where the program and procedure could be tested in its entirety, and improved from there.
 In hindsight, this approach to development was ill-suited to a project of this nature, where the main building blocks are each complex and somewhat fragile.
 If the time had been taken to test and refine \textit{Watershed Segmentation} and \textit{Surface Classification} to maturity, the issue regarding the height function selection could have been detected early enough to solve within the bounds of this project.
 
@@ -35,7 +36,7 @@ In order to maintain the current concept while allowing high-level and algorithm
 Further work would include:
 \begin{itemize}
 	\item An approach to handle both ``hard'' \textit{and} ``soft'' edges must be developed.
-	\item Implement regression and classification functions for remaining geometric primitives
+	\item Implement regression and classification functions for remaining geometric primitives.
 	\item \textit{Geometry Simplification} should be expanded and improved to solve the aforementioned shortcomings, and to improve robustness.
 	\item The \textit{Interior Edge Extension} step should be replaced with one better suited to shapes with curved edges.
 		The Boustrophedon Cellular Decomposition or an expansion thereof would provide a decent starting point for its replacement.
