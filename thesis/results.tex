@@ -158,17 +158,35 @@ The paths planned from 2 of the 12 successes are shown in Figure~\ref{fig:class_
 \begin{figure}[htb]
 	\centering
 	\begin{subfigure}{0.4\textwidth}
-		\includegraphics[width=\textwidth]{../resources/models/91142_paths.png}
-		\caption{Model 91142 paths}
+		\centering
+		\def\modelName{91142}
+\begin{tikzpicture}[scale=2.5]
+	\begin{axis}[no axes, cycle list name=bous-path-3D]
+		\foreach \f in {0,...,13} {
+			\edef\FileName{R\TwoDigits{\f}wpts.obj}
+			\addplot3 table[x index=1, y index=2, z index=3] {../resources/models/m\modelName/\FileName};
+		}
+	\end{axis}
+\end{tikzpicture}
+		\caption{Model \modelName{} paths}
 		% \label{sfig:91142_paths}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}{0.4\textwidth}
-		\includegraphics[width=\textwidth]{../resources/models/1505020_paths.png}
-		\caption{Model 1505020 paths}
+		\centering
+		\def\modelName{1505020}
+\begin{tikzpicture}[scale=2.4]
+	\begin{axis}[no axes, cycle list name=bous-path-3D,view={100}{-40}]
+		\foreach \f in {0,...,31} {
+			\edef\FileName{R\TwoDigits{\f}wpts.obj}
+			\addplot3 table[x index=1, y index=2, z index=3] {../resources/models/m\modelName/\FileName};
+		}
+	\end{axis}
+\end{tikzpicture}
+		\caption{Model \modelName{} paths}
 		\label{sfig:1505020_paths}
 	\end{subfigure}
-	\caption{Paths planned for class 1 models}
+	\caption{Paths planned for two class 1 models}
 	\label{fig:class_1_results}
 \end{figure}
 

@@ -17,7 +17,6 @@ could be run without sudo privileges.
 - [x] Introduction
 - [x] Finish fixing HK edits
 - [x] Finish fixing EL edits
-- [ ] Figure out how to "link" TUDa template to git repo?
 - [ ] Maybe try to clean up the IGD logo svg file?
 
 Reminders:
@@ -29,7 +28,7 @@ Reminders:
 
 ### TUDa Template Installation
 
-For anyone who tries to follow in my footsteps
+For anyone who tries to follow in my footsteps.
 Getting the TUDa template to work required various dependencies. Below are those dependencies, in the order i ran into related errors and then installed them:
 - URspecialopts.sty &rarr; urcls
 - anyfontsize.sty &rarr; anyfontsize
@@ -62,6 +61,16 @@ The text then "floats" up to fill empty space caused by the actual floats being 
 
 Initially i tried using TikZ's datavisualization library, and it worked pretty well.
 I ended up switching to PGFplots when i discovered that i could achieve what i wanted with it while using less code.
+
+### Submission
+My university (or at least my department / thesis mentor) requires theses to contain an affidavit that has been physically printed and signed, then scanned to be included in the submitted document.
+The unviversity's thesis submission system requires that all fonts be embedded in the document.
+The scan (somehow?) contains fonts not embedded.
+To rectify this Ghostscript was used to embed all fonts used:
+```shell
+$ gs -q -dNOPAUSE -dBATCH -dPDFSETTINGS=/prepress -sDEVICE=pdfwrite -sOutputFile=output_file input_file
+```
+To simplify this, and force correct usage, the shell script `embed_pdf_fonts.sh` was created.
 
 ## References
 

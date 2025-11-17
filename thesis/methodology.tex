@@ -17,7 +17,7 @@ This concept is presented graphically in Figure~\ref{fig:mtdy_overview}.
 The first step is \textit{3D Segmentation}, in which the model is segmented into primitive surfaces, such as planes, cylinders, cones, etc.
 % The previous sentence sounds odd with ", such as plane, cylinder, cone, etc." but also sounds off using the plurals...
 Next is \textit{Geometry Simplification}, which unwraps each mesh section in order to create an idealized form from it.
-\textit{2D Segmentation} is an optional step, that segments non-convex simplified surfaces into convex ones.
+\textit{2D Segmentation} is an conditional step, that segments non-convex simplified surfaces into convex ones.
 The local path planning takes place in \textit{Cellular Path Planning}.
 The individually planned paths are joined together in the \textit{Modified TSP} step.
 % In \textit{Inverse Kinematics} the waypoints of the complete path are converted to actuator positions and sent via XMLRPC to the connected robotic arm and rotary table to be executed.
@@ -1305,7 +1305,6 @@ The method followed in this work is described below in Algorithm~\ref{alg:genera
 
 \begin{figure}[htb]
 	\centering
-	% \includegraphics[width=0.5\linewidth]{../resources/seg_2d/iee_ex1_atomic_polygons.png}
 	% NOTE: There is probably a way to set all vertex labels with font size small...
 \begin{tikzpicture}
 	% Draw complete vertex graph
@@ -1582,15 +1581,11 @@ The boustrophedon path planning procedure developed in this work is described in
 	\begin{subfigure}{0.48\textwidth}
 		\centering
 			\begin{tikzpicture}[scale=1.0]
-			\begin{axis}[
-				axis lines=none,
-				scale mode=scale uniformly,
-				enlargelimits=false,
-			]
-			\addplot[black]
-				table[mark=none,col sep=comma] {../resources/boustrophedon/ex_1_polygon.csv};
-			\addplot[red]
-				table[mark=none,col sep=comma] {../resources/boustrophedon/ex_1_perim.csv};
+			\begin{axis}[no axes,cycle list name=bous-path-2D]
+			\addplot
+				table[col sep=comma] {../resources/boustrophedon/ex_1_polygon.csv};
+			\addplot
+				table[col sep=comma] {../resources/boustrophedon/ex_1_perim.csv};
 			\end{axis}
 		\end{tikzpicture}
 		\caption{Perimeter pass in progress}
@@ -1600,20 +1595,16 @@ The boustrophedon path planning procedure developed in this work is described in
 	\begin{subfigure}{0.48\textwidth}
 		\centering
 		\begin{tikzpicture}[scale=1.0]
-			\begin{axis}[
-				axis lines=none,
-				scale mode=scale uniformly,
-				enlargelimits=false,
-			]
-			\addplot[black]
-				table[mark=none,col sep=comma] {../resources/boustrophedon/ex_1_polygon.csv};
-			\addplot[red]
-				table[mark=none,col sep=comma] {../resources/boustrophedon/ex_1_sweep_1.csv};
+			\begin{axis}[no axes,cycle list name=bous-path-2D]
+			\addplot
+				table[col sep=comma] {../resources/boustrophedon/ex_1_polygon.csv};
+			\addplot
+				table[col sep=comma] {../resources/boustrophedon/ex_1_sweep_1.csv};
 			% Mark current corner
 			\draw (axis cs:-0.614514, 3.89323) circle[radius=2pt]
 				node[coordinate,label=right:{$c_{curr}$}] {}; % was pin
 			% Mark post-shift waypoint
-			\draw[red,fill=red] (axis cs:-0.284931, 2.71528) circle[radius=1.2pt];
+			\node[waypoint-2D] at (axis cs:-0.284931, 2.71528) {};
 			% Mark current direction / edge
 			\draw[-{stealth}] (axis cs:-0.111943, 2.09701) -- (axis cs:-0.284931, 2.71528)
 				node[right] {$e_{curr}$};
@@ -1626,15 +1617,11 @@ The boustrophedon path planning procedure developed in this work is described in
 	\begin{subfigure}{0.48\textwidth}
 		\centering
 		\begin{tikzpicture}[scale=1.0]
-			\begin{axis}[
-				axis lines=none,
-				scale mode=scale uniformly,
-				enlargelimits=false,
-			]
-			\addplot[black]
-				table[mark=none,col sep=comma] {../resources/boustrophedon/ex_1_polygon.csv};
-			\addplot[red]
-				table[mark=none,col sep=comma] {../resources/boustrophedon/ex_1_sweep_2.csv};
+			\begin{axis}[no axes,cycle list name=bous-path-2D]
+			\addplot
+				table[col sep=comma] {../resources/boustrophedon/ex_1_polygon.csv};
+			\addplot
+				table[col sep=comma] {../resources/boustrophedon/ex_1_sweep_2.csv};
 			% Circle at current corner
 			\draw (axis cs:10.6172, 2.88409) circle[radius=2pt]
 				node[coordinate,label={above left:{$c_{curr}$}}] {};
@@ -1650,22 +1637,18 @@ The boustrophedon path planning procedure developed in this work is described in
 	\begin{subfigure}{0.48\textwidth}
 		\centering
 		\begin{tikzpicture}[scale=1.0]
-			\begin{axis}[
-				axis lines=none,
-				scale mode=scale uniformly,
-				enlargelimits=false,
-			]
-			\addplot[black]
-				table[mark=none,col sep=comma] {../resources/boustrophedon/ex_1_polygon.csv};
-			\addplot[red]
-				table[mark=none,col sep=comma] {../resources/boustrophedon/ex_1_sweep_3.csv};
+			\begin{axis}[no axes,cycle list name=bous-path-2D]
+			\addplot
+				table[col sep=comma] {../resources/boustrophedon/ex_1_polygon.csv};
+			\addplot
+				table[col sep=comma] {../resources/boustrophedon/ex_1_sweep_3.csv};
 			% Circle at current corner
 			\draw (axis cs:8.76958, 5.67303) circle[radius=2pt]
 				node[coordinate,label={left:{$c_{curr}$}}] {};
 			% Mark waypoints
-			\draw[red,fill=red] (axis cs:10.6151, 2.71528) circle[radius=1.2pt];
-			\draw[red,fill=red] (axis cs:10.6172, 2.88409) circle[radius=1.2pt];
-			\draw[red,fill=red] (axis cs:10.187, 3.51528) circle[radius=1.2pt];
+			\node[waypoint-2D] at (axis cs:10.6151, 2.71528) {};
+			\node[waypoint-2D] at (axis cs:10.6172, 2.88409) {};
+			\node[waypoint-2D] at (axis cs:10.187, 3.51528) {};
 			% Mark current direction / edge
 			\draw[-{stealth}] (axis cs:10.6172, 2.88409) -- (axis cs:10.187, 3.51528)
 				node[below left] {$e_{curr}$};

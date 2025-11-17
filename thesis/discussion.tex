@@ -211,15 +211,11 @@ This is illustrated in Figure \ref{fig:bpath_semi_convex} below.
 \begin{figure}[htb]
 	\centering
 	\begin{tikzpicture}[scale=1.0]
-		\begin{axis}[
-			axis lines=none,
-			scale mode=scale uniformly,
-			enlargelimits=false,
-		]
-		\addplot[thick]
-			table[mark=none,col sep=comma] {../resources/boustrophedon/ex_2_polygon.csv};
+		\begin{axis}[no axes,cycle list name=bous-path-2D]
 		\addplot
-			table[mark=none,col sep=comma] {../resources/boustrophedon/ex_2_path.csv};
+			table[col sep=comma] {../resources/boustrophedon/ex_2_polygon.csv};
+		\addplot
+			table[col sep=comma] {../resources/boustrophedon/ex_2_path.csv};
 		\end{axis}
 	\end{tikzpicture}
 	\caption{Boustrophedon path planning successfully performed on a semi-convex shape}
@@ -337,25 +333,24 @@ The curve's line segments are extended.
 		\centering
 		\begin{tikzpicture}[scale=0.85]
 \begin{axis}[
-	anchor=origin,
-	width=5.8cm,
+	no axes,
 	scale only axis,
-	axis lines=none,
-	scale mode=scale uniformly,
-	enlargelimits=false,
+	width=5.8cm,
+	cycle list name=bous-path-2D
 ]
-\addplot[thick]
-	table[mark=none,col sep=comma] {../resources/boustrophedon/ex_3_polygon.csv};
-\addplot
-	table[mark=none,col sep=comma] {../resources/boustrophedon/ex_3_path.csv};
+	\addplot
+		table[col sep=comma] {../resources/boustrophedon/ex_3_polygon.csv};
+	\addplot
+		table[col sep=comma] {../resources/boustrophedon/ex_3_path.csv};
 \end{axis}
 		\end{tikzpicture}
+		\caption{\raggedright Coverage path for the curved concave shape.}
 	\end{subfigure}
 	\caption{%
 Subfigure (a) gives an example shape that \textit{Interior Edge Extension} is not able to handle well.
 In Subfigure (b) the shape's curved edge has been discretized into 6 segments.
 Assuming a discretization of the curve into 6 equal segments, Subfigure (b) shows the extended edges of that curve as dashed red lines.
-The boustrophedon path shown in Subfigure (c) illustrates that it is not even necessary for the example shape to be segmented.
+The boustrophedon path shown in Subfigure (c) illustrates that it is not necessary for the example shape to be segmented.
 }
 \end{figure}
 % Curves encountered by \textit{Geometry Simplification} are stored as discretized approximations.

@@ -1,17 +1,17 @@
 Filename,Description,Source,Ready,Mesh,Class,Reason,Computation Time,Outcome,Explanation
 1344058,low poly tree stand,10K,TRUE,0.6,1,,,Success,Mesh increase
-91142,block n,10K,TRUE,1,1,,5.3,Success,
-65779,square furniture foot expander,10K,TRUE,0.7,1,,,Failure,Watershed error
+91142,block n,10K,TRUE,1,1,,8.17,Success,
+65779,square furniture foot expander,10K,TRUE,0.7,1,,,Success,Manual up-sampling
 1505020,octagonal hollow cylinder,10K,TRUE,0.8,1,,,Success,
 fc004,brutal object,GC: PF,TRUE,0.5,1,,,Failure ,IEE:Duplicate vertex
 90226,octagonal gem,10K,TRUE,0.5,1,,,Success,
-98412,bridge support,10K,TRUE,1,1,,,Failure,Narrow region
+98412,bridge support,10K,TRUE,1,1,,,Success,Up-sampled narrow region
 69089,square puzzle piece,10K,TRUE,0.8,1,,,Success,
 fc021,flat chair-like,GC: PF,TRUE,1,1,,,Success,
 90223,irregular D14,10K,FALSE,0.7,1,,,Success,Disabled corner check
 90224,irregular D12,10K,FALSE,1,1,,,Success,Disabled corner check
 fc028,blocky chair,GC: PF,TRUE,1,1,,,Success,
-91904,N64 crown,10K,TRUE,1,1,,,Failure,Watershed error
+91904,Meat tenderizer,10K,TRUE,1,1,,,Failure,Watershed error
 1344057,hexagonal rod,10K,TRUE,0.5,1,,,Success,
 1344051,low poly rock with flat bottom,10K,FALSE,1,1,,,Failure,Invalid corner
 1344055,low poly tree base,10K,TRUE,1,1,,,Success,Mesh increase
