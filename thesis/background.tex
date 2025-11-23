@@ -1,5 +1,6 @@
 %! TeX root = thesis.tex
 \chapter{Background}\label{sec:bkgd}
+% This diagram is used twice, thus it makes sense to define it as a pic
 \tikzset{HighLevelProcedure/.pic={
 	\def\dx{6mm}
 	% nodes
@@ -126,7 +127,6 @@ The principal curvatures and directions at the top of a hill-like surface are il
 
 \begin{figure}[htb]
 	\centering
-	% \includegraphics[width=0.7\textwidth]{../resources/minimal_surface_curvature_planes-en.svg.png}
 	\includegraphics[width=0.7\textwidth]{../resources/curvature/principal_curvatures.png}
 	% \includesvg[width=0.9\textwidth]{../resources/Minimal_surface_curvature_planes-en.svg}
 	\caption{
@@ -159,8 +159,8 @@ Similarly, the principal directions are the eigenvectors of Equation~\eqref{eq:2
 
 There are, however, various ways of approximating the principal curvatures on a discrete mesh~\cite{EstCurvOnTriMesh, DiscDiffGeoOpsTriMani}.
 A basic approach is to calculate the mean and Gaussian curvatures, and derive the principal curvatures from them~\cite{DDGAppIntro_19_discrete_k_2, Gauss_mean_k_notes}.
-Given the mean curvature $H$ and Gaussian curvature $K$ (see Sections \ref{sec:mean_k} and \ref{sec:gauss_k}), the principal curvatures can be calculated from
-% Given the mean curvature $H$ and Gaussian curvature $K$ (see Sections \ref{sec:mean_k} and \ref{sec:gauss_k}), the principal curvatures can be calculated from Equations \ref{eq:mean_k} and \ref{eq:gauss_k}, or the discrete approximations from Equations \ref{eq:dihedral_angle} and \ref{eq:disc_gauss_k}.
+Given the mean curvature $H$ and Gaussian curvature $K$ (see Sections~\ref{sec:mean_k} and~\ref{sec:gauss_k}), the principal curvatures can be calculated from
+% Given the mean curvature $H$ and Gaussian curvature $K$ (see Sections~\ref{sec:mean_k} and~\ref{sec:gauss_k}), the principal curvatures can be calculated from Equations~\ref{eq:mean_k} and \ref{eq:gauss_k}, or the discrete approximations from Equations~\ref{eq:dihedral_angle} and \ref{eq:disc_gauss_k}.
 \begin{align*}
 	\kappa_1 &= H - \sqrt{H^2 - K}, \\
 	\kappa_2 &= H + \sqrt{H^2 - K}.
@@ -213,6 +213,7 @@ where $H_i$ is the mean curvature for vertex $i$ and $(\Delta f)_i$ is the mean 
 	\draw [-Stealth,thick] (20:4mm) arc [start angle=20, delta angle=-180, x radius=5mm, y radius=3mm];
 		% node [pos=0.8, label={250:$\phi_{ij}$}] {};
 	\node [] at (-0.3, -0.6) {$\phi_{ij}$};
+	% The ($(A)+(B)$ syntax is used to add / subtract coordinates
 	\draw [|-|, thick] ($(node_i.east)+(0.1,0.05)$) -- ($(node_j.east)+(0.1,0.05)$)
 		node [pos=0.65,label={0:$l_{ij}$}] {};
 \end{tikzpicture}
@@ -229,6 +230,7 @@ where $H_i$ is the mean curvature for vertex $i$ and $(\Delta f)_i$ is the mean 
 	\newlength\arcR
 	\arcR=4mm
 	\node[vertex,label=south west:i] (0, 0) {};
+	% One-liner to create the hexagon
 	\draw [thick] (330: \hexR) \foreach \x in {30,90,...,330} { -- (\x:\hexR) };
 	\foreach \x in {30,90,...,330} {
 		\draw (0, 0) -- (\x:\hexR) node[vertex]{};
@@ -240,6 +242,9 @@ where $H_i$ is the mean curvature for vertex $i$ and $(\Delta f)_i$ is the mean 
 	\draw (270:\arcR) arc [radius=\arcR, start angle=270, end angle=330]
 		node [pos=0.5, label={[xshift=-3.5mm, yshift=1mm]300:$\Theta{ijk}$}] {};
 	% Inner angles
+	% +(A) syntax is non-stacking offset from the previous position.
+	% "non-stacking" meaning that additional offsets are based on the previous coordinate,
+	% rather than this one
 	\draw (210:\hexR) +(330:\arcR) arc [radius=\arcR, start angle=-30, end angle=30]
 		node [pos=0.5, label={[xshift=-2.2mm]0:$\alpha_{ij}$}] {};
 	\draw (330:\hexR) +(150:\arcR) arc [radius=\arcR, start angle=150, end angle=210]
@@ -432,8 +437,7 @@ The transformation procedure is described visually in Figure~\ref{fig:gl_ccyl_tr
 	\draw[->] (0,0) -- (0,1.5) node[above] {Z};
 	% Cylinder
 	\node[cylinder,shape border rotate=90,
-		aspect=2.5, minimum height=20mm, minimum width=20mm,
-		draw=blue!60] at (0,0.0) {};
+		aspect=2.5, minimum height=20mm, minimum width=20mm, draw=black] at (0,0.0) {};
 	% Point
 	\fill[purple] (1,0.5) circle[radius=3pt];
 \end{tikzpicture}
@@ -731,6 +735,8 @@ The only arguments to RDP are a list of points and a tolerance width, within whi
 The algorithm iteratively finds the point farthest from the straight line from point 0 to n-1, and if said distance is greater than the tolerance width, the line is split at the farthest point and the line sections before and after the split are reconsidered individually.
 The procedure is described in greater detail in Algorithm~\ref{alg:RDP}.
 
+% algorithm creates the border / float styling
+% algorithmic is the actual pseudocode envirionment
 \begin{algorithm}[htb]
 \caption{Ramer-Douglas-Peucker}\label{alg:RDP}
 \begin{algorithmic}[1]

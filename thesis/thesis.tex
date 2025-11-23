@@ -57,7 +57,9 @@
 }
 \usepackage{pgfplots}
 \pgfplotsset{width=7cm,compat=1.15}
+% "compat" sets the PGFplots compatibility, effectively setting a PGF version to use
 \pgfplotsset{
+% Define the "no axes" style, for plots without axes
 	no axes/.style={
 		axis lines=none,
 		anchor=origin,
@@ -65,12 +67,14 @@
 		scale mode=scale uniformly}
 }
 % For plotting a polygon and the boustrophedon path planned within it
+% Really only 2 colors are necessary, black for the outline, and red or another color for the path
 \pgfplotscreateplotcyclelist{bous-path-2D}{
 	black,thick,mark=none\\
 	red\\
 	green\\
 	blue\\
 }
+% Here multiple colors are needed because all the paths from a given model are shown together
 \pgfplotscreateplotcyclelist{bous-path-3D}{
 	{black,very thin},
 	{red,very thin},
@@ -83,10 +87,15 @@
 }
 % Define global styles
 \tikzset{
+	% FlowChart node
 	FC-Node/.style={rectangle,semithick,align=center,rounded corners=5pt,draw},
+	% FlowChart arrow
 	FC-Arrow/.style={-{Stealth[round]},semithick,rounded corners=4pt},
+	% general vertex
 	vertex/.style={circle, radius=2pt,fill, inner sep=2pt,outer sep=0pt},
+	% Waypoint2D to mark specific waypoints in bpath graphics
 	waypoint-2D/.style={fill=red,circle,outer sep=0pt,inner sep=1.0pt},
+	% "vine"(/branch) from the Interior Edge Extension step: PolygonGraph
 	Vine/.style={-Stealth}
 }
 % for multifigure environments
@@ -146,17 +155,10 @@
 \usepackage{mathtools} % erweiterte Fassung von amsmath
 \usepackage{amssymb}   % erweiterter Zeichensatz
 %\usepackage{siunitx}   % Einheiten
-% To 0-pad numbers
+% To 0-pad numbers. Used to help generate the results graphics directly from OBJ files
 \newcommand\TwoDigits[1]{%
 	\ifnum#1<10 0#1\else #1\fi
 }
-
-%Formatierungen für Beispiele in diesem Dokument. Im Allgemeinen nicht notwendig!
-\let\file\texttt
-\let\code\texttt
-\let\tbs\textbackslash
-\let\pck\textsf
-\let\cls\textsf
 
 \usepackage{pifont}% Zapf-Dingbats Symbole
 \newcommand*{\FeatureTrue}{\ding{52}}

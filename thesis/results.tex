@@ -22,7 +22,7 @@ The primary input parameter of \textit{isotropic explicit remeshing} is the ``ta
 Unfortunately PyMeshLab's documentation is unclear as to what this value is a percentage of.
 % I tried to find the answer, believe me.
 The vast majority of test models were remeshed with a uniform ``target length'', and the remainder were remeshed using manual selection of regions.
-Models that were remeshed with non-uniform target lengths have a range of values in the \textbf{Mesh} column in appendix \ref{app:model_table}.
+Models that were remeshed with non-uniform target lengths have a range of values in the \textbf{Mesh} column in Appendix~\ref{app:model_table}.
 
 Prior to testing each test object was examined and assigned a ``difficulty class'' from 1-4.
 The difficulty classification was created during a period when the algorithm's conic regression and cylinder detection functionality were sub-optimal and required improvement.
@@ -31,7 +31,7 @@ The example images in the following sections were created using Blender~\cite{Bl
 
 \subsection{Difficulty Class 1}
 These objects are comprised solely of planar surfaces and should pose little to no trouble to the path planner.
-Figure \ref{fig:class_1_models} shows 3 such examples.
+Figure~\ref{fig:class_1_models} shows 3 such examples.
 
 \begin{figure}[htb]
 \centering
@@ -59,7 +59,7 @@ Figure \ref{fig:class_1_models} shows 3 such examples.
 \subsection{Difficulty Class 2}
 Features that would cause an object to be pushed into class 2 include small or narrow surfaces, as well as cylindric surfaces.
 There is a decent chance that small and thin surfaces will be absorbed into a neighboring large planar region, decreasing the chance that the combined region will be classified as planar.
-Three examples of class 2 test models can be found in Figure \ref{fig:class_2_models}.
+Three examples of class 2 test models can be found in Figure~\ref{fig:class_2_models}.
 
 \begin{figure}[htb]
 \centering
@@ -84,12 +84,12 @@ Three examples of class 2 test models can be found in Figure \ref{fig:class_2_mo
 \label{fig:class_2_models}
 \end{figure}
 
-Of the models shown in Figure \ref{fig:class_2_models} model 55583 (Figure \ref{sfig:55583}) has the highest potential for failure, due to the narrow surfaces at the top of each gear tooth.
-The smooth transitions from planar to cylindric in Figure \ref{sfig:7120369} will also be difficult for the path planner.
+Of the models shown in Figure~\ref{fig:class_2_models} model 55583 (Figure~\ref{sfig:55583}) has the highest potential for failure, due to the narrow surfaces at the top of each gear tooth.
+The smooth transitions from planar to cylindric in Figure~\ref{sfig:7120369} will also be difficult for the path planner.
 
 \subsection{Difficulty Class 3}
 Objects of this class are expected to be difficult despite improvements to cylinder detection and regression, and handling of narrow planar surfaces.
-The examples shown in Figure \ref{fig:class_3_models} showcase various difficult features.
+The examples shown in Figure~\ref{fig:class_3_models} showcase various difficult features.
 
 \begin{figure}[htb]
 \centering
@@ -116,7 +116,7 @@ The examples shown in Figure \ref{fig:class_3_models} showcase various difficult
 
 \subsection{Difficulty Class 4}
 Difficulty class 4 models are beyond the scope of this work, but are included for comparison purposes.
-Figure \ref{fig:class_4_models} shows a few such models.
+Figure~\ref{fig:class_4_models} shows a few such models.
 
 \begin{figure}[htb]
 \centering
@@ -141,10 +141,10 @@ Figure \ref{fig:class_4_models} shows a few such models.
 \label{fig:class_4_models}
 \end{figure}
 
-Although spherical surfaces, such as those adorning model 50704 (Figure \ref{sfig:50704}), were part of the planned set of detectable primitives, that functionality was not completed.
+Although spherical surfaces, such as those adorning model 50704 (Figure~\ref{sfig:50704}), were part of the planned set of detectable primitives, that functionality was not completed.
 Thus, even if the path planner were able to perfectly handle the curved surfaces at the base of model 50704, the partial spheres would result in a failure.
-Model 229605 (Figure \ref{sfig:229605} appears simple at first glance, but its lower half is that of a cone, and the detection thereof is not implemented.
-Model 99265, shown in Figure \ref{sfig:99265}, exhibits swept curves which the path planner is unable to process.
+Model 229605 (Figure~\ref{sfig:229605} appears simple at first glance, but its lower half is that of a cone, and the detection thereof is not implemented.
+Model 99265, shown in Figure~\ref{sfig:99265}, exhibits swept curves which the path planner is unable to process.
 Its overall form, comprised of occluded regions, is also beyond the scope of the intended application of the path planner developed.
 
 

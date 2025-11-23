@@ -2,6 +2,7 @@
 \chapter{Discussion}\label{sec:discussion}
 \IMRADlabel{discussion}
 % \section{Discussion of Results}
+% I thought about introducing the discussion chapter, but was unsure how to, and eventually decided against it.
 
 % \section{Organizational Improvements}
 % Despite the successes of the class 1 models, there is ample room for improvement.
@@ -16,7 +17,7 @@ It was discovered towards the end of the project that the \textit{height} functi
 Curvature, specifically Gaussian and RMS curvature, produces boundaries at ``hard'' model edges, but not at ``soft'' model edges.
 If the bordering primitives are tangent or near tangent to one another the edge is considered soft; otherwise, it is considered hard.
 The derivative of curvature is better suited to producing boundaries at soft edges, but produces ``double'' boundaries at hard edges.
-Figures \ref{sfig:m7_rmsk} and \ref{sfig:m7_gradk} give a visual comparison of the singular and double edges produced at hard edges.
+Figures~\ref{sfig:m7_rmsk} and~\ref{sfig:m7_gradk} give a visual comparison of the singular and double edges produced at hard edges.
 % On the other hand, the derivative of curvature (the "magnitude" thereof as used in this work) is more useful for soft edges, but produces a "double" edge at hard edges, which can lead to poor (watershed) segmentation results.
 \begin{figure}[htb]
 	\centering
@@ -39,7 +40,7 @@ Figures \ref{sfig:m7_rmsk} and \ref{sfig:m7_gradk} give a visual comparison of t
 Intuitively, this is a problem because the resultant mesh regions should be divided at hard edges, rather than occupy them.
 Recall that the first step of \textit{Watershed Segmentation} starts a mesh region at every local minima and minimum plateau.
 This means that Watershed will create mesh regions directly on the hard edge due to the double edge produced when using the gradient magnitude as the height function.
-Figures \ref{sfig:m7_rmsk_init} and \ref{sfig:m7_gradk_init} present the initial mesh regions created from the mesh heights shown in Figures \ref{sfig:m7_rmsk} and \ref{sfig:m7_gradk}, respectively.
+Figures~\ref{sfig:m7_rmsk_init} and~\ref{sfig:m7_gradk_init} present the initial mesh regions created from the mesh heights shown in Figures~\ref{sfig:m7_rmsk} and~\ref{sfig:m7_gradk}, respectively.
 
 \begin{figure}[htb]
 	\begin{subfigure}[t]{0.42\textwidth}
@@ -65,7 +66,7 @@ Black indicates un-indexed vertices, while the other colors indicate a mesh regi
 	% \label{fig:height_fn_comparison}
 \end{figure}
 
-% This can be seen in the initial mesh regions presented in Figures \ref{sfig:m7_rmsk_init} and \ref{sfig:m7_gradk_init}.
+% This can be seen in the initial mesh regions presented in Figures~\ref{sfig:m7_rmsk_init} and~\ref{sfig:m7_gradk_init}.
 While the RMS curvature results \textit{do} show some local minima on hard edges, they are few and far between.
 The gradient magnitude results show a myriad of local minima, and thus initialized mesh regions, on hard edges.
 Because of \textit{Descent to Minima} these edge regions grow to encroach past the edge upon which they sit.
@@ -156,7 +157,7 @@ The segmentation of the regions around corners where four or more edges converge
 The regions around corners where four or more edges converged were prone to qualitatively poorer segmentation results.
 Though the exact cause of these invalid corners is unknown, it was observed that the regions of poorer segmentation tended to correlate with their occurrence.
 \iffalse
-This issue can be illustrated with the help of the log file snippet shown in Listing \ref{lst:log_snippet} below.
+This issue can be illustrated with the help of the log file snippet shown in Listing~\ref{lst:log_snippet} below.
 \begin{lstlisting}[
 	frame=tb,captionpos=b,
 	caption={Abbreviated list of shared corners created from a model with quad+ corners.},
@@ -167,14 +168,14 @@ Idx 	Corner end-pts	->		Corner position
 12 { 21[s], 13[s] } -> -0.25649  0.25789  0.72361
 15 { 15[e], 11[s] } ->  0.51136  0.00301  0.36372
 \end{lstlisting}
-Listing \ref{lst:log_snippet} lists some of the shared corners created from a model with quad+ corners.
+Listing~\ref{lst:log_snippet} lists some of the shared corners created from a model with quad+ corners.
 The columns provide, in order, the shared corner's index, its edge tips, and its position.
 The listing has been trimmed to only show those four shared corners for brevity.
 Regarding the edge tips, the number indicates the edge's index and the \verb|s| and \verb|e| in the brackets correspond to the \verb|s|tart and \verb|e|nd tip of the edge.
 Notice that corner 5 contains both of 12's edge tips, and that their positions are approximately coincident.
 Thus, given corner 5, corner 12 is redundant.
 Corners 9 and 15 have the same relationship, with corner 15 made redundant by corner 9.
-These excess corners trip up (? maybe use more sophisticated word?) the program during execution of the \textit{Extend Shared Edges} step (see Section \ref{sec:extend_shared_edges}).
+These excess corners trip up (? maybe use more sophisticated word?) the program during execution of the \textit{Extend Shared Edges} step (see Section~\ref{sec:extend_shared_edges}).
 The quick solution to this issue is to filter out redundant and duplicate shared corners.
 A better solution would be to determine how and why redundant shared corners were created at all.
 This is a clear point of potential improvement, should this project be continued in the future.
@@ -206,7 +207,7 @@ Hence, the goal of minimizing the number of switchbacks was unnecessary for this
 
 Nielsen et al.\ do not explain why the final polygons should be convex, treating it as a given.
 Boustrophedon path planning requires cells to be \textit{semi}-convex, not necessarily truly convex.
-This is illustrated in Figure \ref{fig:bpath_semi_convex} below.
+This is illustrated in Figure~\ref{fig:bpath_semi_convex} below.
 
 \begin{figure}[htb]
 	\centering
@@ -277,6 +278,7 @@ An isovist (grayed area) in a rectilinear polygon.
 	\begin{subfigure}[t]{0.3\textwidth}
 		\centering
 \begin{tikzpicture}[scale=0.70]
+	% "pattern=" requires the TikZ patterns library
 	\draw[pattern=dots,draw=none] (2,-1) rectangle (3,-2);
 	\draw[pattern=dots,draw=none] (2,2) rectangle (3,1);
 	\draw[thick] (1,-1) -- (1,-2) -- (3,-2) -- (3,-1) -- (2,-1) -- (2,1) -- (3,1) -- (3,2) -- (0.5,2) -- (0.5,1) -- (-3,1) -- (-3,-2) -- (-1.5,-2) -- (-1.5,-1) -- cycle;
@@ -299,7 +301,7 @@ Whereas the polygon in (c) cannot, as paths planned in the dotted regions are mu
 \end{figure}
 
 Another issue with \textit{Interior Edge Extension} is how it handles round edges.
-A smooth round edge, such as the one shown in Figure \ref{sfig:interior_curve}, theoretically has an infinite number of infinitesimal edges.
+A smooth round edge, such as the one shown in Figure~\ref{sfig:interior_curve}, theoretically has an infinite number of infinitesimal edges.
 Performing \textit{Interior Edge Extension} on such a shape would naturally be impossible.
 \begin{figure}[htb]
 	\centering
@@ -356,8 +358,8 @@ The boustrophedon path shown in Subfigure (c) illustrates that it is not necessa
 % Curves encountered by \textit{Geometry Simplification} are stored as discretized approximations.
 Curves on a 3D mesh are inherently discrete and the number of their edge segments is finite.
 Despite this, \textit{Interior Edge Extension} is still ill-suited to handling curves.
-Suppose the curved edge shown in Figure \ref{sfig:interior_curve} were discretized into 6 equal line segments.
-Figure \ref{sfig:int_curve_ext} shows the resultant extended interior edges from such a discretization.
+Suppose the curved edge shown in Figure~\ref{sfig:interior_curve} were discretized into 6 equal line segments.
+Figure~\ref{sfig:int_curve_ext} shows the resultant extended interior edges from such a discretization.
 Even with the best computational resources, most of the ``optimal'' sub-regions produced would likely be long slip triangles.
 Hence \textit{Interior Edge Extension} is only useful for simple polygons with all straight edges.
 % Technically, having a curved edge would disqualify a shape from _being_ a "polygon"

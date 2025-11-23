@@ -45,6 +45,15 @@ Getting the TUDa template to work required various dependencies. Below are those
 - Biblatex warns the user if BibTeX is used in place of Biber, because Biber has more functionality than BibTeX / others[7]. Simply switching to Biber quells the warning.
 - Missing German hyphenation patterns &rarr; hyphen-german
 
+##### Overfull hbox
+
+The overfull hbox warning was often encountered in the bibliography due to URLs and DOIs in bib entries.
+A nifty way to quickly and easily locate the offending entry is to use
+```TeX
+\overfullrule=2mm
+```
+so that any problem spots are highlighted black.
+
 ### NeoVim
 
 I am in the process of setting up NeoVim to work properly with LaTeX. So far VimTeX and TexLab have been integrated, and auto-completion and syntax highlighting works. The following resources helped me thus far: [2,3,5,6].
@@ -61,6 +70,11 @@ The text then "floats" up to fill empty space caused by the actual floats being 
 
 Initially i tried using TikZ's datavisualization library, and it worked pretty well.
 I ended up switching to PGFplots when i discovered that i could achieve what i wanted with it while using less code.
+
+#### Including SVGs
+
+The department logo was given as an SVG, but including an SVG in TeX is not at all straightforward.
+After various attempts, the SVG appraoch was abandoned in favor of a PNG file.
 
 ### Submission
 My university (or at least my department / thesis mentor) requires theses to contain an affidavit that has been physically printed and signed, then scanned to be included in the submitted document.

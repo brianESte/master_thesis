@@ -31,20 +31,19 @@ In \textit{Inverse Kinematics} the waypoints of the complete path are converted 
 	% nodes
 	\node (Mesh) {Complete Mesh};
 	\node[FC-Node, text width=28mm] (WS) [right=\dx of Mesh] {Watershed Segmentation};
-	\node[FC-Node, text width=28mm] (PrimCl) [right=\dx of WS] {Surface Classification};
-	\node[text width=25mm, align=center] (MRs) [right=\dx of PrimCl] {Classified Mesh Sections};
+	\node[FC-Node, text width=28mm] (SurfCl) [right=\dx of WS] {Surface Classification};
+	\node[text width=25mm, align=center] (MRs) [right=\dx of SurfCl] {Classified Mesh Sections};
 	% connections
 	\draw [FC-Arrow] (Mesh) -- (WS);
-	\draw [FC-Arrow] (WS) -- (PrimCl);
-	\draw [FC-Arrow] (PrimCl) -- (MRs);
-	% \path (PrimCl.south) -- node[below=5mm of PrimCl] (CompPrim) {Composite Primitive} (WS.south);
-	% \draw [FC-Arrow, rounded corners=5pt] (PrimCl.south) |- (CompPrim) -| (WS.south);
-	\draw [FC-Arrow, rounded corners=5pt] (PrimCl.south) -- +(0,-0.4) -| (WS.south)
-		node[pos=0.5,below right]{Composite surfaces};
+	\draw [FC-Arrow] (WS) -- (SurfCl);
+	\draw [FC-Arrow] (SurfCl) -- (MRs);
+	% \path (SurfCl.south) -- node[below=5mm of SurfCl] (CompPrim) {Composite Primitive} (WS.south);
+	% \draw [FC-Arrow, rounded corners=5pt] (SurfCl.south) |- (CompPrim) -| (WS.south);
+	\draw [FC-Arrow, rounded corners=5pt] (SurfCl.south) -- +(0,-0.4) -| (WS.south)
+		node[pos=0.25,minimum size=16pt,
+		label={[label distance=-11pt]270:Composite surfaces}] (CompSurf) {};
 	% Segmentation 3D container node
-	\draw[thick, dashed, rounded corners=8pt] ($(WS.north west)+(-0.3,0.3)$) rectangle ($(PrimCl.south east)+(0.3,-1.2)$);
-	\node [] at (5.7, 1.1) {3D Segmentation};
-	% TODO: make this diagram more flexible
+	\node[rectangle,rounded corners=8pt,draw,thick,dashed,inner sep=8pt,fit=(WS)(SurfCl)(CompSurf),label={above:3D Segmentation}] {};
 \end{tikzpicture}
 	\caption{Graphic depiction of the 3D segmentation procedure}
 	\label{fig:Seg3D}
@@ -77,7 +76,7 @@ Mangan and Whitaker's algorithm consists of 6 steps:
 
 Their algorithm was modified throughout this project, as described in the following sections.
 Atkar et al.'s Watershed segmentation implementation also helped inspire the implementation in this work~\cite{HierSurfSeg_for_autobody_painting}.
-A graphical depiction of their Watershed segmentation implementation is shown below in Figure \ref{fig:ws_1570179_steps}.
+A graphical depiction of their Watershed segmentation implementation is shown below in Figure~\ref{fig:ws_1570179_steps}.
 % In addition to the mesh to be segmented, a merge threshold value is provided to Watershed.
 % This threshold value is described in greater detail in \ref{sec:shallow_merge}.
 \begin{figure}[htb]
@@ -107,7 +106,7 @@ Its steps are listed below and described in greater detail in the following sect
 
 \subsubsection{Region Initialization}
 In this work's implementation the curvature values and derivative thereof are calculated once for the whole mesh prior to the first Watershed pass.
-Watershed step 0, applying the height function to the mesh, is shown in Figure \ref{sfig:ws_dk}.
+Watershed step 0, applying the height function to the mesh, is shown in Figure~\ref{sfig:ws_dk}.
 This work's version of Watershed begins by creating mesh regions from each local minima.
 Here, local minima includes local plateaus.
 Thus, if a region of the mesh is found whose vertices' curvature are all roughly equal and less than that of their neighbors, it is a minima plateau.
@@ -132,11 +131,11 @@ Black indicates un-assigned vertices, and all other colors mark mesh regions.
 	\end{subfigure}
 \caption{
 Watershed segmentation steps 0 and 1 shown applied to test object ``fc028''.
-All test objects and their sources can be found in Appendix \ref{app:model_table}
+All test objects and their sources can be found in Appendix~\ref{app:model_table}
 }
 \end{figure}
 
-Figure \ref{sfig:ws_1} shows the result of region initialization on the test object ``fc028''.
+Figure~\ref{sfig:ws_1} shows the result of region initialization on the test object ``fc028''.
 Because the surfaces of the test object are perfectly flat, the horizontal and vertical surfaces exhibit large plateaus.
 The lack of plateaus on the inclined surface is most likely due to floating point errors in the vertex positions on the inclined surface.
 
@@ -177,18 +176,18 @@ It is worth noting that Watershed segmentation overall would work without \texti
 	% \label{fig:ws_2_3}
 \end{figure}
 
-Figure \ref{sfig:ws_2} shows the result of \textit{Minima Expansion} on the test object.
+Figure~\ref{sfig:ws_2} shows the result of \textit{Minima Expansion} on the test object.
 Because the variation in height among the vertices of the inclined surface was minimal, a single initial local minima was able to expand to most of the inclined surface's area.
 
 \subsubsection{Descent to Minima}
 From each un-assigned vertex a trail following the path of steepest descent is started.
 When a mesh region is encountered, the traversal ends and all path vertices are added to the encountered mesh region.
 Plateaus encountered during the descent are added to the traversal path.
-In this way, Mangan and Whitaker's step \ref{plateau_step} is effectively split between \textit{Region Initialization} and \textit{Descent to Minima}.
+In this way, Mangan and Whitaker's step~\ref{plateau_step} is effectively split between \textit{Region Initialization} and \textit{Descent to Minima}.
 A way to visualize this step is by placing an imaginary drop of water at an un-assigned vertex of the object.
 All vertices touched by the water droplet as it descends the height map of the object's surface are added to the region that eventually catches the droplet.
 Post \textit{Descent to Minima} all vertices have been assigned to a mesh region and the mesh has been segmented.
-Figure \ref{sfig:ws_3} shows the result of \textit{Descent to Minima} on the test object.
+Figure~\ref{sfig:ws_3} shows the result of \textit{Descent to Minima} on the test object.
 
 % \begin{figure}[htb]
 % 	\centering
@@ -216,7 +215,6 @@ The \textit{Mini-Merge} procedure is shown in Algorithm~\ref{alg:WS:mini_merge}.
 		\If{$s$.small()}
 			\State $s_{lowside} \leftarrow s$.findLowSideNeighbor()
 			\State $s_{lowside}$.absorb($s$)
-			% \State $S$.erase($s$)
 		\EndIf
 	\EndFor
 % \EndFunction
@@ -258,7 +256,7 @@ Watershed segmentation step 4.1 shown applied to test object ``fc028''.
 	\label{fig:ws_4.1}
 \end{figure}
 
-As can be seen in Figure \ref{fig:ws_4.1} the segmentation results post \textit{Mini-Merge} are noticeably cleaner than after the previous step.
+As can be seen in Figure~\ref{fig:ws_4.1} the segmentation results post \textit{Mini-Merge} are noticeably cleaner than after the previous step.
 Had the test object been more complex, the need for further merging would have been apparent.
 
 \subsubsection{Shallow Merge}
@@ -271,7 +269,7 @@ The \textit{Mini-Merge} and \textit{Shallow-Merge} procedures are quite similar,
 \begin{algorithmic}[1]
 	\Function{shallowMerge}{Mesh sections $S$, real $e$}
 		\State Sort $S$ by mesh section depth in ascending order
-		% \State $d_{th} \leftarrow d_{deepest}^{e}$\Comment{See Equation \ref{eq:merge_threshold} for explanation}
+		% \State $d_{th} \leftarrow d_{deepest}^{e}$\Comment{See Equation~\ref{eq:merge_threshold} for explanation}
 		\State calculate merge threshold $d_{th}$ from $d_{max}$ and $e$ \Comment{See Equation~\eqref{eq:merge_threshold}}
 		\While{$S$.first.depth < $d_{th}$}
 			% \State \Comment{While the depth of the shallowest mesh is below the merge threshold}
@@ -320,9 +318,9 @@ Results from Watershed segmentation step 4.2 with a high merge threshold (a) and
 }
 \end{figure}
 
-Figures \ref{sfig:ws_4.2.0} and \ref{sfig:ws_4.2.1} show the results post \textit{Shallow-Merge}.
-If the merge threshold is too high, useful regions will be merged together into a large composite mesh section, as can be seen in Figure \ref{sfig:ws_4.2.0}.
-Figure \ref{sfig:ws_4.2.1} shows the result of a merge threshold more appropriate for the mesh shown.
+Figures~\ref{sfig:ws_4.2.0} and~\ref{sfig:ws_4.2.1} show the results post \textit{Shallow-Merge}.
+If the merge threshold is too high, useful regions will be merged together into a large composite mesh section, as can be seen in Figure~\ref{sfig:ws_4.2.0}.
+Figure~\ref{sfig:ws_4.2.1} shows the result of a merge threshold more appropriate for the mesh shown.
 Because each model has different geometry and meshing, a certain merge threshold may work well for one model, yet work poorly for another.
 A certain merge threshold may not even work well for the entirety of a single model.
 This is why the \textit{3D Segmentation} process is iterative.
@@ -338,8 +336,6 @@ Thus, for example, A vertex assigned to region 4 through \textit{Descent to Mini
 Ties are broken numerically, with lower numbered regions given priority.
 % No explicit tie breaking mechanism was deemed necessary, but lower numbered regions are likely given priority due to how the code was written.
 % At one point perimeter vertices with 3 or more connections to other same-region perimeter vertices were considered a problem,...
-
-% TODO: take a pair of screenshots to illustrate WS5:boundary smoothing?
 
 \subsection{Surface Classification}
 The second high-level step with \textit{3D Segmentation} is \textit{Surface Classification}, in which mesh regions received from the Watershed segmentation step need to be classified before they may be processed by the \textit{Geometry Simplification} step.
@@ -371,7 +367,7 @@ It \textit{is} possible to set useful curvature thresholds for noisy meshes, but
 The second planar test was used for some time until abandoning it in favor of performing regression as a means of classification.
 Planar regression was performed using PCA on the surface's point positions, with the least principal component denoting the plane's normal vector.
 To determine if the surface is indeed planar, the root mean squared error is calculated and compared to a set threshold.
-How to calculate the RMSE for a set of points and a plane is described in greater detail in Section \ref{sec:planar_regression}.
+How to calculate the RMSE for a set of points and a plane is described in greater detail in Section~\ref{sec:planar_regression}.
 If the RMSE is above the threshold, the surface is deemed non-planar and undergoes further tests to check if it is cylindric.
 % As a check on the test, planar regression via Singular Value Decomposition is performed on the mesh region's vertices, and the root mean squared error is reported.
 % If the RMSE is within a set threshold, the region passes the second check and is classified as planar.
@@ -399,7 +395,7 @@ This approach has a glaring flaw: planes pass this test.
 
 Because there exists no direct algebraic solution for the distance from a point to an ellipse, the sum of squared residuals (see Equation~\eqref{eq:sq_residual}) was initially used as the error value when confirming the surface as cylindric.
 This was eventually replaced with an iterative method of calculating the point-surface distance, and then conic regression could be used as cylinder classification.
-The method of computing the distance from a point to an ellipse is described further in Section \ref{sec:elliptic_reg}.
+The method of computing the distance from a point to an ellipse is described further in Section~\ref{sec:elliptic_reg}.
 % After implementing a conic error function based on point-surface distance, conic regression could be used \textit{as} cylinder classification.
 A surface that failed planar classification would be subject to cylindric regression, and the resultant RMSE compared to a threshold to determine cylindric categorization.
 
@@ -419,6 +415,7 @@ The best method for ellipsoidal classification conceived during this project is 
 \begin{figure}[htb]
 	\centering
 \begin{tikzpicture}[inner sep=0]
+	% This diagram uses the TikZ matrix library to place the nodes
 	% Nodes
 	\matrix (table) [
 		matrix of nodes,
@@ -426,11 +423,12 @@ The best method for ellipsoidal classification conceived during this project is 
 		row sep=8mm, column sep=6mm,
 		nodes={anchor=center}
 	] {
-		\node[text width=24mm] (MRs) {Classified Mesh Sections}; &[7mm]
+		% The [6mm] adds extra space between this column and the next
+		\node[text width=24mm, align=center] (MRs) {Classified Mesh Sections}; &[6mm]
 		\node[FC-Node, text width=20mm, minimum size=15mm] (cEdges) {Create Shared Edges}; &
 		\node[FC-Node, text width=20mm, minimum size=15mm] (exEdges) {Extend Shared Edges}; &
 		\node[FC-Node, text width=20mm, minimum size=15mm] (cSurfaces) {Create Simple Surfaces}; &
-		\node[text width=24mm, align=left] (SSurfaces) {Simplified Surfaces}; \\
+		\node[text width=20mm, align=center] (SSurfaces) {Simplified Surfaces}; \\
 		& & & & \\
 	};
 \node[FC-Node, fit=(table-2-2)(table-2-3),minimum size=7mm, text width=46mm,label={center:Create Shared Corners}] (cCorners) {};
@@ -460,7 +458,7 @@ Shared edges are first created from the collection of mesh sections, then extend
 The purpose of the \textit{Geometry Simplification} step is to create a simplified form for each mesh region provided by \textit{3D Segmentation}.
 \textit{Geometry Simplification}'s output is a set of ``simple surfaces'' created from the provided mesh regions.
 A simple surface contains, among other things, a reference to the mesh region from which it was created, a UV-map, and the unwrapped 2D region outline.
-The \textit{Geometry Simplification} procedure follows the block diagram shown in Figure \ref{fig:GeoSimp}.
+The \textit{Geometry Simplification} procedure follows the block diagram shown in Figure~\ref{fig:GeoSimp}.
 First the \verb|SharedEdges|, edges between mesh regions, are ascertained in the \textit{Create Shared Edges} step.
 In \textit{Create Shared Corners} the shared edges are used to determine the region corners (``shared corners''), which are then used to finish preparing the shared edges in \textit{Extend Shared Edges}.
 In the final step \textit{Create Simple Surfaces} the complete shared edges plus the mesh regions are used to create the \textbf{simple surfaces}, which are then passed on to the next high-level step.
@@ -679,7 +677,7 @@ Although $S_{diff}$ can contain more than one element, it matters not which is c
 Next the UV-map belonging to the surface in $S_{diff}$ is obtained.
 % On line \ref{alg:clamp_tip_point} the line tip $t$ is forced to lie at the intersection of its tangent and the extension target surface.
 On line \ref{alg:clamp_tip_point} the line tip $t$ is forced to lie at the intersection of its tangent and the surface represented by the UV-map $m_{UV}$.
-Figure \ref{fig:extend_shared_edges} below shows the before and after of applying \verb|clampLineTips| to a set of shared edges.
+Figure~\ref{fig:extend_shared_edges} below shows the before and after of applying \verb|clampLineTips| to a set of shared edges.
 
 \begin{figure}[htb]
 	\centering
@@ -702,8 +700,8 @@ The shared edges from test object ``1505020'' Before and after \textit{Extend Sh
 	\label{fig:extend_shared_edges}
 \end{figure}
 
-As can be seen in Figure \ref{sfig:gs_shared_edges} ``unclamped'' shared edges are decent, but noticeably unconnected.
-Figure \ref{sfig:gs_shared_edges_clamped} shows the same edges post \textit{Extend Shared Edges}.
+As can be seen in Figure~\ref{sfig:gs_shared_edges} ``unclamped'' shared edges are decent, but noticeably unconnected.
+Figure~\ref{sfig:gs_shared_edges_clamped} shows the same edges post \textit{Extend Shared Edges}.
 
 \subsection{Create Simple Surfaces}
 A simple surface is created from a mesh region and the shared edges that border said mesh region.
@@ -846,7 +844,7 @@ Once the creation of simple surfaces is complete, they are passed on to the next
 The purpose of \textit{2D Segmentation} is to decompose non-convex polygons into convex polygons whose geometry is more conducive to local path planning.
 The \textit{2D Segmentation} step is applied to each simple surface's 2D shape.
 During the research phase of the project it was decided that the algorithm to achieve this would be the ``Interior Extension of Edges'' presented by Nielsen et al.~\cite{IntEdgeExt}.
-Figure \ref{fig:Seg2D} gives a graphical representation of the \textit{2D Segmentation} procedure.
+Figure~\ref{fig:Seg2D} gives a graphical representation of the \textit{2D Segmentation} procedure.
 
 The process can be summarized as the following:
 \begin{enumerate}
@@ -910,7 +908,7 @@ To illustrate this process, the following example polygon is used.
 \subsection{Vertex Graph}
 Creating a vertex graph from a polygon is relatively straightforward.
 A vertex node is created for each vertex in the polygon, as well as a vertex edge for the edge between subsequent polygon vertices.
-Figure \ref{fig:vertex_graph_init} shows the initial vertex graph created from the example polygon.
+Figure~\ref{fig:vertex_graph_init} shows the initial vertex graph created from the example polygon.
 The solid black dots are the graph's nodes.
 % NOTE: Thinking of moving this figure next to the figure above... there is hardly any difference between the 2 figures...
 \begin{figure}[htb]
@@ -934,7 +932,7 @@ The solid black dots are the graph's nodes.
 
 \subsection{Extend Interior Edges}
 The algorithm's namesake step involves extending the polygon's interior edges to create convex sub-polygons.
-Figures \ref{sfig:vg_extend_node_2_edges} and \ref{sfig:vg_extend_node_2_3_edges} show the result of extending the interior edges at nodes 2, and 2 and 3, respectively.
+Figures~\ref{sfig:vg_extend_node_2_edges} and \ref{sfig:vg_extend_node_2_3_edges} show the result of extending the interior edges at nodes 2, and 2 and 3, respectively.
 Note that new nodes are created at all edge intersections, not only at intersections between extended edges and original edges.
 
 \begin{figure}[htb]
@@ -1013,16 +1011,15 @@ The general steps to perform interior edge extension are outlined below in Algor
 Conceptually, \verb|extendInteriorEdges| is fairly simple.
 The function iterates through each edge loop in the general polygon.
 The example polygon here has only one edge loop, the outer boundary.
-Next the vertex nodes of the edge loop are iterated, with exterior corners skipped.
-% NOTE: not a fan of that sentence
+Next the algorithm iterates through the edge loop's vertex nodes, with exterior corners skipped.
 When an interior corner is encountered, an edge is extended from each edge adjacent to the vertex node.
-In Figure \ref{sfig:vg_extend_node_2_edges} node 2 is the interior corner encountered.
+In Figure~\ref{sfig:vg_extend_node_2_edges} node 2 is the interior corner encountered.
 An edge is extended along the 1$\rightarrow$2 direction to create node 8, and also along the 3$\rightarrow$2 direction to create node 9.
-Figure \ref{sfig:vg_extend_node_2_3_edges} shows this procedure repeated for node 3, creating nodes 10, 11, and 12.
+Figure~\ref{sfig:vg_extend_node_2_3_edges} shows this procedure repeated for node 3, creating nodes 10, 11, and 12.
 
 \subsection{Polygon Graph}
 To create a polygon graph ``branches'' traverse the completed vertex graph starting at node~0.
-This process is described in detail in Algorithm~\ref{alg:PG:create} and visually in Figure \ref{fig:PG:create}.
+This process is described in detail in Algorithm~\ref{alg:PG:create} and visually in Figure~\ref{fig:PG:create}.
 
 \begin{algorithm}[!htb]
 \caption{Create Polygon Graph}\label{alg:PG:create}
@@ -1123,6 +1120,9 @@ This process is described in detail in Algorithm~\ref{alg:PG:create} and visuall
 			\draw[very thick] (N3) -- (N10);
 			\draw[very thick] (N3) -- (N11) -- (N12);
 			% Draw vines / branches
+			% To create well-aligned lines for the branches,
+			% many coordinates and intersections were used
+			% See https://texample.net/intersection-of/ for a simpler example
 			\coordinate (N0o) at ($(N0)+(45:0.15)$);
 			\coordinate (N1o) at ($(N1)+(112.5:0.15)$);
 			\coordinate (N2o) at ($(N2)+(202.5:1)$);
@@ -1277,10 +1277,10 @@ Active branches are newly created and reside in queue $B_{active}$ until dequeue
 Mature branches are active branches that have grown to reach a splitting node, but have not been fully utilized in the creation of polygon nodes.
 Complete branches are those that \textit{have} been fully utilized for the creation of polygon nodes.
 On line 6 the queue $B_{active}$ is initialized with branches from node 0.
-This can also be seen in Figure \ref{sfig:pg_n0_branches}.
+This can also be seen in Figure~\ref{sfig:pg_n0_branches}.
 Line 8 sees an active branch dequeued from $B_{active}$ to grow and be processed.
 If the current branch's tip does not split, lines 9-11 ensure it grows until it does so.
-The branch from node 0 to 1 in Figure \ref{sfig:pg_n0_branches} is one such immature branch, and in Figure \ref{sfig:pg_n2_branches} it has grown to node 2 and split to produce new active branches.
+The branch from node 0 to 1 in Figure~\ref{sfig:pg_n0_branches} is one such immature branch, and in Figure~\ref{sfig:pg_n2_branches} it has grown to node 2 and split to produce new active branches.
 Because a given edge on the vertex graph may be processed from each direction, lines 12-14 check if a branch equivalent to $b_{active}$ already exists in either the set of mature or completed branches, so that an already processed branch is not re-processed.
 An example of this is vertex graph edge 2-9.
 An active branch from node 2 to node 9 is created when branch 0$\rightarrow$1 grows to node 2 and splits, and an equivalent branch from node 9 to node 2 is created when the split at node 9 is handled.
@@ -1288,8 +1288,8 @@ An active branch from node 2 to node 9 is created when branch 0$\rightarrow$1 gr
 Once $b_{active}$ is confirmed novel, line \ref{alg:l:b_active_intersection} searches $B_{mature}$ for a branch whose tip occupies the same node as $b_{active}$'s tip.
 $b_{active}$ is added to the list of mature branches \textit{after} searching for an intersection with a mature branch to preclude $b_{active}$ being identified as converging with itself.
 If a converging branch is found both branches are traced backwards until a common base node is found.
-In Figure \ref{sfig:pg_branch_convergence} branch 2$\rightarrow$9 is fully grown and has converged with the mature branch 0$\rightarrow$9.
-Figure \ref{sfig:pg_0_1_2_9_polygon} shows the completed polygon node after both branches were traced back to node 0.
+In Figure~\ref{sfig:pg_branch_convergence} branch 2$\rightarrow$9 is fully grown and has converged with the mature branch 0$\rightarrow$9.
+Figure~\ref{sfig:pg_0_1_2_9_polygon} shows the completed polygon node after both branches were traced back to node 0.
 On line 20 in Algorithm~\ref{alg:PG:create} the newly created polygon node is added to the polygon graph $G_P$.
 Afterwards the branch containers $B_{complete}$ and $B_{mature}$ are updated.
 If a newly matured branch did not converge with any existing mature branches, then this newly matured branch is the first to reach that node on the vertex graph.
@@ -1298,40 +1298,37 @@ If a branch split is encountered, new active branches are created from the newly
 This procedure repeats until all active branches have been exhausted, and all possible polygon nodes are created and added to the polygon graph.
 
 \subsection{Generate Merge Options}
-The completed polygon graph of the ongoing example is shown in Figure \ref{fig:pg_complete}.
+The completed polygon graph of the ongoing example is shown in Figure~\ref{fig:pg_complete}.
 Once the polygon graph has been created, the complete set of convex merge options (CMOs) may be generated.
 The objective is to obtain the complete set of possible CMOs, so that the optimal subset may be identified therefrom.
 The method followed in this work is described below in Algorithm~\ref{alg:generate_CMOs}.
 
 \begin{figure}[htb]
 	\centering
-	% NOTE: There is probably a way to set all vertex labels with font size small...
-\begin{tikzpicture}
+\begin{tikzpicture}[every node/.style={font=\Large}]
 	% Draw complete vertex graph
-	\draw[very thick]
-		(0,0) node (N0) [vertex,label=225:\small 0] {} --
-		(1,0) node (N1) [vertex,label=287.5:\small 1] {} --
-		(2,1) node (N2) [vertex,label=287.5:\small 2] {} --
-		(4,1) node (N3) [vertex,label=247.5:\small 3] {} --
-		(5,0) node (N4) [vertex,label=247.5:\small 4] {} --
-		(6,0) node (N5) [vertex,label=315:\small 5] {} --
-		(6,1) node (N10)[vertex,label= 0:\small 10] {} --
-		(6,3) node (N6) [vertex,label= 45:\small 6] {} --
-		(4,3) node (N8) [vertex,label= 90:\small 8] {} --
-		(2,3) node (N12)[vertex,label=90:\small 12] {} --
-		(0,3) node (N7) [vertex,label=135:\small 7] {} --
-		(0,1) node (N9) [vertex,label=180:\small 9] {} -- cycle;
-	\draw[very thick] (N2) --
-		(3,2) node (N11)[vertex,label= 0:\small 11] {} -- (N8);
-	\draw[very thick] (N2) -- (N9);
-	\draw[very thick] (N3) -- (N10);
-	\draw[very thick] (N3) -- (N11) -- (N12);
-	\node at (0.7,0.5) {\Large 0};
-	\node at (1.2,2.0) {\Large 3};
-	\node at (3.0,1.4) {\Large 2};
-	\node at (3.0,2.6) {\Large 4};
-	\node at (4.8,2.0) {\Large 5};
-	\node at (5.3,0.5) {\Large 1};
+	\draw[very thick,every node/.style={vertex,font=\small}]
+		(2,3) node (N12)[vertex,label=90:12] {} --
+		(3,2) node (N11)[vertex,label= 0:11] {} --
+		(4,1) node (N3) [vertex,label=247.5:3] {} --
+		(5,0) node (N4) [vertex,label=247.5:4] {} --
+		(6,0) node (N5) [vertex,label=315:5] {} --
+		(6,1) node (N10)[vertex,label= 0:10] {} --
+		(6,3) node (N6) [vertex,label= 45:6] {} --
+		(0,3) node (N7) [vertex,label=135:7] {} --
+		(0,1) node (N9) [vertex,label=180:9] {} --
+		(0,0) node (N0) [vertex,label=225:0] {} --
+		(1,0) node (N1) [vertex,label=287.5:1] {} --
+		(2,1) node (N2) [vertex,label=287.5:2] {} --
+		(4,3) node (N8) [vertex,label= 90:8] {};
+	\draw[very thick] (N9) -- (N10);
+	% Polygon node numbers
+	\node at (0.7,0.5) {0};
+	\node at (1.2,2.0) {3};
+	\node at (3.0,1.4) {1};
+	\node at (3.0,2.6) {4};
+	\node at (4.8,2.0) {5};
+	\node at (5.3,0.5) {2};
 \end{tikzpicture}
 	\caption{%
 The complete polygon graph of the example polygon.
@@ -1389,12 +1386,12 @@ The guard clause on lines 16-18 checks if the potential new CMO already exists, 
 Line 19 computes the set of open edges shared between $o_i$ and $o_j$ as a set difference.
 In an effort to simplify checking the convexity of CMOs, each has a set of ``open edges''.
 An open edge is a complete edge that completely borders other polygon nodes.
-As an example, a CMO comprised solely of node 2 in Figure \ref{fig:pg_complete} has 3 open edges: bordering node 1 (vertices 2-9), bordering node 3 (vertices 2-11), and bordering node 4 (vertices 11-12).
-However, a \{1,2\} CMO has only 1 open edge: bordering node 4.
-The edge between nodes 1 and 2 allowed them to merge, and node 2's edge bordering node 3 (vertices 2-11) is no longer considered open and valid because there is no collinear open edge on node 1.
-That the edge between the \{1,2\} CMO and \{3\} CMO is closed, prevents them from merging and creating a non-convex merge option.
-As another example, when the \{2\} CMO and \{4\} CMO merge, \{2\}'s edge with node 3 and \{4\}'s edge with node 5 also merge to form a single open edge from vertex 2 to 8.
-The combined \{2,4\} CMO can no longer merge with \{3\} or \{5\} because neither has an open edge from vertex 2 to 8.
+For example, a CMO comprised solely of node 3 in Figure~\ref{fig:pg_complete} has 3 open edges: bordering node 1 (vertices 2-9), bordering node 3 (vertices 2-11), and bordering node 4 (vertices 11-12).
+However, a \{0,3\} CMO has only 1 open edge: bordering node 4.
+The edge between nodes 0 and 3 allowed them to merge, and node 3's edge bordering node 1 (vertices 2-11) is no longer considered open and valid because there is no collinear open edge on node 0.
+That the edge between the \{0,3\} CMO and \{1\} CMO is closed, prevents them from merging and creating a non-convex merge option.
+As another example, when the \{3\} CMO and \{4\} CMO merge, \{3\}'s edge with node 1 and \{4\}'s edge with node 5 also merge to form a single open edge from vertex 2 to 8.
+The combined \{3,4\} CMO can no longer merge with the \{1\} or \{5\} CMO, because neither has an open edge from vertex 2 to 8, but \textit{can} merge with the \{1,5\} CMO.
 If the aforementioned set difference $E_{shared}$ from line 19 is empty, then $o_i$ and $o_j$ have no common open edge and cannot combine to create a valid CMO.
 Once all guard clauses are passed, a new CMO is created, and added to the set $O_{merge}$.
 
@@ -1406,7 +1403,7 @@ The method they propose is similar to the ``CMO degree'' proposed here, in which
 The example they give is that for a CMO comprised of 6 sub-polygons only input CMOs of 3 sub-polygons are considered.
 It is unknown how the implementation here compares to theirs, because the shapes tested never came close to the $N=300$ they encountered.
 
-For the example presented, there are 15 total CMOs: six from single sub-polygons: \{0\},...,\{5\}, six from sets of two sub-polygons: \{0,3\},...,\{4,5\}, two from sets of 3 sub-polygons: \{1,4,5\}, \{0,3,4\}, and one comprised of 4 sub-polygons: \{2,3,4,5\}.
+For the example presented, there are 15 total CMOs: six from single sub-polygons: \{0\},...,\{5\}, six from sets of two sub-polygons: \{0,3\},...,\{4,5\}, two from sets of 3 sub-polygons: \{2,4,5\}, \{0,3,4\}, and one comprised of 4 sub-polygons: \{1,3,4,5\}.
 % The complete set of CMOs for the example polygon is:
 % \[
 % \begin{split}
@@ -1416,7 +1413,7 @@ For the example presented, there are 15 total CMOs: six from single sub-polygons
 % 	4:& \{2,3,4,5\}
 % \end{split}
 % \]
-% (? Is it worth displaying this?)
+% Not really worth displaying this
 
 \subsection{Optimal Polygon Set}%\label{OptimalCMOs}
 The final step of \textit{Interior Edge Extension} is to determine the subset of CMOs that minimizes the sum of CMO widths.
@@ -1426,7 +1423,7 @@ While this was a step above a pure brute force method, it was still quite ineffi
 % I do not know at what level it becomes noticably problematic. At 20 it works ok, at 60 it never returns...
 % This works fine for relatively small numbers of CMOs, but quickly becomes a computational bottleneck.
 The completion of a minimal working ``pipeline'' was prioritized over computational efficiency, hence why this solution was left in place for most of development.
-This was however eventually replaced with a greedy approximation solver, described below in Algorithms \ref{alg:greedySCP} and \ref{alg:expandPartialPS}.
+This was however eventually replaced with a greedy approximation solver, described below in Algorithms~\ref{alg:greedySCP} and~\ref{alg:expandPartialPS}.
 
 A Set Cover Problem attempts to determine the minimum subset of $S$ that covers the problem's ``universe''.
 A weighted SCP differs in that each set $s \in S$ has a weight, and instead of finding the minimum subset that covers the universe, the goal is to minimize the sum of weights in the covering subset.
@@ -1437,7 +1434,7 @@ Here, the heuristic is
 	h(s) = \frac{n_s}{w_s}
 \end{equation*}
 where $h(s)$ is the heuristic value as a function of $s$, $n_s$ is the number of subpolygons in CMO $s$, and $w_s$ is the minimum width of CMO $s$.
-For example, $h(s)$ for CMO \{0\} is 1, because $n_s$ = 1 and $w_s$ = 1, whereas $h(s)$ for CMO \{2,3,4,5\} is 2, because its $n_s$ = 4, and $w_s$ = 2.
+For example, $h(s)$ for CMO \{0\} is 1, because $n_s$ = 1 and $w_s$ = 1, whereas $h(s)$ for CMO \{1,3,4,5\} is 2, because its $n_s$ = 4, and $w_s$ = 2.
 
 \begin{algorithm}[htb]
 \caption{Find approximate solution to SCP using a greedy algorithm}\label{alg:greedySCP}
@@ -1457,9 +1454,9 @@ For example, $h(s)$ for CMO \{0\} is 1, because $n_s$ = 1 and $w_s$ = 1, whereas
 \end{algorithmic}
 \end{algorithm}
 
-The function \verb|greedySCP| (Algorithm \ref{alg:greedySCP}) works by creating a partial Polygon Subset (PartialPS) using the first few CMOs in $S_{sorted}$, and calls \verb|expandPartialPS| on each.
+The function \verb|greedySCP| (Algorithm~\ref{alg:greedySCP}) works by creating a partial Polygon Subset (PartialPS) using the first few CMOs in $S_{sorted}$, and calls \verb|expandPartialPS| on each.
 The function \verb|expandPartialPS| recursively expands the given PS until it completely covers $U$ or is no better than the current best PS and is discontinued.
-Algorithm \ref{alg:greedySCP} begins by evaluating the heuristic for each $s \in S$ and creating a copy of $S$ sorted by the calculated values.
+Algorithm~\ref{alg:greedySCP} begins by evaluating the heuristic for each $s \in S$ and creating a copy of $S$ sorted by the calculated values.
 On lines 4 and 5 a worst case PS is created and added to $L_{PS}$ to act as the initial reference point for later comparison.
 Line 6 sets a ``spawn limit'' for the number of function calls spawned by \verb|greedySCP|.
 This limit ensures that the function terminates quickly.
@@ -1496,7 +1493,7 @@ The \verb|for| loop creates a PartialPS $p$ from the first $l_{spawn}$ CMOs in $
 \end{algorithmic}
 \end{algorithm}
 
-The function \verb|expandPartialPS| (Algorithm \ref{alg:expandPartialPS}) begins by checking if the given PartialPS $p$ covers the universe $U$ and is thus complete.
+The function \verb|expandPartialPS| (Algorithm~\ref{alg:expandPartialPS}) begins by checking if the given PartialPS $p$ covers the universe $U$ and is thus complete.
 If so, it's width sum is compared to the current best width sum in $L_{PS}$, and only if it is lower than that will a new PS be created from $p$ and added to $L_{PS}$.
 If PartialPS $p$'s width is greater than the current best, creating a PS from $p$ is pointless, and the function exits early.
 If $p$ is incomplete, the function iterates through the CMOs in $S$, starting from the $b$-th element.
@@ -1522,7 +1519,7 @@ After the greedy SCP function was developed, over-segmentation was no longer dee
 \textit{Cellular Path Planning} consists of generating a back-and-forth path for the given convex polygon.
 The back-and-forth style of path planning has been termed ``boustrophedon path''.
 The word boustrophedon comes from ancient Greek, and roughly means ``the way the ox turns'', describing the path an ox would take while plowing a field.
-The boustrophedon path planning procedure developed in this work is described in detail in Algorithm~\ref{alg:boustrophedon}, and visually in Figure \ref{fig:bpath_steps}.
+The boustrophedon path planning procedure developed in this work is described in detail in Algorithm~\ref{alg:boustrophedon}, and visually in Figure~\ref{fig:bpath_steps}.
 
 % NOTE: the following float seems to only sit where i want it with the !p options...
 \begin{algorithm}[!htbp]
@@ -1549,14 +1546,15 @@ The boustrophedon path planning procedure developed in this work is described in
 	\State new corner $c_{curr} \leftarrow$ corner prior to point 0
 	\While{$w$.y < $h_{pass}$}
 		\State new real $d_{edge} \leftarrow d_{shift}$ / $e_{curr}$.dir.y
-		\State new waypoint $w_{temp} \leftarrow w$ moved up $d_{edge}$ along $e_{curr}$
-		\If{$w_{temp}$.y > $h_{pass}$}
+		\State new waypoint $w_{prop} \leftarrow w$ moved up $d_{edge}$ along $e_{curr}$
+			\Comment{Proposed waypoint}
+		\If{$w_{prop}$.y > $h_{pass}$}
 			\State $d_{edge} \leftarrow $($h_{pass} - w$.y) / $e_{curr}$.dir.y
-		\ElsIf{$w_{temp}$.y > $c_{curr}$.y}
+		\ElsIf{$w_{prop}$.y > $c_{curr}$.y}
 			\State $w \leftarrow c_{curr}$
 			\State $W_{bous}$.append($w$)
 			\State $e_{curr}$.next(); $c_{curr}$.next()
-			\State $d_{edge} \leftarrow (w_{temp}$.y - $w$.y) / $e_{curr}$.dir.y
+			\State $d_{edge} \leftarrow (w_{prop}$.y - $w$.y) / $e_{curr}$.dir.y
 		\EndIf
 		\State $w \leftarrow w + d_{edge} * e_{curr}$.dir
 		\State $W_{bous}$.append($w$)
@@ -1573,9 +1571,6 @@ The boustrophedon path planning procedure developed in this work is described in
 \end{algorithmic}
 \end{algorithm}
 
-% TODO: figure out how to write the PGFplots styles more concisely
-% Even after switching to PGFPlots, the styles repeat, so i could make this cleaner by
-% defining and reusing styles
 \begin{figure}[htb]
 	\centering
 	\begin{subfigure}{0.48\textwidth}
@@ -1675,26 +1670,25 @@ To simplify calculating the positions of waypoints, a local ``boustrophedon'' co
 This coordinate system is defined such that the sweep direction $s$ aligns with the x axis, and its origin coincides with the corner point in $P$ that precedes the edge that best aligns with $s$.
 The input polygon $P$ is then transformed to the local coordinate system, creating $P_{bous}$.
 In order to ensure complete coverage of the polygon, a perimeter pass is performed first, which creates a path inset from the polygon.
-Figure \ref{sfig:bpath_step1} shows a perimeter pass in progress.
+Figure~\ref{sfig:bpath_step1} shows a perimeter pass in progress.
 From this perimeter pass the upper bound in the y direction of the remaining waypoints ($h_{pass}$) can be calculated from the highest waypoint in $W_{bous}$.
 On line 12 the edge $e_{curr}$ is created to manage the edge currently being followed for shifts, and on the subsequent line the corner $c_{curr}$ is created to manage switching between sides of the polygon.
 More specifically, $e_{curr}$ contains the edge from the perimeter pass that is used to guide each ``shift'', that is, the movement up to where the next sweep pass begins.
 Both $e_{curr}$ and $c_{curr}$ can be observed in Figure~\ref{sfig:bpath_sweep1}.
 The \verb|while| loop carries out a shift upwards along the current edge and then a long pass across the polygon meeting the opposite edge.
 Note that the edges referenced at this point are not those of the polygon itself, but of those created by the perimeter pass.
-This is made clear by noting the sweep pass lines in Figure \ref{sfig:bpath_sweep1}.
+This is made clear by noting the sweep pass lines in Figure~\ref{sfig:bpath_sweep1}.
 The \verb|while| loop's procedure begins by calculating the distance to be traveled along the current edge's direction.
-A temporary waypoint $w_{temp}$ is created at this proposed position to check a couple conditions.
+A temporary waypoint $w_{prop}$ is created at this proposed position to check a couple conditions.
 % NOTE: should probably rename h_pass...
-First, if $w_{temp}$'s y coordinate is greater than $h_{pass}$, $d_{edge}$ is updated so that the next waypoint $w$ is no higher than $h_{pass}$, as this will be the final shift and sweep pass.
-Second, if $w_{temp}$ is above the current corner, then a waypoint is added at the corner and both the current edge and corner are moved up to their next positions.
+First, if $w_{prop}$'s y coordinate is greater than $h_{pass}$, $d_{edge}$ is updated so that the next waypoint $w$ is no higher than $h_{pass}$, as this will be the final shift and sweep pass.
+Second, if $w_{prop}$ is above the current corner, then a waypoint is added at the corner and both the current edge and corner are moved up to their next positions.
 The edge distance is then recalculated based on the remaining distance from the proposed waypoint to the waypoint set by the corner.
 This is illustrated in figures \ref{sfig:bpath_sweep2} and \ref{sfig:bpath_sweep3}.
-In Figure \ref{sfig:bpath_sweep2} the sweep path will intersect a little below the current corner, and the proposed next waypoint will be above this corner.
-Figure \ref{sfig:bpath_sweep3} shows the intersection waypoint, corner waypoint and the final waypoint of this shift upwards after $e_{curr}$ and $c_{curr}$ have been updated.
-% NOTE: thinking of renaming w_temp to w_prop for proposed...
+In Figure~\ref{sfig:bpath_sweep2} the sweep path will intersect a little below the current corner, and the proposed next waypoint will be above this corner.
+Figure~\ref{sfig:bpath_sweep3} shows the intersection waypoint, corner waypoint and the final waypoint of this shift upwards after $e_{curr}$ and $c_{curr}$ have been updated.
 Once $d_{edge}$ has been adjusted according to either aforementioned condition, a new waypoint is set from the current waypoint moved up $d_{edge}$ along the current edge's direction.
-Figure \ref{sfig:bpath_sweep1} marks this new waypoint with a red dot.
+Figure~\ref{sfig:bpath_sweep1} marks this new waypoint with a red dot.
 Before performing the actual sweep pass, $e_{curr}$ and $c_{curr}$ are switched to the opposite side of the perimeter pass.
 This can be observed by comparing figures \ref{sfig:bpath_sweep1} and \ref{sfig:bpath_sweep2}.
 On lines 27-29 the y coordinate of the last waypoint, and subsequent intersection post sweep, is checked against the newly switched current corner.
@@ -1703,9 +1697,9 @@ This is to ensure that the intersection of the sweep direction extended from the
 % This is to ensure that the intersection between the current waypoint along the sweep direction and the current edge is correct.
 At the end of the \verb|while| loop the intersection is calculated, $w$ is updated and added to $W_{bous}$, and the process repeats.
 Once the local path is complete, the waypoints are transformed back to the polygon coordinate system and returned.
-% Figure \ref{sfig:bpath_sweep2} shows the current edge and corner after switching to the opposite side to intercept the sweep pass.
+% Figure~\ref{sfig:bpath_sweep2} shows the current edge and corner after switching to the opposite side to intercept the sweep pass.
 % From the intersection point, the second condition ($w_{temp}$.y > $c_{curr}$.y) will trigger, resulting in a waypoint at the corner and another above the corner set from the updated $e_{curr}$.
-% Figure \ref{sfig:bpath_sweep3} shows the updated positions of $e_{curr}$ and $c_{curr}$, as well as the intersection, corner and full-shift waypoints (red dots).
+% Figure~\ref{sfig:bpath_sweep3} shows the updated positions of $e_{curr}$ and $c_{curr}$, as well as the intersection, corner and full-shift waypoints (red dots).
 
 \section{Modified Traveling Salesman Problem}
 As mentioned in the background chapter, determining the order with which the individual cell paths will be tied together into a complete path is a TSP.
@@ -1726,43 +1720,50 @@ At the beginning of this project, a bare bones graphical user interface (GUI) im
 The GUI as initially provided featured two dummy buttons, and the display window.
 The scene rendering in the display window was originally implemented using OpenGL version 1.1~\cite{OpenGL_wiki}, but was eventually updated to version 3.3.
 Throughout the project the GUI was significantly expanded to support development and testing of the core research goals.
-An overview of the GUI and its controls are shown in Figure \ref{fig:gui_overview}, and the callouts are described in the list below.
+An overview of the GUI and its controls are shown in Figure~\ref{fig:gui_overview}, and the callouts are described in the list below.
 
 When the application is first opened the only GUI controls enabled are the \textbf{Load Model} and \textbf{Reload Models} buttons.
 Without a mesh loaded the remaining controls are meaningless, hence they are enabled only after a mesh has been loaded.
 
 \begin{figure}[htb]
 	\centering
-	% TODO: update this graphic with the newest state of the GUI
 \begin{tikzpicture}[scale=0.9,
+	% transform shape applies transformations (such as scale) to the entirety
+	% of the node's contents
 	every node/.style={transform shape},
 	nBalloon/.style={circle,fill=white,draw=black,in front of path,inner sep=1pt,outer sep=0},
+	nbArrow/.style={-{Latex[round]}},
 	nbAreaLine/.style={draw,rounded corners=6pt}]
 	% \draw[step=5mm,blue!50,very thin] (-9,-5) grid (7, 5);
 	\node[] (GUIFull) {\includegraphics[width=\textwidth]{../resources/gui/gui_full_enabled.png}};
 	% \node[left=of GUIFull] (GUIDisabled) {\includegraphics[width=0.2\textwidth]{../resources/gui/gui_disabled.png}};
 	\node[nBalloon] at (-6,4.55) {1}; % Load model
 	\node[nBalloon] at (-4,4.55) {2}; % Reload models
-	\draw[-{Latex[round]}] (-7.55,3.7) node[nBalloon] {3} -- +(350:3.5mm); % Check mesh quality
+	\draw[nbArrow] (-7.55,3.7) node[nBalloon] {3} -- +(350:3.5mm); % Check mesh quality
 	% \node[nBalloon] at (-7.5,2.8) {4}; % Start
 	% \node[nBalloon] at (-2.5,2.8) {5}; % Stop
 	% Path planning controls
+	% In order to better control the end points of the "areaLines" a
+	% transparent rectangle was placed over the target region, and its corners
+	% used as the end points for those lines
 	\node[shape=rectangle,minimum height=59mm,minimum width=43mm,
 		fill=gray!20,opacity=0.0] (PPControls) at (-5,0.35) {};
 	\node[nBalloon,left=10mm of PPControls] (PPCnb) {4};
 	\draw[nbAreaLine] (PPCnb) |- (PPControls.north west);
 	\draw[nbAreaLine] (PPCnb) |- (PPControls.south west);
 	% Mesh segmentation inputs
-	\draw[-{Latex[round]}] (-2.4,2.37) node[nBalloon] {5} -- +(180:3.5mm); % Smoothing sigma
-	\draw[-{Latex[round]}] (-2.4,1.87) node[nBalloon] {6} -- +(180:3.5mm); % Merge threshold
+	\draw[nbArrow] (-2.4,2.37) node[nBalloon] {5} -- +(180:3.5mm); % Smoothing sigma
+	\draw[nbArrow] (-2.4,1.87) node[nBalloon] {6} -- +(180:3.5mm); % Merge threshold
 	% YieldPoint window
+	% minimum height and width control the height and width of a node
+	% useful for setting the size of the node larger than its content
 	\node[shape=rectangle,minimum height=34mm,minimum width=43mm,
 		fill=gray!20,opacity=0.0] (YPwindow) at (-5,-0.06) {};
 	\node[nBalloon,left=2mm of YPwindow] (YPnb) {7};
 	\draw[nbAreaLine] (YPnb) |- (YPwindow.north west);
 	\draw[nbAreaLine] (YPnb) |- (YPwindow.south west);
 	% Execute path
-	\draw[-{Latex[round]}] (-2.4,-2.40) node[nBalloon] {8} -- +(180:3.5mm);
+	\draw[nbArrow] (-2.4,-2.40) node[nBalloon] {8} -- +(180:3.5mm);
 	% Mesh Display Settings
 	\node[shape=rectangle,minimum height=16mm,minimum width=43mm,
 		fill=gray!20,opacity=0.0] (MeshDispSettings) at (-5,-3.5) {};
@@ -1771,7 +1772,7 @@ Without a mesh loaded the remaining controls are meaningless, hence they are ena
 	\draw[nbAreaLine] (MDSnb) |- (MeshDispSettings.south west);
 	% scene and model label
 	\node[nBalloon] at (6,2.5) {10};
-	\draw[-{Latex[round]}] (-1,-3.9) node[nBalloon, in front of path] {11} -- +(270:4.4mm);
+	\draw[nbArrow] (-1,-3.9) node[nBalloon, in front of path] {11} -- +(270:4.4mm);
 \end{tikzpicture}
 	\caption{Application GUI with callouts}
 	\label{fig:gui_overview}
@@ -1823,5 +1824,5 @@ Without a mesh loaded the remaining controls are meaningless, hence they are ena
 Although not relevant to the research goals of this project, the application was critical to development and testing.
 % Development of the application and its GUI consumed a meaningful portion of the allotted project time, hence the need to mention it.
 
-% NOTE: Is there any merit in describing the unit tests created?
+% NOTE: Is there any merit in describing the unit tests created? -> Apparently not
 
